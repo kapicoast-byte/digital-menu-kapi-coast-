@@ -3,39 +3,179 @@
 <head>
   <title>Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 200px;
+      background: #1a1a1a;
+      color: #ccc;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-title {
+      padding: 18px 16px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #333;
+    }
+    .nav-item {
+      padding: 13px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      border-left: 3px solid transparent;
+      transition: background 0.15s;
+    }
+    .nav-item:hover { background: #2a2a2a; }
+    .nav-item.active { background: #2a2a2a; border-left-color: #C49A6C; color: #fff; }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    h2 { font-size: 20px; margin-bottom: 18px; color: #1a1a1a; }
+    h3 { font-size: 16px; margin: 20px 0 10px; color: #333; }
+
+    /* ── Inputs ── */
+    input[type="text"], input[type="number"], textarea {
+      width: 100%; max-width: 420px; padding: 9px 11px;
+      border: 1px solid #ccc; border-radius: 6px; font-size: 14px;
+      margin-bottom: 10px; display: block;
+    }
+    textarea { resize: vertical; min-height: 70px; }
+    input[type="file"] { margin-bottom: 10px; }
+    input[type="color"] { padding: 2px; height: 36px; width: 60px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 10px; cursor: pointer; }
+
+    /* ── Buttons ── */
+    .btn { padding: 9px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+    .btn-primary { background: #1a1a1a; color: #fff; }
+    .btn-success { background: #2e7d32; color: #fff; }
+    .btn-danger  { background: #c62828; color: #fff; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn + .btn { margin-left: 8px; }
+
+    hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
+    #status { color: green; font-size: 13px; margin-top: 8px; }
+
+    /* ── Menu item card ── */
+    .item-card {
+      display: flex; gap: 10px; background: white; padding: 10px;
+      margin-bottom: 10px; border-radius: 8px; align-items: center;
+    }
+    .item-card img { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; background: #e5e5e5; }
+    .item-card-info { flex: 1; }
+
+    /* ── Ad list ── */
+    .ad-card {
+      background: white; border-radius: 8px; padding: 14px 16px;
+      margin-bottom: 12px; border-left: 4px solid #ccc;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    }
+    .ad-card.ad-active { border-left-color: #2e7d32; }
+    .ad-card-body { flex: 1; }
+    .ad-card-title { font-weight: bold; font-size: 15px; margin-bottom: 4px; }
+    .ad-card-text  { font-size: 13px; color: #555; margin-bottom: 6px; }
+    .ad-color-swatch {
+      display: inline-block; width: 16px; height: 16px; border-radius: 3px;
+      border: 1px solid #ccc; vertical-align: middle; margin-right: 4px;
+    }
+    .ad-status-badge {
+      display: inline-block; font-size: 11px; font-weight: bold; padding: 2px 8px;
+      border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .ad-status-badge.on  { background: #e8f5e9; color: #2e7d32; }
+    .ad-status-badge.off { background: #f5f5f5; color: #999; }
+    .ad-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
+
+    @media (max-width: 600px) {
+      .sidebar { width: 56px; }
+      .sidebar-title, .nav-item span { display: none; }
+      .nav-item { text-align: center; font-size: 18px; padding: 14px 0; }
+    }
+  </style>
 </head>
+<body>
 
-<body style="font-family: Arial; padding:15px; background:#f5f5f5;">
+<!-- ── Sidebar nav ── -->
+<nav class="sidebar">
+  <div class="sidebar-title">Kapi Coast</div>
+  <div class="nav-item active" onclick="showSection('menuItems', this)">
+    🍽 <span>Menu Items</span>
+  </div>
+  <div class="nav-item" onclick="showSection('offerBanner', this)">
+    🏷 <span>Offer Banner</span>
+  </div>
+  <div class="nav-item" onclick="showSection('adsBanners', this)">
+    📢 <span>Ads &amp; Banners</span>
+  </div>
+</nav>
 
-<h2>Admin Dashboard</h2>
+<!-- ── Main content ── -->
+<div class="main">
 
-<h3>Add Item</h3>
+  <!-- Section: Menu Items -->
+  <div id="menuItems" class="section active">
+    <h2>Menu Items</h2>
 
-<input id="name" placeholder="Item Name"><br><br>
-<input id="price" placeholder="Price"><br><br>
-<input id="desc" placeholder="Description"><br><br>
-<input id="category" placeholder="Category"><br><br>
-<input type="file" id="image"><br><br>
+    <h3>Add Item</h3>
+    <input type="text" id="name"     placeholder="Item Name">
+    <input type="text" id="price"    placeholder="Price">
+    <input type="text" id="desc"     placeholder="Description">
+    <input type="text" id="category" placeholder="Category">
+    <input type="file" id="image"><br>
+    <button class="btn btn-primary" onclick="addItem()">Add Item</button>
 
-<button onclick="addItem()">Add Item</button>
+    <hr>
 
-<hr>
+    <h3>All Items</h3>
+    <div id="menuList">Loading...</div>
+  </div>
 
-<h3>Offer Banner</h3>
+  <!-- Section: Offer Banner -->
+  <div id="offerBanner" class="section">
+    <h2>Offer Banner</h2>
+    <input type="text" id="offerInput" placeholder="Enter offer message (leave empty to disable)">
+    <button class="btn btn-primary" onclick="saveOffer()">Save Offer</button>
+    <p id="status"></p>
+  </div>
 
-<input id="offerInput" placeholder="Enter offer (leave empty to disable)" style="width:80%; padding:10px;"><br><br>
-<button onclick="saveOffer()">Save Offer</button>
+  <!-- Section: Ads & Banners -->
+  <div id="adsBanners" class="section">
+    <h2>Ads &amp; Banners</h2>
 
-<p id="status"></p>
+    <h3>Create New Ad</h3>
+    <input type="text" id="adTitle" placeholder="Ad Title">
+    <textarea id="adBody" placeholder="Ad body text"></textarea>
+    <label style="font-size:13px; color:#555; display:block; margin-bottom:4px;">Background Color</label>
+    <input type="color" id="adColor" value="#fff3cd">
+    <br>
+    <button class="btn btn-primary" onclick="saveAd()">Save Ad</button>
+    <p id="adStatus" style="color:green; font-size:13px; margin-top:8px;"></p>
 
-<hr>
+    <hr>
 
-<h3>All Items</h3>
-<div id="menuList">Loading...</div>
+    <h3>All Ads</h3>
+    <div id="adList">Loading...</div>
+  </div>
+
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import {
+  getFirestore, collection, getDocs, deleteDoc, doc, setDoc, getDoc,
+  addDoc, updateDoc, query, where, writeBatch, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -48,68 +188,68 @@ const firebaseConfig = {
   measurementId: "G-YSBZE6JDTY"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app     = initializeApp(firebaseConfig);
+const db      = getFirestore(app);
 const storage = getStorage(app);
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[char]));
 }
 
-async function loadOffer() {
-  const offerInput = document.getElementById("offerInput");
-  const offerDoc = await getDoc(doc(db, "settings", "offer"));
+// ── Section nav ──
+window.showSection = function (id, navEl) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  navEl.classList.add("active");
+};
 
+// ── Offer Banner ──
+async function loadOffer() {
+  const offerDoc = await getDoc(doc(db, "settings", "offer"));
   if (offerDoc.exists()) {
-    offerInput.value = offerDoc.data().message || "";
+    document.getElementById("offerInput").value = offerDoc.data().message || "";
   }
 }
 
+window.saveOffer = async function () {
+  const offer = document.getElementById("offerInput").value.trim();
+  await setDoc(doc(db, "settings", "offer"), { message: offer });
+  document.getElementById("status").innerText = "Offer saved!";
+};
+
+// ── Menu Items ──
 async function loadItems() {
-  const div = document.getElementById("menuList");
+  const div      = document.getElementById("menuList");
   const snapshot = await getDocs(collection(db, "menu"));
   const categories = {};
   let html = "";
 
   snapshot.forEach(docSnap => {
     const item = docSnap.data();
-    const id = docSnap.id;
-    const cat = (item.category || "Others").trim();
-
+    const cat  = (item.category || "Others").trim();
     if (!categories[cat]) categories[cat] = [];
-    categories[cat].push({ ...item, id });
+    categories[cat].push({ ...item, id: docSnap.id });
   });
 
   Object.keys(categories).forEach(cat => {
     html += `<h3 style="margin-top:15px;">${escapeHtml(cat)}</h3>`;
-
     categories[cat].forEach(item => {
-      const safeImageUrl = item.imageUrl || "";
-
       html += `
-        <div style="display:flex; gap:10px; background:white; padding:10px; margin-bottom:10px; border-radius:8px; align-items:center;">
-          <img src="${safeImageUrl}"
-               alt="${escapeHtml(item.name)}"
-               style="width:60px; height:60px; border-radius:6px; object-fit:cover; background:#e5e5e5;">
-
-          <div style="flex:1;">
+        <div class="item-card">
+          <img src="${item.imageUrl || ""}" alt="${escapeHtml(item.name)}">
+          <div class="item-card-info">
             <b>${escapeHtml(item.name)}</b><br>
             Rs. ${escapeHtml(item.price)}<br>
             <small>${escapeHtml(item.description || "")}</small>
           </div>
-
           <div>
-            <button onclick="editItem('${item.id}')">Edit</button><br><br>
-            <button onclick="deleteItem('${item.id}')">Delete</button>
+            <button class="btn btn-sm btn-primary" onclick="editItem('${item.id}')">Edit</button><br><br>
+            <button class="btn btn-sm btn-danger"  onclick="deleteItem('${item.id}')">Delete</button>
           </div>
-        </div>
-      `;
+        </div>`;
     });
   });
 
@@ -117,38 +257,23 @@ async function loadItems() {
 }
 
 window.addItem = async function () {
-  const name = document.getElementById("name").value.trim();
-  const price = document.getElementById("price").value.trim();
-  const desc = document.getElementById("desc").value.trim();
+  const name     = document.getElementById("name").value.trim();
+  const price    = document.getElementById("price").value.trim();
+  const desc     = document.getElementById("desc").value.trim();
   const category = document.getElementById("category").value.trim();
-  const file = document.getElementById("image").files[0];
+  const file     = document.getElementById("image").files[0];
 
-  if (!name || !price || !category || !file) {
-    alert("Fill all fields");
-    return;
-  }
+  if (!name || !price || !category || !file) { alert("Fill all fields"); return; }
 
-  const id = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const id      = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   const itemRef = doc(db, "menu", id);
-  const existing = await getDoc(itemRef);
-
-  if (existing.exists()) {
-    alert("Item already exists");
-    return;
-  }
+  if ((await getDoc(itemRef)).exists()) { alert("Item already exists"); return; }
 
   const storageRef = ref(storage, "menu/" + Date.now() + "-" + file.name);
   await uploadBytes(storageRef, file);
   const imageUrl = await getDownloadURL(storageRef);
 
-  await setDoc(itemRef, {
-    name,
-    price,
-    description: desc,
-    category,
-    imageUrl
-  });
-
+  await setDoc(itemRef, { name, price, description: desc, category, imageUrl });
   alert("Item Added");
   location.reload();
 };
@@ -160,46 +285,113 @@ window.deleteItem = async function (id) {
 };
 
 window.editItem = async function (id) {
-  const itemRef = doc(db, "menu", id);
+  const itemRef  = doc(db, "menu", id);
   const itemSnap = await getDoc(itemRef);
+  if (!itemSnap.exists()) { alert("Item not found"); return; }
 
-  if (!itemSnap.exists()) {
-    alert("Item not found");
-    return;
-  }
-
-  const item = itemSnap.data();
-  const newName = prompt("Name", item.name || "");
-  const newPrice = prompt("Price", item.price || "");
-  const newDesc = prompt("Description", item.description || "");
-  const newCategory = prompt("Category", item.category || "Others");
-
+  const item        = itemSnap.data();
+  const newName     = prompt("Name",        item.name        || "");
+  const newPrice    = prompt("Price",       item.price       || "");
+  const newDesc     = prompt("Description", item.description || "");
+  const newCategory = prompt("Category",    item.category    || "Others");
   if (!newName) return;
 
   await setDoc(itemRef, {
-    name: newName.trim(),
-    price: (newPrice || "").trim(),
-    description: (newDesc || "").trim(),
-    category: (newCategory || "Others").trim(),
-    imageUrl: item.imageUrl || ""
+    name:        newName.trim(),
+    price:       (newPrice    || "").trim(),
+    description: (newDesc     || "").trim(),
+    category:    (newCategory || "Others").trim(),
+    imageUrl:    item.imageUrl || ""
   });
-
   alert("Updated");
   location.reload();
 };
 
-window.saveOffer = async function () {
-  const offer = document.getElementById("offerInput").value.trim();
+// ── Ads & Banners ──
+window.saveAd = async function () {
+  const title = document.getElementById("adTitle").value.trim();
+  const body  = document.getElementById("adBody").value.trim();
+  const color = document.getElementById("adColor").value;
 
-  await setDoc(doc(db, "settings", "offer"), {
-    message: offer
+  if (!title || !body) {
+    document.getElementById("adStatus").textContent = "Please fill in title and body.";
+    document.getElementById("adStatus").style.color = "red";
+    return;
+  }
+
+  await addDoc(collection(db, "ads"), {
+    title,
+    body,
+    color,
+    active:    false,
+    createdAt: serverTimestamp()
   });
 
-  document.getElementById("status").innerText = "Offer saved!";
+  document.getElementById("adTitle").value = "";
+  document.getElementById("adBody").value  = "";
+  document.getElementById("adColor").value = "#fff3cd";
+  document.getElementById("adStatus").textContent = "Ad saved!";
+  document.getElementById("adStatus").style.color = "green";
+  loadAds();
 };
+
+window.toggleAd = async function (id, makeActive) {
+  if (makeActive) {
+    // Deactivate all other ads first
+    const snapshot = await getDocs(query(collection(db, "ads"), where("active", "==", true)));
+    const batch    = writeBatch(db);
+    snapshot.forEach(d => { if (d.id !== id) batch.update(d.ref, { active: false }); });
+    batch.update(doc(db, "ads", id), { active: true });
+    await batch.commit();
+  } else {
+    await updateDoc(doc(db, "ads", id), { active: false });
+  }
+  loadAds();
+};
+
+window.deleteAd = async function (id) {
+  if (!confirm("Delete this ad?")) return;
+  await deleteDoc(doc(db, "ads", id));
+  loadAds();
+};
+
+async function loadAds() {
+  const div      = document.getElementById("adList");
+  const snapshot = await getDocs(collection(db, "ads"));
+
+  if (snapshot.empty) { div.innerHTML = "<p style='color:#999; font-size:14px;'>No ads yet.</p>"; return; }
+
+  // Sort newest first
+  const ads = [];
+  snapshot.forEach(d => ads.push({ id: d.id, ...d.data() }));
+  ads.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+  div.innerHTML = ads.map(ad => {
+    const statusClass = ad.active ? "on"  : "off";
+    const statusLabel = ad.active ? "Active" : "Inactive";
+    const toggleLabel = ad.active ? "Deactivate" : "Activate";
+    const toggleClass = ad.active ? "btn-danger"  : "btn-success";
+    return `
+      <div class="ad-card ${ad.active ? "ad-active" : ""}">
+        <div class="ad-card-body">
+          <div class="ad-card-title">${escapeHtml(ad.title)}</div>
+          <div class="ad-card-text">${escapeHtml(ad.body)}</div>
+          <span class="ad-color-swatch" style="background:${escapeHtml(ad.color)};"></span>
+          <small style="font-size:12px; color:#777;">${escapeHtml(ad.color)}</small>
+          &nbsp;
+          <span class="ad-status-badge ${statusClass}">${statusLabel}</span>
+        </div>
+        <div class="ad-actions">
+          <button class="btn btn-sm ${toggleClass}" onclick="toggleAd('${ad.id}', ${!ad.active})">${toggleLabel}</button>
+          <button class="btn btn-sm btn-danger"      onclick="deleteAd('${ad.id}')">Delete</button>
+        </div>
+      </div>`;
+  }).join("");
+}
 
 await loadOffer();
 await loadItems();
+await loadAds();
 </script>
 
 </body>

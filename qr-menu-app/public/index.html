@@ -11,12 +11,13 @@
   Kapi Coast Menu
 </h2>
 
+<div id="adBanner" style="display:none; margin:10px; padding:16px; border-radius:10px;"></div>
 <div id="offerBanner" style="display:none; margin:10px; padding:12px; background:#fff3cd; border-radius:10px; color:#5c4400;"></div>
 <div id="menu" style="padding:10px;">Loading...</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB_gtI05K2B7GUEslsMjU_pN4B7rV8kkbM",
@@ -101,8 +102,29 @@ async function loadMenu() {
   }
 }
 
+function listenForActiveAd() {
+  const adBanner = document.getElementById("adBanner");
+  const q = query(collection(db, "ads"), where("active", "==", true));
+
+  onSnapshot(q, snapshot => {
+    if (snapshot.empty) {
+      adBanner.style.display = "none";
+      adBanner.innerHTML = "";
+      return;
+    }
+
+    const ad = snapshot.docs[0].data();
+    adBanner.style.background = ad.color || "#fff3cd";
+    adBanner.innerHTML =
+      `<div style="font-weight:bold; font-size:15px; margin-bottom:4px;">${escapeHtml(ad.title)}</div>` +
+      `<div style="font-size:14px;">${escapeHtml(ad.body)}</div>`;
+    adBanner.style.display = "block";
+  });
+}
+
 await loadOffer();
 await loadMenu();
+listenForActiveAd();
 </script>
 
 </body>
