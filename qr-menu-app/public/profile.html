@@ -257,7 +257,7 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-menu" onclick="window.location.href='/index.html'">☕ View Menu</button>
+      <button class="btn btn-menu" onclick="window.location.href='/index.html'">View Menu</button>
       <button class="btn btn-signout" onclick="handleSignOut()">Sign Out</button>
     </div>
   </div>
@@ -298,9 +298,9 @@ function formatMonthYear(ts) {
 }
 
 function loyaltyInfo(visits) {
-  if (visits >= 6) return { label: "★ VIP", cls: "badge-vip",     sub: "You're part of the inner circle — thank you!" };
-  if (visits >= 2) return { label: "♥ Regular", cls: "badge-regular", sub: `${6 - visits} more visit${6 - visits > 1 ? "s" : ""} to unlock VIP status` };
-  return              { label: "☕ First Timer", cls: "badge-first",   sub: "Welcome to Kapi Coast! Come back for more." };
+  if (visits >= 6) return { label: "VIP", cls: "badge-vip",     sub: "You're part of the inner circle — thank you!" };
+  if (visits >= 2) return { label: "Regular", cls: "badge-regular", sub: `${6 - visits} more visit${6 - visits > 1 ? "s" : ""} to unlock VIP status` };
+  return              { label: "First Timer", cls: "badge-first",   sub: "Welcome to Kapi Coast! Come back for more." };
 }
 
 onAuthStateChanged(auth, async (user) => {

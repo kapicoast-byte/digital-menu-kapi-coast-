@@ -438,9 +438,9 @@ async function loadAds() {
 let allCustomers = [];
 
 function loyaltyPill(visits) {
-  if (visits >= 6) return `<span class="loyalty-pill pill-vip">★ VIP</span>`;
-  if (visits >= 2) return `<span class="loyalty-pill pill-regular">♥ Regular</span>`;
-  return `<span class="loyalty-pill pill-first">Kapi Coast First Timer</span>`;
+  if (visits >= 6) return `<span class="loyalty-pill pill-vip">VIP</span>`;
+  if (visits >= 2) return `<span class="loyalty-pill pill-regular">Regular</span>`;
+  return `<span class="loyalty-pill pill-first">First Timer</span>`;
 }
 
 function fmtDate(ts) {
