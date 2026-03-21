@@ -20,21 +20,26 @@
 <br>
 
 <!-- PHONE LOGIN -->
-<input id="phone" placeholder="+91XXXXXXXXXX" style="padding:10px;"><br><br>
+<div class="input-wrap">
+  <span class="input-prefix">+91</span>
+  <input type="tel" id="phone" placeholder="9876543210" maxlength="10" pattern="[0-9]{10}">
+</div>
 
-<button onclick="sendOTP()" 
+<button id="sendBtn" onclick="sendOTP()"
         style="padding:10px 20px; background:green; color:white; border:none; border-radius:5px;">
   Send OTP
 </button>
 
+<div id="otpPanel" style="display:none;">
 <br><br>
 
 <input id="otp" placeholder="Enter OTP" style="padding:10px;"><br><br>
 
-<button onclick="verifyOTP()" 
+<button onclick="verifyOTP()"
         style="padding:10px 20px; background:blue; color:white; border:none; border-radius:5px;">
   Verify OTP
 </button>
+</div>
 
 <div id="recaptcha-container"></div>
 
@@ -104,14 +109,25 @@ window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
 });
 
 window.sendOTP = async function () {
-  const phone = document.getElementById("phone").value;
+  let raw = document.getElementById("phone").value.trim().replace(/\D/g, "");
 
-  const appVerifier = window.recaptchaVerifier;
-
-  const confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
-  window.confirmationResult = confirmationResult;
-
-  alert("OTP sent");
+  if (raw.length !== 10) {
+    alert("Please enter a valid 10-digit mobile number");
+    return;
+  }
+  const phone = "+91" + raw;
+  try {
+    document.getElementById("sendBtn").disabled = true;
+    const result = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+    window.confirmationResult = result;
+    document.getElementById("otpPanel").style.display = "block";
+    document.getElementById("sendBtn").style.display = "none";
+    alert("OTP sent to +91" + raw);
+  } catch (e) {
+    console.error(e);
+    alert("Failed to send OTP: " + e.message);
+    document.getElementById("sendBtn").disabled = false;
+  }
 };
 
 window.verifyOTP = async function () {
