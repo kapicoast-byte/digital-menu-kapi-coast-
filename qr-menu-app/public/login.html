@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="font-family: Arial; text-align:center; padding-top:80px; background:#f5f5f5;">
+
+<h2>Welcome to Kapi Coast</h2>
+<p>Login to continue</p>
+
+<!-- GOOGLE LOGIN -->
+<button onclick="loginGoogle()" 
+        style="padding:10px 20px; margin:10px; background:black; color:white; border:none; border-radius:5px;">
+  Login with Google
+</button>
+
+<br>
+
+<!-- PHONE LOGIN -->
+<input id="phone" placeholder="+91XXXXXXXXXX" style="padding:10px;"><br><br>
+
+<button onclick="sendOTP()" 
+        style="padding:10px 20px; background:green; color:white; border:none; border-radius:5px;">
+  Send OTP
+</button>
+
+<br><br>
+
+<input id="otp" placeholder="Enter OTP" style="padding:10px;"><br><br>
+
+<button onclick="verifyOTP()" 
+        style="padding:10px 20px; background:blue; color:white; border:none; border-radius:5px;">
+  Verify OTP
+</button>
+
+<div id="recaptcha-container"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { 
+  getAuth, GoogleAuthProvider, signInWithPopup,
+  RecaptchaVerifier, signInWithPhoneNumber
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+import { getFirestore, doc, setDoc, getDoc, updateDoc } 
+from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyB_gtI05K2B7GUEslsMjU_pN4B7rV8kkbM",
+  authDomain: "pspk-c5298.firebaseapp.com",
+  projectId: "pspk-c5298",
+  storageBucket: "pspk-c5298.firebasestorage.app",
+  messagingSenderId: "426256600838",
+  appId: "1:426256600838:web:e8f5b8f4be326d482c5887",
+  measurementId: "G-YSBZE6JDTY"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ---------- COMMON SAVE FUNCTION ----------
+async function saveUser(user) {
+  const userRef = doc(db, "customers", user.uid);
+  const userSnap = await getDoc(userRef);
+
+  const today = new Date().toDateString();
+
+  if (userSnap.exists()) {
+    const lastLoginDate = userSnap.data().lastLogin
+      ? new Date(userSnap.data().lastLogin.seconds * 1000).toDateString()
+      : null;
+
+    if (lastLoginDate !== today) {
+      await updateDoc(userRef, {
+        lastLogin: new Date(),
+        visits: (userSnap.data().visits || 1) + 1
+      });
+    } else {
+      await updateDoc(userRef, {
+        lastLogin: new Date()
+      });
+    }
+  } else {
+    await setDoc(userRef, {
+      name: user.displayName || "Customer",
+      phone: user.phoneNumber || "",
+      email: user.email || "",
+      visits: 1,
+      firstVisit: new Date(),
+      lastLogin: new Date()
+    });
+  }
+
+  window.location.href = "/index.html";
+}
+
+// ---------- GOOGLE LOGIN ----------
+window.loginGoogle = async function () {
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  await saveUser(result.user);
+};
+
+// ---------- PHONE LOGIN ----------
+window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+  size: 'invisible'
+});
+
+window.sendOTP = async function () {
+  const phone = document.getElementById("phone").value;
+
+  const appVerifier = window.recaptchaVerifier;
+
+  const confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
+  window.confirmationResult = confirmationResult;
+
+  alert("OTP sent");
+};
+
+window.verifyOTP = async function () {
+  const code = document.getElementById("otp").value;
+
+  const result = await window.confirmationResult.confirm(code);
+  await saveUser(result.user);
+};
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="font-family: Arial; padding:15px; background:#f5f5f5;">
+
+<h2>Admin Dashboard</h2>
+
+<h3>Add Item</h3>
+
+<input id="name" placeholder="Item Name"><br><br>
+<input id="price" placeholder="Price"><br><br>
+<input id="desc" placeholder="Description"><br><br>
+<input id="category" placeholder="Category"><br><br>
+<input type="file" id="image"><br><br>
+
+<button onclick="addItem()">Add Item</button>
+
+<hr>
+
+<h3>Offer Banner</h3>
+
+<input id="offerInput" placeholder="Enter offer (leave empty to disable)" style="width:80%; padding:10px;"><br><br>
+<button onclick="saveOffer()">Save Offer</button>
+
+<p id="status"></p>
+
+<hr>
+
+<h3>All Items</h3>
+<div id="menuList">Loading...</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, collection, getDocs, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB_gtI05K2B7GUEslsMjU_pN4B7rV8kkbM",
+  authDomain: "pspk-c5298.firebaseapp.com",
+  projectId: "pspk-c5298",
+  storageBucket: "pspk-c5298.firebasestorage.app",
+  messagingSenderId: "426256600838",
+  appId: "1:426256600838:web:e8f5b8f4be326d482c5887",
+  measurementId: "G-YSBZE6JDTY"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[char]));
+}
+
+async function loadOffer() {
+  const offerInput = document.getElementById("offerInput");
+  const offerDoc = await getDoc(doc(db, "settings", "offer"));
+
+  if (offerDoc.exists()) {
+    offerInput.value = offerDoc.data().message || "";
+  }
+}
+
+async function loadItems() {
+  const div = document.getElementById("menuList");
+  const snapshot = await getDocs(collection(db, "menu"));
+  const categories = {};
+  let html = "";
+
+  snapshot.forEach(docSnap => {
+    const item = docSnap.data();
+    const id = docSnap.id;
+    const cat = (item.category || "Others").trim();
+
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push({ ...item, id });
+  });
+
+  Object.keys(categories).forEach(cat => {
+    html += `<h3 style="margin-top:15px;">${escapeHtml(cat)}</h3>`;
+
+    categories[cat].forEach(item => {
+      const safeImageUrl = item.imageUrl || "";
+
+      html += `
+        <div style="display:flex; gap:10px; background:white; padding:10px; margin-bottom:10px; border-radius:8px; align-items:center;">
+          <img src="${safeImageUrl}"
+               alt="${escapeHtml(item.name)}"
+               style="width:60px; height:60px; border-radius:6px; object-fit:cover; background:#e5e5e5;">
+
+          <div style="flex:1;">
+            <b>${escapeHtml(item.name)}</b><br>
+            Rs. ${escapeHtml(item.price)}<br>
+            <small>${escapeHtml(item.description || "")}</small>
+          </div>
+
+          <div>
+            <button onclick="editItem('${item.id}')">Edit</button><br><br>
+            <button onclick="deleteItem('${item.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+    });
+  });
+
+  div.innerHTML = html || "No items found";
+}
+
+window.addItem = async function () {
+  const name = document.getElementById("name").value.trim();
+  const price = document.getElementById("price").value.trim();
+  const desc = document.getElementById("desc").value.trim();
+  const category = document.getElementById("category").value.trim();
+  const file = document.getElementById("image").files[0];
+
+  if (!name || !price || !category || !file) {
+    alert("Fill all fields");
+    return;
+  }
+
+  const id = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const itemRef = doc(db, "menu", id);
+  const existing = await getDoc(itemRef);
+
+  if (existing.exists()) {
+    alert("Item already exists");
+    return;
+  }
+
+  const storageRef = ref(storage, "menu/" + Date.now() + "-" + file.name);
+  await uploadBytes(storageRef, file);
+  const imageUrl = await getDownloadURL(storageRef);
+
+  await setDoc(itemRef, {
+    name,
+    price,
+    description: desc,
+    category,
+    imageUrl
+  });
+
+  alert("Item Added");
+  location.reload();
+};
+
+window.deleteItem = async function (id) {
+  if (!confirm("Delete this item?")) return;
+  await deleteDoc(doc(db, "menu", id));
+  location.reload();
+};
+
+window.editItem = async function (id) {
+  const itemRef = doc(db, "menu", id);
+  const itemSnap = await getDoc(itemRef);
+
+  if (!itemSnap.exists()) {
+    alert("Item not found");
+    return;
+  }
+
+  const item = itemSnap.data();
+  const newName = prompt("Name", item.name || "");
+  const newPrice = prompt("Price", item.price || "");
+  const newDesc = prompt("Description", item.description || "");
+  const newCategory = prompt("Category", item.category || "Others");
+
+  if (!newName) return;
+
+  await setDoc(itemRef, {
+    name: newName.trim(),
+    price: (newPrice || "").trim(),
+    description: (newDesc || "").trim(),
+    category: (newCategory || "Others").trim(),
+    imageUrl: item.imageUrl || ""
+  });
+
+  alert("Updated");
+  location.reload();
+};
+
+window.saveOffer = async function () {
+  const offer = document.getElementById("offerInput").value.trim();
+
+  await setDoc(doc(db, "settings", "offer"), {
+    message: offer
+  });
+
+  document.getElementById("status").innerText = "Offer saved!";
+};
+
+await loadOffer();
+await loadItems();
+</script>
+
+</body>
+</html>
