@@ -97,6 +97,29 @@
     .ad-status-badge.off { background: #f5f5f5; color: #999; }
     .ad-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
 
+    /* ── Customer table ── */
+    .customer-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .customer-table th {
+      background: #1a1a1a; color: #C49A6C; text-align: left;
+      padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .customer-table td { padding: 10px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    .customer-table tr:last-child td { border-bottom: none; }
+    .customer-table tr:hover td { background: #fafafa; }
+    .loyalty-pill {
+      display: inline-block; border-radius: 10px; padding: 2px 10px;
+      font-size: 11px; font-weight: bold; white-space: nowrap;
+    }
+    .pill-first   { background: #FFF3CD; color: #7A5200; }
+    .pill-regular { background: #E8F4E8; color: #2D6A2D; }
+    .pill-vip     { background: #2C1A0E; color: #C49A6C; }
+    #customerSearch {
+      width: 100%; max-width: 320px; padding: 8px 11px;
+      border: 1px solid #ccc; border-radius: 6px; font-size: 14px;
+      margin-bottom: 14px; display: block;
+    }
+    #customerCount { font-size: 13px; color: #777; margin-bottom: 12px; }
+
     @media (max-width: 600px) {
       .sidebar { width: 56px; }
       .sidebar-title, .nav-item span { display: none; }
@@ -117,6 +140,9 @@
   </div>
   <div class="nav-item" onclick="showSection('adsBanners', this)">
     📢 <span>Ads &amp; Banners</span>
+  </div>
+  <div class="nav-item" onclick="showSection('customers', this)">
+    👥 <span>Customers</span>
   </div>
 </nav>
 
@@ -147,6 +173,14 @@
     <input type="text" id="offerInput" placeholder="Enter offer message (leave empty to disable)">
     <button class="btn btn-primary" onclick="saveOffer()">Save Offer</button>
     <p id="status"></p>
+  </div>
+
+  <!-- Section: Customers -->
+  <div id="customers" class="section">
+    <h2>Customers</h2>
+    <input type="text" id="customerSearch" placeholder="Search by name, email or phone…" oninput="filterCustomers()">
+    <div id="customerCount"></div>
+    <div id="customerTable" style="overflow-x:auto;">Loading...</div>
   </div>
 
   <!-- Section: Ads & Banners -->
@@ -389,9 +423,77 @@ async function loadAds() {
   }).join("");
 }
 
+// ── Customers ──
+let allCustomers = [];
+
+function loyaltyPill(visits) {
+  if (visits >= 6) return `<span class="loyalty-pill pill-vip">★ VIP</span>`;
+  if (visits >= 2) return `<span class="loyalty-pill pill-regular">♥ Regular</span>`;
+  return `<span class="loyalty-pill pill-first">☕ First Timer</span>`;
+}
+
+function fmtDate(ts) {
+  if (!ts) return "—";
+  const d = ts.toDate ? ts.toDate() : new Date(ts.seconds * 1000);
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function renderCustomers(list) {
+  const div = document.getElementById("customerTable");
+  document.getElementById("customerCount").textContent = `${list.length} customer${list.length !== 1 ? "s" : ""}`;
+
+  if (!list.length) { div.innerHTML = "<p style='color:#999; font-size:14px;'>No customers found.</p>"; return; }
+
+  div.innerHTML = `
+    <table class="customer-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Loyalty</th>
+          <th>Visits</th>
+          <th>First Visit</th>
+          <th>Last Login</th>
+          <th>Via</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(c => `
+          <tr>
+            <td><b>${escapeHtml(c.name || "Customer")}</b></td>
+            <td>${escapeHtml(c.email || "")}${c.email && c.phone ? "<br>" : ""}${escapeHtml(c.phone || "")}</td>
+            <td>${loyaltyPill(c.visits || 1)}</td>
+            <td style="text-align:center; font-weight:bold;">${c.visits ?? "—"}</td>
+            <td>${fmtDate(c.firstVisit)}</td>
+            <td>${fmtDate(c.lastLogin)}</td>
+            <td style="text-transform:capitalize;">${escapeHtml(c.loginMethod || "—")}</td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+}
+
+async function loadCustomers() {
+  const snapshot = await getDocs(collection(db, "customers"));
+  allCustomers = [];
+  snapshot.forEach(d => allCustomers.push({ id: d.id, ...d.data() }));
+  allCustomers.sort((a, b) => (b.lastLogin?.seconds || 0) - (a.lastLogin?.seconds || 0));
+  renderCustomers(allCustomers);
+}
+
+window.filterCustomers = function () {
+  const q = document.getElementById("customerSearch").value.toLowerCase();
+  if (!q) { renderCustomers(allCustomers); return; }
+  renderCustomers(allCustomers.filter(c =>
+    (c.name  || "").toLowerCase().includes(q) ||
+    (c.email || "").toLowerCase().includes(q) ||
+    (c.phone || "").toLowerCase().includes(q)
+  ));
+};
+
 await loadOffer();
 await loadItems();
 await loadAds();
+await loadCustomers();
 </script>
 
 </body>
