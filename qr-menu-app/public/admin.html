@@ -2,8 +2,8 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; min-height: 100vh; }
@@ -134,16 +134,16 @@
 <nav class="sidebar">
   <div class="sidebar-title">Kapi Coast</div>
   <div class="nav-item active" onclick="showSection('menuItems', this)">
-    🍽 <span>Menu Items</span>
+    <span>Menu Items</span>
   </div>
   <div class="nav-item" onclick="showSection('offerBanner', this)">
-    🏷 <span>Offer Banner</span>
+    <span>Offer Banner</span>
   </div>
   <div class="nav-item" onclick="showSection('adsBanners', this)">
-    📢 <span>Ads &amp; Banners</span>
+    <span>Ads &amp; Banners</span>
   </div>
   <div class="nav-item" onclick="showSection('customers', this)">
-    👥 <span>Customers</span>
+    <span>Customers</span>
   </div>
 </nav>
 
@@ -440,7 +440,7 @@ let allCustomers = [];
 function loyaltyPill(visits) {
   if (visits >= 6) return `<span class="loyalty-pill pill-vip">★ VIP</span>`;
   if (visits >= 2) return `<span class="loyalty-pill pill-regular">♥ Regular</span>`;
-  return `<span class="loyalty-pill pill-first">☕ First Timer</span>`;
+  return `<span class="loyalty-pill pill-first">Kapi Coast First Timer</span>`;
 }
 
 function fmtDate(ts) {
