@@ -205,6 +205,16 @@
 </div>
 
 <script type="module">
+const pass = sessionStorage.getItem("adminAuth");
+if (!pass) {
+  const entered = prompt("Enter admin password:");
+  if (entered !== "kapi2024") {
+    alert("Wrong password!");
+    window.location.href = "index.html";
+  } else {
+    sessionStorage.setItem("adminAuth", "true");
+  }
+}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, deleteDoc, doc, setDoc, getDoc,
