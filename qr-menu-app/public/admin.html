@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -483,11 +484,48 @@ function renderCustomers(list) {
 }
 
 async function loadCustomers() {
-  const snapshot = await getDocs(collection(db, "customers"));
-  allCustomers = [];
-  snapshot.forEach(d => allCustomers.push({ id: d.id, ...d.data() }));
-  allCustomers.sort((a, b) => (b.lastLogin?.seconds || 0) - (a.lastLogin?.seconds || 0));
-  renderCustomers(allCustomers);
+  try {
+    const snap = await getDocs(collection(db, "customers"));
+    const today = new Date().toDateString();
+    let total = 0, todayCount = 0, repeat = 0, vip = 0;
+    let rows = "";
+    snap.forEach(d => {
+      const c = d.data();
+      total++;
+      if ((c.visits || 1) > 1) repeat++;
+      if ((c.visits || 1) >= 6) vip++;
+      const lastDate = c.lastLogin ? new Date(c.lastLogin.seconds * 1000).toDateString() : null;
+      if (lastDate === today) todayCount++;
+      const badge = (c.visits || 1) >= 6 ? "VIP" : (c.visits || 1) >= 2 ? "Regular" : "First Timer";
+      const firstVisit = c.firstVisit ? new Date(c.firstVisit.seconds * 1000).toLocaleDateString("en-IN") : "—";
+      const lastLogin = c.lastLogin ? new Date(c.lastLogin.seconds * 1000).toLocaleDateString("en-IN") : "—";
+      rows += `<tr>
+        <td>${c.name || "—"}</td>
+        <td>${c.phone || c.email || "—"}</td>
+        <td>${c.loginMethod || "—"}</td>
+        <td>${c.visits || 1}</td>
+        <td>${badge}</td>
+        <td>${firstVisit}</td>
+        <td>${lastLogin}</td>
+      </tr>`;
+    });
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("statToday").textContent = todayCount;
+    document.getElementById("statRepeat").textContent = repeat;
+    document.getElementById("statVip") && (document.getElementById("statVip").textContent = vip);
+    document.getElementById("customerTable").innerHTML = total === 0
+      ? "<p style='padding:30px;color:#999;text-align:center;'>No customers yet — they will appear after first login</p>"
+      : `<table class="customers-table">
+          <thead><tr>
+            <th>Name</th><th>Contact</th><th>Method</th>
+            <th>Visits</th><th>Badge</th><th>First Visit</th><th>Last Login</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+  } catch(e) {
+    console.error("Customer load error:", e);
+    document.getElementById("customerTable").innerHTML = "<p style='padding:30px;color:red;'>Error loading customers: " + e.message + "</p>";
+  }
 }
 
 window.filterCustomers = function () {
