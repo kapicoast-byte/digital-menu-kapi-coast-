@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Kapi Coast</title>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kapi Coast</title>
 </head>
 
 <body style="font-family: Arial; background:#f5f5f5; margin:0;">
 
 <header style="background:#2C1A0E; color:white; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;">
-  <span style="font-size:18px; font-weight:bold; letter-spacing:1px;">☕ Kapi Coast</span>
+  <span style="font-size:18px; font-weight:bold; letter-spacing:1px;">Kapi Coast</span>
   <a id="avatarLink" href="/login.html"
      style="width:36px; height:36px; border-radius:50%; background:#5C3D1E; color:#F5EFE6;
             display:flex; align-items:center; justify-content:center; font-size:14px;
             font-weight:bold; text-decoration:none; border:2px solid #C49A6C; flex-shrink:0;"
      title="My Profile" id="avatarLink">
-    👤
   </a>
 </header>
 
@@ -57,7 +57,7 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     link.href  = "/login.html";
     link.title = "Login";
-    link.textContent = "👤";
+    link.textContent = "";
   }
 });
 
