@@ -4,28 +4,274 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kapi Coast</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', Arial, sans-serif;
+      background: #FAF6F0;
+      min-height: 100vh;
+      padding-bottom: 70px;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #2C1A0E;
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .logo {
+      font-size: 20px; font-weight: 800;
+      color: #fff; letter-spacing: 0.3px;
+    }
+    .table-badge {
+      background: #C8894A; color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px;
+      letter-spacing: 0.4px; display: none;
+    }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .avatar-link {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #5C3D1E; color: #F5EFE6;
+      display: none; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      text-decoration: none; border: 2px solid #C8894A;
+      flex-shrink: 0;
+    }
+    .sign-in-btn {
+      background: #C8894A; color: #fff;
+      font-size: 13px; font-weight: 700;
+      padding: 6px 16px; border-radius: 20px;
+      text-decoration: none; display: none;
+    }
+
+    /* ── Offer banner ── */
+    #offerBanner {
+      display: none;
+      margin: 12px 12px 0;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #C8894A 0%, #8B5E3C 100%);
+      color: #fff;
+      box-shadow: 0 3px 14px rgba(200,137,74,0.28);
+    }
+    #offerBanner .offer-title {
+      font-size: 14px; font-weight: 800; margin-bottom: 3px;
+    }
+    #offerBanner .offer-body { font-size: 13px; font-weight: 500; opacity: 0.92; }
+
+    /* ── Search ── */
+    .search-area { padding: 12px 12px 0; }
+    .search-wrap { position: relative; }
+    .search-input {
+      width: 100%; padding: 12px 38px 12px 42px;
+      border: 1.5px solid #E8DDD5; border-radius: 12px;
+      font-family: 'Manrope', sans-serif; font-size: 14px; color: #2C1A0E;
+      background: #fff; outline: none;
+      box-shadow: 0 1px 5px rgba(44,26,14,0.06);
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: #C8894A; }
+    .search-input::placeholder { color: #B8A898; }
+    .search-icon {
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px; pointer-events: none;
+    }
+    .search-clear {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: #9A7D6B; font-size: 17px; line-height: 1;
+      display: none; padding: 0 2px;
+    }
+
+    /* ── Filter pills ── */
+    .filter-pills {
+      display: flex; gap: 8px;
+      overflow-x: auto; padding: 12px 12px 6px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .filter-pills::-webkit-scrollbar { display: none; }
+    .pill {
+      flex-shrink: 0; padding: 7px 16px;
+      border-radius: 20px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid #D4C4B4; background: #fff; color: #2C1A0E;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .pill.active { background: #2C1A0E; color: #fff; border-color: #2C1A0E; }
+
+    /* ── Category heading ── */
+    .cat-heading {
+      font-size: 17px; font-weight: 800; color: #2C1A0E;
+      padding: 18px 12px 10px; letter-spacing: -0.2px;
+    }
+
+    /* ── Menu grid ── */
+    .menu-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; padding: 0 12px;
+    }
+    .menu-card {
+      background: #fff; border-radius: 14px; overflow: hidden;
+      box-shadow: 0 2px 10px rgba(44,26,14,0.07);
+      position: relative; display: flex; flex-direction: column;
+    }
+    .menu-card.sold-out { opacity: 0.6; }
+    .card-img-wrap {
+      position: relative; width: 100%; padding-top: 72%; background: #EDE5DB;
+    }
+    .card-img-wrap img {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .veg-dot {
+      position: absolute; top: 8px; left: 8px;
+      width: 11px; height: 11px; border-radius: 50%;
+      background: #22C55E; border: 2px solid #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .sold-out-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: #EF4444; color: #fff;
+      font-size: 10px; font-weight: 700;
+      padding: 3px 8px; border-radius: 6px;
+      letter-spacing: 0.4px; text-transform: uppercase;
+      display: none;
+    }
+    .menu-card.sold-out .sold-out-badge { display: block; }
+    .card-body {
+      padding: 10px 10px 12px;
+      flex: 1; display: flex; flex-direction: column; gap: 3px;
+    }
+    .card-name { font-size: 13px; font-weight: 700; color: #2C1A0E; line-height: 1.3; }
+    .card-desc {
+      font-size: 11px; color: #9A7D6B; line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-price { font-size: 14px; font-weight: 800; color: #C8894A; margin-top: 4px; }
+
+    /* ── No results ── */
+    #noResults {
+      display: none; text-align: center;
+      padding: 60px 20px; color: #9A7D6B;
+      font-size: 15px; font-weight: 600;
+    }
+
+    /* ── Social bar (sticky bottom) ── */
+    .social-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; padding: 10px 12px;
+      display: flex; gap: 10px;
+      box-shadow: 0 -2px 14px rgba(44,26,14,0.1);
+      z-index: 90;
+    }
+    .social-btn {
+      flex: 1; padding: 11px 8px; border-radius: 12px;
+      font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 700;
+      text-decoration: none; display: flex; align-items: center;
+      justify-content: center; gap: 6px; border: none; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .social-btn:active { opacity: 0.8; }
+    .btn-google { background: #fff; color: #2C1A0E; border: 1.5px solid #E0D4C8; }
+    .btn-instagram {
+      background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      color: #fff;
+    }
+
+    /* ── Scroll to top ── */
+    #scrollTop {
+      position: fixed; bottom: 80px; right: 16px;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #2C1A0E; color: #fff; border: none;
+      font-size: 20px; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(44,26,14,0.4);
+      z-index: 95; transition: opacity 0.2s;
+    }
+    #scrollTop.visible { display: flex; }
+  </style>
 </head>
+<body>
 
-<body style="font-family: Arial; background:#f5f5f5; margin:0;">
-
-<header style="background:#2C1A0E; color:white; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;">
-  <span style="font-size:18px; font-weight:bold; letter-spacing:1px;">Kapi Coast</span>
-  <a id="avatarLink" href="/login.html"
-     style="width:36px; height:36px; border-radius:50%; background:#5C3D1E; color:#F5EFE6;
-            display:flex; align-items:center; justify-content:center; font-size:14px;
-            font-weight:bold; text-decoration:none; border:2px solid #C49A6C; flex-shrink:0;"
-     title="My Profile" id="avatarLink">
-  </a>
+<!-- ── Header ── -->
+<header class="header">
+  <div class="header-left">
+    <span class="logo">Kapi Coast</span>
+    <span class="table-badge" id="tableBadge"></span>
+  </div>
+  <div class="header-right">
+    <a href="/login.html" class="sign-in-btn" id="signInBtn">Sign In</a>
+    <a href="/login.html" class="avatar-link" id="avatarLink" title="My Profile"></a>
+  </div>
 </header>
 
-<div id="adBanner" style="display:none; margin:10px; padding:16px; border-radius:10px;"></div>
-<div id="offerBanner" style="display:none; margin:10px; padding:12px; background:#fff3cd; border-radius:10px; color:#5c4400;"></div>
-<div id="menu" style="padding:10px;">Loading...</div>
+<!-- ── Offer Banner ── -->
+<div id="offerBanner">
+  <div class="offer-title" id="offerTitle"></div>
+  <div class="offer-body"  id="offerBody"></div>
+</div>
+
+<!-- ── Search ── -->
+<div class="search-area">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" type="text"
+           placeholder="Search coffee, food…" oninput="onSearch()">
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+</div>
+
+<!-- ── Filter pills ── -->
+<div class="filter-pills" id="filterPills">
+  <div class="pill active" data-cat="all" onclick="setFilter('all', this)">All</div>
+</div>
+
+<!-- ── Menu ── -->
+<div id="menuContainer"></div>
+<div id="noResults">No items match your search 🍵</div>
+
+<!-- ── Social bar ── -->
+<div class="social-bar">
+  <a href="https://g.page/r/Ca5EPPEPHT4CEBM/review"
+     target="_blank" rel="noopener" class="social-btn btn-google">
+    <svg width="15" height="15" viewBox="0 0 48 48">
+      <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.6 2.2 30.1 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.5 13.2 17.8 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17z"/>
+      <path fill="#FBBC05" d="M10.5 28.6A14.8 14.8 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.6 2.6 10.9l7.9-6.3z"/>
+      <path fill="#34A853" d="M24 48c6.1 0 11.2-2 15-5.4l-7.5-5.8c-2 1.4-4.6 2.2-7.5 2.2-6.2 0-11.5-3.7-13.5-9.1l-7.9 6.3C6.6 42.6 14.6 48 24 48z"/>
+    </svg>
+    Rate on Google
+  </a>
+  <a href="https://www.instagram.com/kapicoast/"
+     target="_blank" rel="noopener" class="social-btn btn-instagram">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+    </svg>
+    Follow on Instagram
+  </a>
+</div>
+
+<!-- ── Scroll to top ── -->
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, getDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import {
+  getFirestore, collection, doc, getDoc,
+  query, where, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB_gtI05K2B7GUEslsMjU_pN4B7rV8kkbM",
@@ -41,119 +287,162 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// ── Header avatar: links to profile if logged in, login if not ──
+function escapeHtml(v) {
+  return String(v ?? "").replace(/[&<>"']/g,
+    c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// ── Table badge ──
+const tableNum = new URLSearchParams(location.search).get("table");
+if (tableNum) {
+  const badge = document.getElementById("tableBadge");
+  badge.textContent  = "Table " + tableNum;
+  badge.style.display = "inline-block";
+}
+
+// ── Auth state ──
 onAuthStateChanged(auth, async (user) => {
-  const link = document.getElementById("avatarLink");
+  const avatarLink = document.getElementById("avatarLink");
+  const signInBtn  = document.getElementById("signInBtn");
   if (user) {
-    link.href = "/profile.html";
-    link.title = "My Profile";
-    // Show initials if we can pull name from Firestore
+    avatarLink.href         = "/profile.html";
+    avatarLink.style.display = "flex";
+    signInBtn.style.display  = "none";
     const snap = await getDoc(doc(db, "customers", user.uid));
     if (snap.exists()) {
-      const name = snap.data().name || "";
+      const name     = snap.data().name || "";
       const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-      if (initials) link.textContent = initials;
+      avatarLink.textContent = initials || "👤";
+    } else {
+      avatarLink.textContent = "👤";
     }
   } else {
-    link.href  = "/login.html";
-    link.title = "Login";
-    link.textContent = "";
+    avatarLink.style.display = "none";
+    signInBtn.style.display  = "inline-block";
   }
 });
 
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  }[char]));
-}
+// ── Active ad — real-time ──
+onSnapshot(query(collection(db, "ads"), where("active", "==", true)), snap => {
+  const banner = document.getElementById("offerBanner");
+  if (snap.empty) { banner.style.display = "none"; return; }
+  const ad = snap.docs[0].data();
+  document.getElementById("offerTitle").textContent = ad.title || "";
+  document.getElementById("offerBody").textContent  = ad.body  || "";
+  banner.style.background =
+    `linear-gradient(135deg, ${ad.color || "#C8894A"} 0%, #6B3F22 100%)`;
+  banner.style.display = "block";
+});
 
-async function loadOffer() {
-  const offerBanner = document.getElementById("offerBanner");
-  const offerDoc = await getDoc(doc(db, "settings", "offer"));
+// ── Menu — real-time ──
+let allItems    = [];
+let activeFilter = "all";
 
-  if (!offerDoc.exists()) {
-    return;
-  }
-
-  const message = (offerDoc.data().message || "").trim();
-  if (!message) {
-    return;
-  }
-
-  offerBanner.textContent = message;
-  offerBanner.style.display = "block";
-}
-
-async function loadMenu() {
-  const menuDiv = document.getElementById("menu");
-
-  try {
-    const snapshot = await getDocs(collection(db, "menu"));
-    const categories = {};
-    let html = "";
-
-    snapshot.forEach(docSnap => {
-      const item = docSnap.data();
-      const cat = (item.category || "Others").trim();
-
-      if (!categories[cat]) categories[cat] = [];
-      categories[cat].push(item);
-    });
-
-    Object.keys(categories).forEach(cat => {
-      html += `<h3 style="margin:10px;">${escapeHtml(cat)}</h3>`;
-
-      categories[cat].forEach(item => {
-        html += `
-          <div style="display:flex; gap:10px; background:white; padding:10px; margin:10px; border-radius:10px;">
-            <img src="${item.imageUrl || ""}"
-                 alt="${escapeHtml(item.name)}"
-                 style="width:70px; height:70px; border-radius:8px; object-fit:cover; background:#e5e5e5;">
-
-            <div>
-              <h4>${escapeHtml(item.name)}</h4>
-              <p>${escapeHtml(item.description || "")}</p>
-              <b>Rs. ${escapeHtml(item.price)}</b>
-            </div>
-          </div>
-        `;
-      });
-    });
-
-    menuDiv.innerHTML = html || "No items found";
-  } catch (err) {
-    console.error(err);
-    menuDiv.innerHTML = "Error loading menu";
-  }
-}
-
-function listenForActiveAd() {
-  const adBanner = document.getElementById("adBanner");
-  const q = query(collection(db, "ads"), where("active", "==", true));
-
-  onSnapshot(q, snapshot => {
-    if (snapshot.empty) {
-      adBanner.style.display = "none";
-      adBanner.innerHTML = "";
-      return;
-    }
-
-    const ad = snapshot.docs[0].data();
-    adBanner.style.background = ad.color || "#fff3cd";
-    adBanner.innerHTML =
-      `<div style="font-weight:bold; font-size:15px; margin-bottom:4px;">${escapeHtml(ad.title)}</div>` +
-      `<div style="font-size:14px;">${escapeHtml(ad.body)}</div>`;
-    adBanner.style.display = "block";
+function buildPills(cats) {
+  const container = document.getElementById("filterPills");
+  container.innerHTML =
+    `<div class="pill active" data-cat="all" onclick="setFilter('all',this)">All</div>`;
+  cats.forEach(cat => {
+    const el = document.createElement("div");
+    el.className    = "pill";
+    el.dataset.cat  = cat;
+    el.textContent  = cat;
+    el.onclick      = function () { setFilter(cat, this); };
+    container.appendChild(el);
   });
 }
 
-await loadOffer();
-await loadMenu();
-listenForActiveAd();
+function renderMenu() {
+  const container = document.getElementById("menuContainer");
+  const search    = document.getElementById("searchInput").value.toLowerCase();
+
+  const filtered = allItems.filter(item => {
+    const matchCat    = activeFilter === "all" || item.category === activeFilter;
+    const matchSearch = !search ||
+      (item.name        || "").toLowerCase().includes(search) ||
+      (item.description || "").toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+
+  document.getElementById("noResults").style.display =
+    filtered.length ? "none" : "block";
+
+  if (!filtered.length) { container.innerHTML = ""; return; }
+
+  // preserve category order
+  const catOrder = [...new Set(allItems.map(i => i.category))];
+  const byCat    = {};
+  filtered.forEach(item => {
+    if (!byCat[item.category]) byCat[item.category] = [];
+    byCat[item.category].push(item);
+  });
+
+  let html = "";
+  catOrder.forEach(cat => {
+    if (!byCat[cat]) return;
+    html += `<div class="cat-heading">${escapeHtml(cat)}</div><div class="menu-grid">`;
+    byCat[cat].forEach(item => {
+      const soldOut = item.available === false;
+      html += `
+        <div class="menu-card${soldOut ? " sold-out" : ""}">
+          <div class="card-img-wrap">
+            <img src="${escapeHtml(item.imageUrl || "")}"
+                 alt="${escapeHtml(item.name)}" loading="lazy">
+            <span class="veg-dot"></span>
+            <span class="sold-out-badge">Sold Out</span>
+          </div>
+          <div class="card-body">
+            <div class="card-name">${escapeHtml(item.name)}</div>
+            <div class="card-desc">${escapeHtml(item.description || "")}</div>
+            <div class="card-price">Rs. ${escapeHtml(item.price)}</div>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+}
+
+onSnapshot(collection(db, "menu"), snap => {
+  allItems = [];
+  const catSet = new Set();
+  snap.forEach(d => {
+    const item = { ...d.data(), id: d.id };
+    item.category = (item.category || "Others").trim();
+    catSet.add(item.category);
+    allItems.push(item);
+  });
+  allItems.sort((a, b) =>
+    a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+  buildPills([...catSet].sort());
+  renderMenu();
+});
+
+// ── Search handlers ──
+window.onSearch = function () {
+  const val = document.getElementById("searchInput").value;
+  document.getElementById("searchClear").style.display = val ? "block" : "none";
+  renderMenu();
+};
+window.clearSearch = function () {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("searchClear").style.display = "none";
+  renderMenu();
+};
+
+// ── Filter pill handler ──
+window.setFilter = function (cat, el) {
+  activeFilter = cat;
+  document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  renderMenu();
+};
+
+// ── Scroll to top button ──
+window.addEventListener("scroll", () => {
+  document.getElementById("scrollTop")
+    .classList.toggle("visible", window.scrollY > 200);
+});
 </script>
 
 </body>
