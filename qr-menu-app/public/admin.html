@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; min-height: 100vh; }
+    body { font-family: 'Manrope', Arial, sans-serif; background: #f5f5f5; display: flex; min-height: 100vh; }
 
     /* ── Sidebar ── */
     .sidebar {
@@ -98,28 +99,97 @@
     .ad-status-badge.off { background: #f5f5f5; color: #999; }
     .ad-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
 
+    /* ── Customers – stat cards ── */
+    #customers h2 {
+      font-family: 'Manrope', sans-serif;
+      font-size: 22px; font-weight: 800;
+      color: #2C1A0E; margin-bottom: 24px; letter-spacing: -0.3px;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: #fff; border-radius: 14px;
+      padding: 22px 20px 18px;
+      box-shadow: 0 2px 12px rgba(44,26,14,0.07);
+      border-left: 4px solid #C8894A;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .stat-value {
+      font-size: 36px; font-weight: 800; color: #2C1A0E; line-height: 1;
+    }
+    .stat-label {
+      font-size: 12px; font-weight: 600; color: #9A7D6B;
+      text-transform: uppercase; letter-spacing: 0.7px;
+    }
+
+    /* ── Customers – search bar ── */
+    #customerSearch {
+      width: 100%; padding: 12px 18px;
+      border: 1.5px solid #E8DDD5; border-radius: 10px;
+      font-family: 'Manrope', sans-serif; font-size: 14px; color: #2C1A0E;
+      background: #fff; margin-bottom: 8px; display: block;
+      box-shadow: 0 1px 4px rgba(44,26,14,0.05);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    #customerSearch::placeholder { color: #B8A898; }
+    #customerSearch:focus { border-color: #C8894A; }
+    #customerCount {
+      font-size: 12px; font-weight: 600; color: #9A7D6B;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Customers – table container ── */
+    .customer-table-wrap {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(44,26,14,0.08);
+      overflow: hidden;
+    }
+
     /* ── Customer table ── */
     .customer-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .customer-table thead tr {
+      background: #FAF6F0;
+    }
     .customer-table th {
-      background: #1a1a1a; color: #C49A6C; text-align: left;
-      padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 13px 16px; font-size: 10.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: #9A7D6B;
+      text-align: left; border-bottom: 1px solid #EDE5DB;
+      white-space: nowrap;
     }
-    .customer-table td { padding: 10px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
-    .customer-table tr:last-child td { border-bottom: none; }
-    .customer-table tr:hover td { background: #fafafa; }
+    .customer-table td {
+      padding: 14px 16px; border-bottom: 1px solid #F4EDE6;
+      vertical-align: middle; color: #2C1A0E;
+    }
+    .customer-table tbody tr:last-child td { border-bottom: none; }
+    .customer-table tbody tr:hover td { background: #FAF6F0; }
+
+    .cust-name { font-weight: 700; font-size: 14px; color: #2C1A0E; }
+    .cust-contact { font-size: 12px; color: #9A7D6B; margin-top: 2px; }
+    .cust-visits { font-weight: 800; font-size: 16px; color: #2C1A0E; text-align: center; display: block; }
+
+    /* method badges */
+    .method-pill {
+      display: inline-block; border-radius: 20px; padding: 3px 11px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap;
+    }
+    .method-google { background: #E8F0FE; color: #1A56DB; }
+    .method-phone  { background: #DCFCE7; color: #15803D; }
+    .method-other  { background: #F3F4F6; color: #6B7280; }
+
+    /* loyalty badges */
     .loyalty-pill {
-      display: inline-block; border-radius: 10px; padding: 2px 10px;
-      font-size: 11px; font-weight: bold; white-space: nowrap;
+      display: inline-block; border-radius: 20px; padding: 4px 12px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap;
     }
-    .pill-first   { background: #FFF3CD; color: #7A5200; }
-    .pill-regular { background: #E8F4E8; color: #2D6A2D; }
-    .pill-vip     { background: #2C1A0E; color: #C49A6C; }
-    #customerSearch {
-      width: 100%; max-width: 320px; padding: 8px 11px;
-      border: 1px solid #ccc; border-radius: 6px; font-size: 14px;
-      margin-bottom: 14px; display: block;
-    }
-    #customerCount { font-size: 13px; color: #777; margin-bottom: 12px; }
+    .pill-first   { background: #F3F4F6; color: #6B7280; }
+    .pill-regular { background: #FEF3C7; color: #92400E; }
+    .pill-vip     { background: #2C1A0E; color: #C8894A; }
+
+    .cust-date { font-size: 12px; color: #9A7D6B; }
 
     @media (max-width: 600px) {
       .sidebar { width: 56px; }
@@ -202,7 +272,9 @@
     </div>
     <input type="text" id="customerSearch" placeholder="Search by name, email or phone…" oninput="filterCustomers()">
     <div id="customerCount"></div>
-    <div id="customerTable" style="overflow-x:auto;">Loading...</div>
+    <div class="customer-table-wrap">
+      <div id="customerTable" style="overflow-x:auto;">Loading...</div>
+    </div>
   </div>
 
   <!-- Section: Ads & Banners -->
@@ -464,6 +536,13 @@ function loyaltyPill(visits) {
   return `<span class="loyalty-pill pill-first">First Timer</span>`;
 }
 
+function methodPill(method) {
+  const m = (method || "").toLowerCase();
+  if (m === "google") return `<span class="method-pill method-google">Google</span>`;
+  if (m === "phone")  return `<span class="method-pill method-phone">Phone</span>`;
+  return `<span class="method-pill method-other">${escapeHtml(method || "—")}</span>`;
+}
+
 function fmtDate(ts) {
   if (!ts) return "—";
   const d = ts.toDate ? ts.toDate() : new Date(ts.seconds * 1000);
@@ -472,9 +551,14 @@ function fmtDate(ts) {
 
 function renderCustomers(list) {
   const div = document.getElementById("customerTable");
-  document.getElementById("customerCount").textContent = `${list.length} customer${list.length !== 1 ? "s" : ""}`;
+  const count = list.length;
+  document.getElementById("customerCount").textContent =
+    `${count} customer${count !== 1 ? "s" : ""}`;
 
-  if (!list.length) { div.innerHTML = "<p style='color:#999; font-size:14px;'>No customers found.</p>"; return; }
+  if (!count) {
+    div.innerHTML = `<p style="padding:40px;text-align:center;color:#9A7D6B;font-size:14px;font-weight:600;">No customers found.</p>`;
+    return;
+  }
 
   div.innerHTML = `
     <table class="customer-table">
@@ -482,23 +566,30 @@ function renderCustomers(list) {
         <tr>
           <th>Name</th>
           <th>Contact</th>
-          <th>Loyalty</th>
-          <th>Visits</th>
+          <th>Method</th>
+          <th style="text-align:center;">Visits</th>
+          <th>Badge</th>
           <th>First Visit</th>
           <th>Last Login</th>
-          <th>Via</th>
         </tr>
       </thead>
       <tbody>
         ${list.map(c => `
           <tr>
-            <td><b>${escapeHtml(c.name || "Customer")}</b></td>
-            <td>${escapeHtml(c.email || "")}${c.email && c.phone ? "<br>" : ""}${escapeHtml(c.phone || "")}</td>
+            <td><div class="cust-name">${escapeHtml(c.name || "Customer")}</div></td>
+            <td>
+              <div class="cust-contact">
+                ${escapeHtml(c.email || "")}
+                ${c.email && c.phone ? "<br>" : ""}
+                ${escapeHtml(c.phone || "")}
+                ${!c.email && !c.phone ? "—" : ""}
+              </div>
+            </td>
+            <td>${methodPill(c.loginMethod)}</td>
+            <td style="text-align:center;"><span class="cust-visits">${c.visits ?? 1}</span></td>
             <td>${loyaltyPill(c.visits || 1)}</td>
-            <td style="text-align:center; font-weight:bold;">${c.visits ?? "—"}</td>
-            <td>${fmtDate(c.firstVisit)}</td>
-            <td>${fmtDate(c.lastLogin)}</td>
-            <td style="text-transform:capitalize;">${escapeHtml(c.loginMethod || "—")}</td>
+            <td><span class="cust-date">${fmtDate(c.firstVisit)}</span></td>
+            <td><span class="cust-date">${fmtDate(c.lastLogin)}</span></td>
           </tr>`).join("")}
       </tbody>
     </table>`;
@@ -509,43 +600,37 @@ async function loadCustomers() {
     const snap = await getDocs(collection(db, "customers"));
     const today = new Date().toDateString();
     let total = 0, todayCount = 0, repeat = 0, vip = 0;
-    let rows = "";
+
+    allCustomers = [];
     snap.forEach(d => {
-      const c = d.data();
+      const c = { ...d.data(), id: d.id };
+      const visits = c.visits || 1;
       total++;
-      if ((c.visits || 1) > 1) repeat++;
-      if ((c.visits || 1) >= 6) vip++;
+      if (visits > 1)  repeat++;
+      if (visits >= 6) vip++;
       const lastDate = c.lastLogin ? new Date(c.lastLogin.seconds * 1000).toDateString() : null;
       if (lastDate === today) todayCount++;
-      const badge = (c.visits || 1) >= 6 ? "VIP" : (c.visits || 1) >= 2 ? "Regular" : "First Timer";
-      const firstVisit = c.firstVisit ? new Date(c.firstVisit.seconds * 1000).toLocaleDateString("en-IN") : "—";
-      const lastLogin = c.lastLogin ? new Date(c.lastLogin.seconds * 1000).toLocaleDateString("en-IN") : "—";
-      rows += `<tr>
-        <td>${c.name || "—"}</td>
-        <td>${c.phone || c.email || "—"}</td>
-        <td>${c.loginMethod || "—"}</td>
-        <td>${c.visits || 1}</td>
-        <td>${badge}</td>
-        <td>${firstVisit}</td>
-        <td>${lastLogin}</td>
-      </tr>`;
+      allCustomers.push(c);
     });
-    if(document.getElementById("statTotal")) document.getElementById("statTotal").textContent = total;
-    if(document.getElementById("statToday")) document.getElementById("statToday").textContent = todayCount;
-    if(document.getElementById("statRepeat")) document.getElementById("statRepeat").textContent = repeat;
-    if(document.getElementById("statVip")) document.getElementById("statVip").textContent = vip;
-    document.getElementById("customerTable").innerHTML = total === 0
-      ? "<p style='padding:30px;color:#999;text-align:center;'>No customers yet — they will appear after first login</p>"
-      : `<table class="customers-table">
-          <thead><tr>
-            <th>Name</th><th>Contact</th><th>Method</th>
-            <th>Visits</th><th>Badge</th><th>First Visit</th><th>Last Login</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>`;
-  } catch(e) {
+
+    // Sort by visits descending
+    allCustomers.sort((a, b) => (b.visits || 1) - (a.visits || 1));
+
+    document.getElementById("statTotal").textContent  = total;
+    document.getElementById("statToday").textContent  = todayCount;
+    document.getElementById("statRepeat").textContent = repeat;
+    document.getElementById("statVip").textContent    = vip;
+
+    if (total === 0) {
+      document.getElementById("customerTable").innerHTML =
+        `<p style="padding:40px;text-align:center;color:#9A7D6B;font-size:14px;font-weight:600;">No customers yet — they will appear after first login.</p>`;
+    } else {
+      renderCustomers(allCustomers);
+    }
+  } catch (e) {
     console.error("Customer load error:", e);
-    document.getElementById("customerTable").innerHTML = "<p style='padding:30px;color:red;'>Error loading customers: " + e.message + "</p>";
+    document.getElementById("customerTable").innerHTML =
+      `<p style="padding:30px;color:red;">Error loading customers: ${escapeHtml(e.message)}</p>`;
   }
 }
 
