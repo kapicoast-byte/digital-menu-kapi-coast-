@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table QR Generator — Kapi Coast</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: #FAF6F0;
+      color: #2C1A0E;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: #2C1A0E;
+      color: #FAF6F0;
+      padding: 18px 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+    .header-brand {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .header-divider {
+      width: 1px;
+      height: 14px;
+      background: #9A7D6B;
+      align-self: center;
+    }
+    .header-sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: #C8894A;
+      letter-spacing: 0.04em;
+    }
+    .back-link {
+      margin-left: auto;
+      font-size: 13px;
+      font-weight: 600;
+      color: #9A7D6B;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: #FAF6F0; }
+
+    /* Layout */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+
+    /* Section titles */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #9A7D6B;
+      margin-bottom: 14px;
+    }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 2px 20px rgba(44,26,14,0.07);
+      margin-bottom: 32px;
+    }
+
+    /* Single generator */
+    .gen-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #9A7D6B;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .field input {
+      font-family: 'Manrope', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #2C1A0E;
+      background: #FAF6F0;
+      border: 1.5px solid #E0D5CC;
+      border-radius: 10px;
+      padding: 10px 14px;
+      width: 120px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: #C8894A; }
+
+    /* Buttons */
+    .btn {
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 20px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-dark { background: #2C1A0E; color: #FAF6F0; }
+    .btn-dark:hover { opacity: 0.85; }
+    .btn-caramel { background: #C8894A; color: #fff; }
+    .btn-caramel:hover { opacity: 0.88; }
+    .btn-outline {
+      background: #fff;
+      color: #2C1A0E;
+      border: 1.5px solid #E0D5CC;
+    }
+    .btn-outline:hover { background: #FAF6F0; }
+    .btn-sm {
+      font-size: 12px;
+      padding: 7px 14px;
+      border-radius: 8px;
+    }
+
+    /* Single QR result */
+    #singleResult { display: none; margin-top: 28px; }
+    .qr-preview {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    #singleQrCanvas {
+      border: 3px solid #FAF6F0;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .qr-meta { flex: 1; min-width: 180px; }
+    .qr-table-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9A7D6B;
+      margin-bottom: 4px;
+    }
+    .qr-table-num {
+      font-size: 36px;
+      font-weight: 800;
+      color: #2C1A0E;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .qr-url {
+      font-size: 11px;
+      color: #9A7D6B;
+      word-break: break-all;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      background: #FAF6F0;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+    .qr-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* Bulk section */
+    .bulk-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .bulk-label {
+      font-size: 13px;
+      color: #9A7D6B;
+      font-weight: 500;
+    }
+
+    /* QR Grid */
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .qr-card {
+      background: #fff;
+      border: 1.5px solid #E0D5CC;
+      border-radius: 14px;
+      padding: 20px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .qr-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9A7D6B;
+    }
+    .qr-card-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: #2C1A0E;
+    }
+    .qr-card-canvas { border-radius: 8px; overflow: hidden; }
+    .qr-card-dl {
+      width: 100%;
+      text-align: center;
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      body { background: #fff; }
+      header, .card > *:not(#bulkGrid), .gen-controls, #singleResult .qr-meta,
+      .bulk-controls, .section-title, .card.single-card { display: none !important; }
+
+      .card.bulk-card {
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .qr-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        padding: 16px;
+      }
+
+      .qr-card {
+        border: 1.5px solid #ccc;
+        border-radius: 10px;
+        padding: 16px 12px 12px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .qr-card-dl { display: none !important; }
+
+      .qr-card-label {
+        font-size: 10px;
+      }
+      .qr-card-num {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="header-brand">Kapi Coast</span>
+    <span class="header-divider"></span>
+    <span class="header-sub">Table QR Generator</span>
+    <a class="back-link" href="/admin.html">Back to Admin</a>
+  </header>
+
+  <div class="container">
+
+    <!-- Single QR -->
+    <p class="section-title">Single Table</p>
+    <div class="card single-card">
+      <div class="gen-row gen-controls">
+        <div class="field">
+          <label>Table Number</label>
+          <input type="number" id="tableNum" min="1" max="50" placeholder="e.g. 5">
+        </div>
+        <button class="btn btn-dark" onclick="generateSingle()">Generate QR</button>
+        <button class="btn btn-outline" onclick="printSingle()">Print</button>
+      </div>
+
+      <div id="singleResult">
+        <div class="qr-preview">
+          <div id="singleQrCanvas"></div>
+          <div class="qr-meta">
+            <div class="qr-table-label">Table</div>
+            <div class="qr-table-num" id="singleTableNum"></div>
+            <div class="qr-url" id="singleUrl"></div>
+            <div class="qr-actions">
+              <button class="btn btn-caramel btn-sm" onclick="downloadSingle()">Download PNG</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk QR -->
+    <p class="section-title">All Tables</p>
+    <div class="card bulk-card">
+      <div class="bulk-controls gen-controls">
+        <button class="btn btn-dark" onclick="generateAll()">Generate Tables 1 – 10</button>
+        <button class="btn btn-outline" onclick="window.print()">Print All</button>
+        <span class="bulk-label" id="bulkStatus"></span>
+      </div>
+      <div class="qr-grid" id="bulkGrid"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const BASE_DOMAIN = "kc-high-digital-menu-a7jn2l-df683a-72-62-194-136.traefik.me";
+
+    function tableUrl(n) {
+      return `https://${BASE_DOMAIN}/login.html?table=${n}`;
+    }
+
+    let singleQR = null;
+
+    function generateSingle() {
+      const n = parseInt(document.getElementById("tableNum").value, 10);
+      if (!n || n < 1 || n > 50) {
+        alert("Please enter a table number between 1 and 50.");
+        return;
+      }
+      const url = tableUrl(n);
+
+      // Clear previous
+      const container = document.getElementById("singleQrCanvas");
+      container.innerHTML = "";
+      if (singleQR) { singleQR = null; }
+
+      singleQR = new QRCode(container, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: "#2C1A0E",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      document.getElementById("singleTableNum").textContent = n;
+      document.getElementById("singleUrl").textContent = url;
+      document.getElementById("singleResult").style.display = "block";
+    }
+
+    function downloadSingle() {
+      const canvas = document.querySelector("#singleQrCanvas canvas");
+      if (!canvas) { alert("Generate a QR code first."); return; }
+      const n = document.getElementById("singleTableNum").textContent;
+      const link = document.createElement("a");
+      link.download = `kapicoast-table-${n}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    function printSingle() {
+      const n = parseInt(document.getElementById("tableNum").value, 10);
+      if (!n) { alert("Generate a QR code first."); return; }
+      window.print();
+    }
+
+    function generateAll() {
+      const grid = document.getElementById("bulkGrid");
+      grid.innerHTML = "";
+      document.getElementById("bulkStatus").textContent = "Generating…";
+
+      for (let i = 1; i <= 10; i++) {
+        const url = tableUrl(i);
+        const card = document.createElement("div");
+        card.className = "qr-card";
+        card.innerHTML = `
+          <div class="qr-card-label">Table</div>
+          <div class="qr-card-num">${i}</div>
+          <div class="qr-card-canvas" id="bulk-qr-${i}"></div>
+          <div class="qr-card-dl">
+            <button class="btn btn-outline btn-sm" onclick="downloadBulk(${i})">Download</button>
+          </div>
+        `;
+        grid.appendChild(card);
+
+        new QRCode(document.getElementById(`bulk-qr-${i}`), {
+          text: url,
+          width: 140,
+          height: 140,
+          colorDark: "#2C1A0E",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      }
+
+      document.getElementById("bulkStatus").textContent = "10 QR codes ready";
+    }
+
+    function downloadBulk(n) {
+      // QRCode.js renders an img tag on some browsers; prefer canvas
+      const container = document.getElementById(`bulk-qr-${n}`);
+      const canvas = container.querySelector("canvas");
+      const img = container.querySelector("img");
+      if (canvas) {
+        const link = document.createElement("a");
+        link.download = `kapicoast-table-${n}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } else if (img) {
+        const link = document.createElement("a");
+        link.download = `kapicoast-table-${n}.png`;
+        link.href = img.src;
+        link.click();
+      } else {
+        alert("QR not ready yet.");
+      }
+    }
+  </script>
+
+</body>
+</html>
