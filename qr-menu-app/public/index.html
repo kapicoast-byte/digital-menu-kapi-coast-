@@ -200,6 +200,43 @@
       z-index: 95; transition: opacity 0.2s;
     }
     #scrollTop.visible { display: flex; }
+
+    /* ── Theme toggle switch ── */
+    .theme-switch { cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .switch-track {
+      width: 48px; height: 26px;
+      background: #555;
+      border-radius: 13px;
+      position: relative;
+      transition: background 0.3s;
+      display: block;
+    }
+    .switch-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    input:checked + .switch-track { background: #C8894A; }
+    input:checked + .switch-track .switch-thumb { transform: translateX(22px); }
+    .theme-switch input { display: none; }
+    .theme-label { font-size: 11px; font-weight: 600; color: #9A7D6B; }
+
+    /* ── Dark mode ── */
+    body.dark { background: #0D0D0D; color: white; }
+    body.dark .menu-card { background: #1A1A1A; }
+    body.dark .header { background: #1A1A1A; }
+    body.dark .card-name { color: white; }
+    body.dark .cat-heading { color: white; border-color: #333; }
+    body.dark .social-bar { background: #1A1A1A; border-color: #333; }
+    body.dark .pill { background: #333; color: #aaa; border-color: #444; }
+    body.dark .pill.active { background: #C8894A; color: white; border-color: #C8894A; }
+    body.dark .card-desc { color: #888; }
+    body.dark .search-input { background: #1A1A1A; color: white; border-color: #333; }
+    body.dark .search-input::placeholder { color: #666; }
+    body.light { background: #FAF6F0; color: #2C1A0E; }
   </style>
 </head>
 <body>
@@ -211,6 +248,13 @@
     <span class="table-badge" id="tableBadge"></span>
   </div>
   <div class="header-right">
+    <span class="theme-label" id="themeLabel">Light</span>
+    <label class="theme-switch">
+      <input type="checkbox" id="themeToggle" onchange="toggleTheme(this.checked)">
+      <span class="switch-track">
+        <span class="switch-thumb"></span>
+      </span>
+    </label>
     <a href="/login.html" class="sign-in-btn" id="signInBtn">Sign In</a>
     <a href="/login.html" class="avatar-link" id="avatarLink" title="My Profile"></a>
   </div>
@@ -437,6 +481,25 @@ window.setFilter = function (cat, el) {
   el.classList.add("active");
   renderMenu();
 };
+
+// ── Theme toggle ──
+window.toggleTheme = function (isDark) {
+  if (isDark) {
+    document.body.classList.add('dark');
+    document.body.classList.remove('light');
+    localStorage.setItem('theme', 'dark');
+    document.getElementById('themeLabel').textContent = 'Dark';
+  } else {
+    document.body.classList.add('light');
+    document.body.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+    document.getElementById('themeLabel').textContent = 'Light';
+  }
+};
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.classList.add(savedTheme);
+document.getElementById('themeToggle').checked = savedTheme === 'dark';
+document.getElementById('themeLabel').textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
 
 // ── Scroll to top button ──
 window.addEventListener("scroll", () => {
