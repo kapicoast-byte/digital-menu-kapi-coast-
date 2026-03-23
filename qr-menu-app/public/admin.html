@@ -192,9 +192,61 @@
     .cust-date { font-size: 12px; color: #9A7D6B; }
 
     @media (max-width: 600px) {
-      .sidebar { width: 56px; }
-      .sidebar-title, .nav-item span { display: none; }
-      .nav-item { text-align: center; font-size: 18px; padding: 14px 0; }
+      .sidebar-title { display: none; }
+    }
+
+    :root { --caramel: #C8894A; }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        width: 100%;
+        height: 60px;
+        flex-direction: row;
+        padding: 0;
+        z-index: 999;
+        justify-content: space-around;
+        align-items: center;
+      }
+      .sidebar-logo { display: none; }
+      .sidebar-footer { display: none; }
+      .nav-item {
+        flex-direction: column;
+        padding: 8px 4px;
+        font-size: 10px;
+        border-left: none;
+        border-top: 3px solid transparent;
+        flex: 1;
+        justify-content: center;
+        align-items: center;
+        gap: 2px;
+      }
+      .nav-item.active {
+        border-left: none;
+        border-top: 3px solid var(--caramel);
+      }
+      .nav-icon { font-size: 20px; }
+      .main {
+        margin-left: 0;
+        margin-bottom: 60px;
+        padding: 16px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .customer-table-wrap {
+        display: none;
+      }
+      #customerCards {
+        display: block !important;
+      }
     }
   </style>
 </head>
@@ -204,19 +256,19 @@
 <nav class="sidebar">
   <div class="sidebar-title">Kapi Coast</div>
   <div class="nav-item active" onclick="showSection('menuItems', this)">
-    <span>Menu Items</span>
+    <span class="nav-icon">🍽️</span><span>Menu Items</span>
   </div>
   <div class="nav-item" onclick="showSection('offerBanner', this)">
-    <span>Offer Banner</span>
+    <span class="nav-icon">🏷️</span><span>Offers</span>
   </div>
   <div class="nav-item" onclick="showSection('adsBanners', this)">
-    <span>Ads &amp; Banners</span>
+    <span class="nav-icon">📢</span><span>Ads</span>
   </div>
   <div class="nav-item" onclick="showSection('customers', this)">
-    <span>Customers</span>
+    <span class="nav-icon">👥</span><span>Customers</span>
   </div>
   <a href="/qr.html" class="nav-item" style="text-decoration:none;">
-    <span>QR Codes</span>
+    <span class="nav-icon">📱</span><span>QR Codes</span>
   </a>
 </nav>
 
@@ -275,6 +327,7 @@
     <div class="customer-table-wrap">
       <div id="customerTable" style="overflow-x:auto;">Loading...</div>
     </div>
+    <div id="customerCards" style="display:none;"></div>
   </div>
 
   <!-- Section: Ads & Banners -->
@@ -551,12 +604,14 @@ function fmtDate(ts) {
 
 function renderCustomers(list) {
   const div = document.getElementById("customerTable");
+  const cards = document.getElementById("customerCards");
   const count = list.length;
   document.getElementById("customerCount").textContent =
     `${count} customer${count !== 1 ? "s" : ""}`;
 
   if (!count) {
     div.innerHTML = `<p style="padding:40px;text-align:center;color:#9A7D6B;font-size:14px;font-weight:600;">No customers found.</p>`;
+    cards.innerHTML = `<p style="padding:20px;text-align:center;color:#9A7D6B;font-size:14px;font-weight:600;">No customers found.</p>`;
     return;
   }
 
@@ -593,6 +648,22 @@ function renderCustomers(list) {
           </tr>`).join("")}
       </tbody>
     </table>`;
+
+  cards.innerHTML = list.map(c => `
+    <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 8px rgba(44,26,14,0.07);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div class="cust-name">${escapeHtml(c.name || "Customer")}</div>
+          <div class="cust-contact">${escapeHtml(c.email || "")}${c.email && c.phone ? " · " : ""}${escapeHtml(c.phone || "")}${!c.email && !c.phone ? "—" : ""}</div>
+        </div>
+        <div style="background:#2C1A0E;color:#C8894A;font-weight:800;font-size:14px;border-radius:8px;padding:4px 10px;min-width:40px;text-align:center;">${c.visits ?? 1} visits</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        ${methodPill(c.loginMethod)}
+        ${loyaltyPill(c.visits || 1)}
+        <span style="font-size:11px;color:#9A7D6B;margin-left:auto;">Last: ${fmtDate(c.lastLogin)}</span>
+      </div>
+    </div>`).join("");
 }
 
 async function loadCustomers() {
