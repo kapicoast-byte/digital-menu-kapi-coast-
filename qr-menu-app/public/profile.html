@@ -4,268 +4,326 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Profile – Kapi Coast</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ── Brand palette ── */
-    :root {
-      --espresso:   #2C1A0E;
-      --mocha:      #5C3D1E;
-      --latte:      #C49A6C;
-      --cream:      #F5EFE6;
-      --foam:       #FDF8F2;
-      --text-dark:  #1E1108;
-      --text-mid:   #6B4F35;
-      --text-light: #9E7A55;
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: Georgia, 'Times New Roman', serif;
-      background: var(--cream);
+      font-family: 'Manrope', Arial, sans-serif;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: #FAF6F0;
+      color: #2C1A0E;
+      padding-bottom: 40px;
+      transition: background 0.25s, color 0.25s;
+    }
+    body.dark {
+      background: #0D0D0D;
+      color: #FAF6F0;
     }
 
     /* ── Header bar ── */
-    header {
-      width: 100%;
-      background: var(--espresso);
-      color: var(--cream);
-      text-align: center;
-      padding: 18px 16px 14px;
+    .header {
+      background: #2C1A0E;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
-    header h1 {
+    .header-back {
+      color: #C8894A;
       font-size: 22px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      text-decoration: none;
+      line-height: 1;
+      padding: 4px 6px;
     }
-    header p {
+    .header-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #FAF6F0;
+      letter-spacing: 0.3px;
+    }
+    .theme-toggle-btn {
+      background: none;
+      border: 1px solid rgba(200,137,74,0.4);
+      border-radius: 20px;
+      padding: 5px 12px;
+      color: #C8894A;
+      font-family: 'Manrope', sans-serif;
       font-size: 12px;
-      letter-spacing: 1px;
-      opacity: 0.7;
-      margin-top: 2px;
-      font-family: Arial, sans-serif;
-      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .theme-toggle-btn:hover { background: rgba(200,137,74,0.1); }
+
+    /* ── Page container ── */
+    .page {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 24px 16px;
     }
 
-    /* ── Card ── */
-    .card {
-      background: var(--foam);
-      width: 100%;
-      max-width: 420px;
-      border-radius: 0 0 16px 16px;
-      padding: 28px 24px 32px;
-      box-shadow: 0 6px 24px rgba(44,26,14,0.12);
+    /* ── Loading ── */
+    #loading {
+      text-align: center;
+      padding: 80px 20px;
+      color: #9A7D6B;
+      font-size: 15px;
+      font-weight: 600;
     }
+    #content { display: none; }
 
-    /* ── Avatar + name ── */
+    /* ── Avatar + identity ── */
+    .identity {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 28px;
+    }
     .avatar {
-      width: 72px;
-      height: 72px;
+      width: 84px;
+      height: 84px;
       border-radius: 50%;
-      background: var(--mocha);
-      color: var(--cream);
-      font-size: 28px;
+      background: #2C1A0E;
+      color: #C8894A;
+      font-size: 32px;
+      font-weight: 800;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 12px;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
+      border: 3px solid #C8894A;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 20px rgba(200,137,74,0.25);
     }
-    .customer-name {
+    body.dark .avatar { background: #1A1A1A; }
+    .profile-name {
       font-size: 22px;
-      color: var(--text-dark);
-      text-align: center;
+      font-weight: 800;
+      color: #2C1A0E;
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
     }
-    .customer-contact {
+    body.dark .profile-name { color: #FAF6F0; }
+    .profile-contact {
       font-size: 13px;
-      color: var(--text-light);
-      text-align: center;
-      margin-top: 4px;
-      font-family: Arial, sans-serif;
+      color: #9A7D6B;
+      font-weight: 500;
     }
 
-    /* ── Loyalty badge ── */
-    .loyalty-section {
-      margin: 22px 0 18px;
-      text-align: center;
+    /* ── Loyalty card ── */
+    .loyalty-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(44,26,14,0.08);
     }
-    .badge {
+    body.dark .loyalty-card { background: #1A1A1A; box-shadow: none; }
+    .loyalty-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .loyalty-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #9A7D6B;
+    }
+    .badge-pill {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      border-radius: 30px;
-      padding: 7px 20px;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-    }
-    .badge-first  { background: #FFF3CD; color: #7A5200; border: 1.5px solid #F0C040; }
-    .badge-regular{ background: #E8F4E8; color: #2D6A2D; border: 1.5px solid #82C882; }
-    .badge-vip    { background: var(--espresso); color: var(--latte);  border: 1.5px solid var(--latte); }
-
-    .badge-sub {
+      gap: 5px;
+      padding: 5px 14px;
+      border-radius: 20px;
       font-size: 12px;
-      color: var(--text-light);
-      margin-top: 6px;
-      font-family: Arial, sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .pill-first   { background: #F3F4F6; color: #6B7280; }
+    .pill-regular { background: #FEF3C7; color: #92400E; }
+    .pill-vip     { background: #2C1A0E; color: #C8894A; }
+    body.dark .pill-first   { background: #2A2A2A; color: #888; }
+    body.dark .pill-regular { background: #3D2E00; color: #F59E0B; }
+
+    /* Progress bar */
+    .progress-track {
+      height: 8px;
+      background: #EDE5DB;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    body.dark .progress-track { background: #2A2A2A; }
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #C8894A, #e8a963);
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 0%;
+    }
+    .progress-hint {
+      font-size: 12px;
+      font-weight: 600;
+      color: #9A7D6B;
     }
 
-    /* ── Stats grid ── */
-    .stats {
+    /* ── Stats row ── */
+    .stats-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 22px;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
     }
-    .stat-box {
-      background: var(--cream);
-      border-radius: 10px;
-      padding: 14px 12px;
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 10px;
       text-align: center;
-      border: 1px solid rgba(196,154,108,0.3);
+      box-shadow: 0 2px 8px rgba(44,26,14,0.07);
     }
+    body.dark .stat-card { background: #1A1A1A; box-shadow: none; }
     .stat-value {
       font-size: 20px;
-      font-weight: bold;
-      color: var(--mocha);
-      font-family: Arial, sans-serif;
+      font-weight: 800;
+      color: #C8894A;
+      line-height: 1;
+      margin-bottom: 5px;
     }
     .stat-label {
-      font-size: 11px;
-      color: var(--text-light);
-      margin-top: 3px;
+      font-size: 10px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
-      font-family: Arial, sans-serif;
+      letter-spacing: 0.8px;
+      color: #9A7D6B;
     }
 
-    /* ── Detail rows ── */
-    .detail-row {
+    /* ── Badges earned ── */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #9A7D6B;
+      margin-bottom: 12px;
+    }
+    .badges-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 11px 0;
-      border-bottom: 1px solid rgba(196,154,108,0.2);
-      font-family: Arial, sans-serif;
+      gap: 10px;
+      margin-bottom: 24px;
     }
-    .detail-row:last-of-type { border-bottom: none; }
-    .detail-key {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-light);
+    .badge-card {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(44,26,14,0.07);
+      border: 2px solid transparent;
+      transition: border-color 0.2s, opacity 0.2s;
     }
-    .detail-val {
-      font-size: 14px;
-      color: var(--text-dark);
-      font-weight: bold;
-      text-align: right;
-    }
-
-    /* ── Divider ── */
-    .divider {
-      border: none;
-      border-top: 1px solid rgba(196,154,108,0.3);
-      margin: 20px 0;
-    }
+    body.dark .badge-card { background: #1A1A1A; box-shadow: none; }
+    .badge-card.earned   { border-color: #C8894A; }
+    .badge-card.locked   { opacity: 0.38; }
+    .badge-icon  { font-size: 26px; margin-bottom: 6px; }
+    .badge-name  { font-size: 11px; font-weight: 700; color: #2C1A0E; }
+    body.dark .badge-name { color: #FAF6F0; }
+    .badge-req   { font-size: 10px; color: #9A7D6B; margin-top: 2px; font-weight: 500; }
 
     /* ── Buttons ── */
     .btn-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-top: 24px;
     }
     .btn {
-      flex: 1;
-      padding: 13px 10px;
-      border: none;
-      border-radius: 8px;
+      padding: 14px 10px;
+      border-radius: 12px;
+      font-family: 'Manrope', sans-serif;
       font-size: 14px;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
-      letter-spacing: 0.4px;
+      border: none;
       transition: opacity 0.15s;
+      text-align: center;
     }
     .btn:active { opacity: 0.8; }
-    .btn-menu {
-      background: var(--espresso);
-      color: var(--cream);
-    }
-    .btn-signout {
-      background: transparent;
-      color: var(--mocha);
-      border: 1.5px solid var(--latte);
-    }
-
-    /* ── Loading state ── */
-    #loading {
-      padding: 60px 0;
-      text-align: center;
-      color: var(--text-light);
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-    }
-    #content { display: none; }
+    .btn-primary  { background: #2C1A0E; color: #FAF6F0; }
+    .btn-outline  { background: transparent; color: #C8894A; border: 1.5px solid #C8894A; }
+    body.dark .btn-primary { background: #C8894A; color: #fff; }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Kapi Coast</h1>
-  <p>My Profile</p>
-</header>
+<!-- Header -->
+<div class="header">
+  <a href="/index.html" class="header-back">&#8592;</a>
+  <span class="header-title">My Profile</span>
+  <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()">☀ Light</button>
+</div>
 
-<div class="card">
+<div class="page">
   <div id="loading">Loading your profile…</div>
 
   <div id="content">
-    <div class="avatar" id="avatar">?</div>
-    <div class="customer-name" id="name"></div>
-    <div class="customer-contact" id="contact"></div>
 
-    <div class="loyalty-section">
-      <div class="badge" id="loyaltyBadge"></div>
-      <div class="badge-sub" id="badgeSub"></div>
+    <!-- Identity -->
+    <div class="identity">
+      <div class="avatar" id="avatar">?</div>
+      <div class="profile-name" id="profileName"></div>
+      <div class="profile-contact" id="profileContact"></div>
     </div>
 
-    <div class="stats">
-      <div class="stat-box">
-        <div class="stat-value" id="visitCount">—</div>
-        <div class="stat-label">Total Visits</div>
+    <!-- Loyalty progress -->
+    <div class="loyalty-card">
+      <div class="loyalty-top">
+        <span class="loyalty-label">Loyalty Status</span>
+        <span class="badge-pill" id="loyaltyPill"></span>
       </div>
-      <div class="stat-box">
-        <div class="stat-value" id="memberSince">—</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-hint" id="progressHint"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="statVisits">—</div>
+        <div class="stat-label">Visits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statSince">—</div>
         <div class="stat-label">Member Since</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statLast">—</div>
+        <div class="stat-label">Last Visit</div>
+      </div>
     </div>
 
-    <hr class="divider">
+    <!-- Badges -->
+    <div class="section-title">Badges Earned</div>
+    <div class="badges-row" id="badgesRow"></div>
 
-    <div class="detail-row">
-      <span class="detail-key">Last Visit</span>
-      <span class="detail-val" id="lastLogin">—</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-key">Login Via</span>
-      <span class="detail-val" id="loginMethod">—</span>
-    </div>
-
+    <!-- Action buttons -->
     <div class="btn-row">
-      <button class="btn btn-menu" onclick="window.location.href='/index.html'">View Menu</button>
-      <button class="btn btn-signout" onclick="handleSignOut()">Sign Out</button>
+      <button class="btn btn-primary"  onclick="window.location.href='/index.html'">View Menu</button>
+      <button class="btn btn-outline"  onclick="handleSignOut()">Sign Out</button>
     </div>
-  </div>
+
+  </div><!-- #content -->
 </div>
 
 <script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { initializeApp }     from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 import { getFirestore, doc, getDoc }
@@ -285,71 +343,121 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-function formatDate(ts) {
+// ── Theme ──
+const savedTheme = localStorage.getItem("theme") || "light";
+document.body.classList.add(savedTheme);
+updateThemeBtn(savedTheme === "dark");
+
+function updateThemeBtn(isDark) {
+  document.getElementById("themeBtn").textContent = isDark ? "☾ Dark" : "☀ Light";
+}
+
+window.toggleTheme = function () {
+  const isDark = !document.body.classList.contains("dark");
+  document.body.classList.toggle("dark", isDark);
+  document.body.classList.toggle("light", !isDark);
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+  updateThemeBtn(isDark);
+};
+
+// ── Formatting ──
+function fmtDate(ts) {
   if (!ts) return "—";
   const d = ts.toDate ? ts.toDate() : new Date(ts.seconds * 1000);
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
-
-function formatMonthYear(ts) {
+function fmtMonthYear(ts) {
   if (!ts) return "—";
   const d = ts.toDate ? ts.toDate() : new Date(ts.seconds * 1000);
-  return d.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
 }
 
-function loyaltyInfo(visits) {
-  if (visits >= 6) return { label: "VIP", cls: "badge-vip",     sub: "You're part of the inner circle — thank you!" };
-  if (visits >= 2) return { label: "Regular", cls: "badge-regular", sub: `${6 - visits} more visit${6 - visits > 1 ? "s" : ""} to unlock VIP status` };
-  return              { label: "First Timer", cls: "badge-first",   sub: "Welcome to Kapi Coast! Come back for more." };
+// ── Loyalty helpers ──
+function loyaltyTier(visits) {
+  if (visits >= 6) return "vip";
+  if (visits >= 2) return "regular";
+  return "first";
 }
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "/login.html";
-    return;
+function loyaltyProgress(visits) {
+  if (visits >= 6)
+    return { pct: 100, hint: "You've reached VIP status — thank you!" };
+  if (visits >= 2) {
+    const rem = 6 - visits;
+    return {
+      pct: Math.round(((visits - 2) / 4) * 100),
+      hint: `${rem} more visit${rem > 1 ? "s" : ""} to unlock VIP`
+    };
   }
+  const rem = 2 - visits;
+  return {
+    pct: Math.round((visits / 2) * 100),
+    hint: `${rem} more visit${rem > 1 ? "s" : ""} to become a Regular`
+  };
+}
+
+// ── Render profile ──
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "/login.html"; return; }
 
   const snap = await getDoc(doc(db, "customers", user.uid));
-  if (!snap.exists()) {
-    window.location.href = "/login.html";
-    return;
-  }
-
+  if (!snap.exists()) { window.location.href = "/login.html"; return; }
   const d = snap.data();
+  const visits = d.visits || 1;
 
   // Avatar initials
   const initials = (d.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   document.getElementById("avatar").textContent = initials;
 
   // Name & contact
-  document.getElementById("name").textContent = d.name || "Customer";
+  document.getElementById("profileName").textContent = d.name || "Customer";
   const contact = [d.email, d.phone].filter(Boolean).join(" · ");
-  document.getElementById("contact").textContent = contact || "";
+  document.getElementById("profileContact").textContent = contact || "";
 
-  // Loyalty badge
-  const { label, cls, sub } = loyaltyInfo(d.visits || 1);
-  const badge = document.getElementById("loyaltyBadge");
-  badge.textContent = label;
-  badge.className = "badge " + cls;
-  document.getElementById("badgeSub").textContent = sub;
+  // Loyalty pill
+  const tier = loyaltyTier(visits);
+  const pillEl = document.getElementById("loyaltyPill");
+  const pillLabels = { first: "First Timer", regular: "Regular", vip: "VIP ✦" };
+  const pillClasses = { first: "pill-first", regular: "pill-regular", vip: "pill-vip" };
+  pillEl.textContent = pillLabels[tier];
+  pillEl.className = "badge-pill " + pillClasses[tier];
+
+  // Progress bar (animate on next frame)
+  const { pct, hint } = loyaltyProgress(visits);
+  document.getElementById("progressHint").textContent = hint;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.getElementById("progressFill").style.width = pct + "%";
+    });
+  });
 
   // Stats
-  document.getElementById("visitCount").textContent = d.visits ?? "—";
-  document.getElementById("memberSince").textContent = formatMonthYear(d.firstVisit);
+  document.getElementById("statVisits").textContent  = visits;
+  document.getElementById("statSince").textContent   = fmtMonthYear(d.firstVisit);
+  document.getElementById("statLast").textContent    = fmtDate(d.lastLogin);
 
-  // Details
-  document.getElementById("lastLogin").textContent   = formatDate(d.lastLogin);
-  document.getElementById("loginMethod").textContent = d.loginMethod === "google" ? "Google" : d.loginMethod === "phone" ? "Phone / OTP" : (d.loginMethod || "—");
+  // Badges row
+  const badges = [
+    { key: "first",   icon: "☕", name: "First Timer", req: "1 visit",   earned: visits >= 1 },
+    { key: "regular", icon: "⭐", name: "Regular",     req: "2 visits",  earned: visits >= 2 },
+    { key: "vip",     icon: "✦",  name: "VIP",         req: "6 visits",  earned: visits >= 6 },
+  ];
+  document.getElementById("badgesRow").innerHTML = badges.map(b => `
+    <div class="badge-card ${b.earned ? "earned" : "locked"}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-req">${b.earned ? "Earned" : b.req}</div>
+    </div>`).join("");
 
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("content").style.display = "block";
+  // Show content
+  document.getElementById("loading").style.display  = "none";
+  document.getElementById("content").style.display  = "block";
 });
 
 window.handleSignOut = async function () {
   await signOut(auth);
   window.location.href = "/login.html";
 };
-
 </script>
 </body>
 </html>
