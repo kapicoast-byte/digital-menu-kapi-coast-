@@ -191,6 +191,33 @@
 
     .cust-date { font-size: 12px; color: #9A7D6B; }
 
+    /* ── Cast panel ── */
+    .cast-panel {
+      background: #fff; border-radius: 12px;
+      padding: 24px; max-width: 480px;
+      box-shadow: 0 2px 12px rgba(44,26,14,0.08);
+    }
+    .cast-panel h3 { margin-top: 0; color: #2C1A0E; font-size: 18px; }
+    .cast-panel p  { font-size: 14px; color: #9A7D6B; margin-bottom: 12px; }
+    #castStatus {
+      font-size: 13px; font-weight: 600; color: #2C1A0E;
+      background: #FAF6F0; border-radius: 8px;
+      padding: 10px 14px; margin: 12px 0;
+    }
+    .cast-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .display-settings { margin-top: 24px; padding-top: 20px; border-top: 1px solid #EDE5DB; }
+    .slider-row {
+      display: flex; align-items: center; gap: 12px; margin: 10px 0;
+    }
+    .slider-row input[type="range"] {
+      flex: 1; max-width: 200px; margin-bottom: 0; border: none;
+      padding: 0; height: auto; accent-color: #C8894A;
+    }
+    .slider-val {
+      font-size: 14px; font-weight: 700; color: #C8894A;
+      min-width: 60px;
+    }
+
     @media (max-width: 600px) {
       .sidebar-title { display: none; }
     }
@@ -270,6 +297,9 @@
   <a href="/qr.html" class="nav-item" style="text-decoration:none;">
     <span class="nav-icon">📱</span><span>QR Codes</span>
   </a>
+  <div class="nav-item" onclick="showSection('castTV', this)">
+    <span class="nav-icon">📺</span><span>Cast TV</span>
+  </div>
 </nav>
 
 <!-- ── Main content ── -->
@@ -328,6 +358,37 @@
       <div id="customerTable" style="overflow-x:auto;">Loading...</div>
     </div>
     <div id="customerCards" style="display:none;"></div>
+  </div>
+
+  <!-- Section: Cast to TV -->
+  <div id="castTV" class="section">
+    <h2>Cast to TV</h2>
+    <div class="cast-panel">
+      <h3>📺 Cast Display Screen</h3>
+      <p>Opens the Kapi Coast menu display on a nearby Chromecast or smart TV on the same WiFi network.</p>
+      <div id="castStatus">Not casting</div>
+      <div class="cast-actions">
+        <button id="startCastBtn" class="btn btn-primary" onclick="startCasting()">Start Casting</button>
+        <button id="stopCastBtn"  class="btn btn-danger"  onclick="stopCasting()" style="display:none;">Stop Casting</button>
+        <a href="/display.html" target="_blank" class="btn btn-success">Preview Display</a>
+      </div>
+      <div style="margin-top:16px; font-size:12px; color:#9A7D6B; line-height:1.6;">
+        Works with: Chromecast, smart TVs with Chrome, any screen on the same WiFi.<br>
+        Casting requires Chrome browser.
+      </div>
+
+      <div class="display-settings">
+        <h3 style="margin-bottom:6px;">Slide Duration</h3>
+        <p style="margin-bottom:8px;">How long each slide stays on screen before rotating.</p>
+        <div class="slider-row">
+          <input type="range" id="intervalSlider" min="3" max="15" step="1" value="7"
+                 oninput="document.getElementById('intervalVal').textContent = this.value + 's'">
+          <span class="slider-val" id="intervalVal">7s</span>
+          <button class="btn btn-primary btn-sm" onclick="saveDisplaySettings()">Save</button>
+        </div>
+        <p id="displaySettingsStatus" style="font-size:13px; color:green; margin-top:6px; font-weight:600;"></p>
+      </div>
+    </div>
   </div>
 
   <!-- Section: Ads & Banners -->
@@ -719,6 +780,78 @@ await loadOffer();
 await loadItems();
 await loadAds();
 await loadCustomers();
+await loadDisplaySettings();
+
+// ── Display settings ──
+async function loadDisplaySettings() {
+  const snap = await getDoc(doc(db, "settings", "display"));
+  if (snap.exists()) {
+    const secs = snap.data().intervalSeconds || 7;
+    document.getElementById("intervalSlider").value = secs;
+    document.getElementById("intervalVal").textContent = secs + "s";
+  }
+}
+
+window.saveDisplaySettings = async function () {
+  const secs = parseInt(document.getElementById("intervalSlider").value, 10);
+  await setDoc(doc(db, "settings", "display"), { intervalSeconds: secs });
+  const st = document.getElementById("displaySettingsStatus");
+  st.textContent = "Saved!";
+  setTimeout(() => { st.textContent = ""; }, 2000);
+};
+
+// ── Cast to TV ──
+const DISPLAY_URL = window.location.origin + "/display.html";
+let presentationConnection = null;
+
+window.startCasting = async function () {
+  if (!window.PresentationRequest) {
+    document.getElementById("castStatus").textContent =
+      "Casting requires Chrome browser. Please open admin in Chrome.";
+    return;
+  }
+  try {
+    document.getElementById("castStatus").textContent = "Searching for devices…";
+    const request = new PresentationRequest([DISPLAY_URL]);
+
+    request.getAvailability().then(av => {
+      if (!presentationConnection) {
+        document.getElementById("castStatus").textContent = av.value
+          ? "Devices found nearby — pick one in the dialog"
+          : "No cast devices found. Make sure Chromecast is on the same WiFi.";
+      }
+    }).catch(() => {});
+
+    presentationConnection = await request.start();
+
+    presentationConnection.addEventListener("close", () => {
+      document.getElementById("castStatus").textContent = "Casting stopped";
+      document.getElementById("stopCastBtn").style.display  = "none";
+      document.getElementById("startCastBtn").style.display = "inline-block";
+      presentationConnection = null;
+    });
+
+    document.getElementById("castStatus").textContent =
+      "Casting to TV — connection ID: " + (presentationConnection.id || "connected");
+    document.getElementById("stopCastBtn").style.display  = "inline-block";
+    document.getElementById("startCastBtn").style.display = "none";
+
+  } catch (e) {
+    document.getElementById("castStatus").textContent =
+      e.name === "NotAllowedError" ? "Casting cancelled." : "Error: " + e.message;
+    console.error(e);
+  }
+};
+
+window.stopCasting = function () {
+  if (presentationConnection) {
+    presentationConnection.close();
+    presentationConnection = null;
+  }
+  document.getElementById("castStatus").textContent     = "Not casting";
+  document.getElementById("stopCastBtn").style.display  = "none";
+  document.getElementById("startCastBtn").style.display = "inline-block";
+};
 </script>
 
 </body>
