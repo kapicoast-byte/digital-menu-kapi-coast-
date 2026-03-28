@@ -257,7 +257,8 @@
         border-left: none;
         border-top: 3px solid var(--caramel);
       }
-      .nav-icon { font-size: 20px; }
+      .nav-icon { font-size: 18px; }
+      .nav-item span:not(.nav-icon) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .main {
         margin-left: 0;
         margin-bottom: 60px;
@@ -293,13 +294,13 @@
     <span class="nav-icon">📢</span><span>Ads</span>
   </div>
   <div class="nav-item" onclick="showSection('customers', this)">
-    <span class="nav-icon">👥</span><span>Customers</span>
+    <span class="nav-icon">👥</span><span>Guests</span>
   </div>
   <a href="/qr.html" class="nav-item" style="text-decoration:none;">
-    <span class="nav-icon">📱</span><span>QR Codes</span>
+    <span class="nav-icon">📱</span><span>QR</span>
   </a>
   <div class="nav-item" onclick="showSection('castTV', this)">
-    <span class="nav-icon">📺</span><span>Cast TV</span>
+    <span class="nav-icon">📺</span><span>Cast</span>
   </div>
   <div class="nav-item" onclick="showSection('reports', this)">
     <span class="nav-icon">📊</span><span>Reports</span>
