@@ -226,56 +226,113 @@
     :root { --caramel: #C8894A; }
 
     @media (max-width: 768px) {
+      /* ── Bottom nav ── */
       .sidebar {
         position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        top: auto;
-        width: 100%;
-        height: 60px;
+        bottom: 0; left: 0; right: 0; top: auto;
+        width: 100%; height: 60px;
         flex-direction: row;
-        padding: 0;
-        z-index: 999;
+        padding: 0; z-index: 999;
         justify-content: space-around;
         align-items: center;
       }
+      .sidebar-title { display: none; }
       .sidebar-logo { display: none; }
       .sidebar-footer { display: none; }
+      #navQR { display: none; }
       .nav-item {
         flex-direction: column;
-        padding: 8px 4px;
+        padding: 6px 4px;
         font-size: 10px;
         border-left: none;
         border-top: 3px solid transparent;
         flex: 1;
         justify-content: center;
         align-items: center;
-        gap: 2px;
+        gap: 1px;
+        display: flex;
       }
       .nav-item.active {
         border-left: none;
         border-top: 3px solid var(--caramel);
+        color: #fff;
       }
-      .nav-icon { font-size: 18px; }
-      .nav-item span:not(.nav-icon) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      /* hide emoji icons on mobile — show text labels only */
+      .nav-icon { display: none; }
+      .nav-item span:not(.nav-icon) {
+        font-size: 10px; font-weight: 600;
+        max-width: 100%; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap;
+      }
+
+      /* ── Main layout ── */
       .main {
         margin-left: 0;
-        margin-bottom: 60px;
+        margin-bottom: 68px;
         padding: 16px;
       }
-      .stats-grid {
-        grid-template-columns: 1fr 1fr;
+
+      /* ── Typography ── */
+      body { font-size: 14px; }
+      h2 { font-size: 18px; }
+      h3 { font-size: 15px; }
+      .stat-label { font-size: 11px; }
+      .stat-value { font-size: 28px; }
+
+      /* ── Grids ── */
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+      .form-grid { grid-template-columns: 1fr; }
+
+      /* ── Form inputs — full width, min 44px ── */
+      input[type="text"], input[type="number"], textarea {
+        max-width: 100%;
+        min-height: 44px;
+        font-size: 14px;
       }
-      .form-grid {
-        grid-template-columns: 1fr;
+      .btn {
+        min-height: 44px;
+        font-size: 14px;
       }
-      .customer-table-wrap {
-        display: none;
+      .btn-sm { min-height: 36px; font-size: 13px; }
+
+      /* ── Menu item cards on mobile ── */
+      .item-card {
+        flex-wrap: wrap;
+        padding: 12px;
+        gap: 12px;
       }
-      #customerCards {
-        display: block !important;
+      .item-card img {
+        width: 70px; height: 70px;
+        border-radius: 8px;
+        flex-shrink: 0;
       }
+      .item-card-info {
+        flex: 1;
+        min-width: 0;
+        font-size: 14px;
+      }
+      .item-card > div:last-child {
+        display: flex;
+        width: 100%;
+        gap: 8px;
+      }
+      .item-card > div:last-child .btn {
+        flex: 1;
+      }
+      .item-card > div:last-child br { display: none; }
+
+      /* ── Customers — hide table, show cards ── */
+      .customer-table-wrap { display: none; }
+      #customerCards { display: block !important; }
+      #customerCards > div { font-size: 14px; }
+
+      /* ── Cast panel ── */
+      .cast-panel { max-width: 100%; }
+      .cast-actions { flex-direction: column; }
+      .cast-actions .btn { width: 100%; text-align: center; }
+
+      /* ── Reports ── */
+      #reportStats { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -296,7 +353,7 @@
   <div class="nav-item" onclick="showSection('customers', this)">
     <span class="nav-icon">👥</span><span>Guests</span>
   </div>
-  <a href="/qr.html" class="nav-item" style="text-decoration:none;">
+  <a href="/qr.html" id="navQR" class="nav-item" style="text-decoration:none;">
     <span class="nav-icon">📱</span><span>QR</span>
   </a>
   <div class="nav-item" onclick="showSection('castTV', this)">
@@ -319,7 +376,22 @@
     <input type="text" id="price"    placeholder="Price">
     <input type="text" id="desc"     placeholder="Description">
     <input type="text" id="category" placeholder="Category">
-    <input type="file" id="image"><br>
+    <input type="file" id="image">
+    <div class="form-group" style="margin-bottom:12px;">
+      <label style="font-size:13px;color:#555;display:block;margin-bottom:4px;">Type</label>
+      <div style="display:flex; gap:12px; margin-top:6px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;">
+          <input type="radio" name="vegType" id="isVeg" value="veg" checked>
+          <span style="width:14px;height:14px;border:2px solid green;border-radius:2px;display:inline-block;background:green;"></span>
+          Veg
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;">
+          <input type="radio" name="vegType" id="isNonVeg" value="nonveg">
+          <span style="width:14px;height:14px;border:2px solid red;border-radius:2px;display:inline-block;background:red;"></span>
+          Non-Veg
+        </label>
+      </div>
+    </div>
     <button class="btn btn-primary" onclick="addItem()">Add Item</button>
 
     <hr>
@@ -524,12 +596,17 @@ async function loadItems() {
   Object.keys(categories).forEach(cat => {
     html += `<h3 style="margin-top:15px;">${escapeHtml(cat)}</h3>`;
     categories[cat].forEach(item => {
+      const vegSquare = item.veg === "nonveg"
+        ? `<span style="display:inline-block;width:12px;height:12px;background:#e53935;border-radius:2px;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>`
+        : item.veg === "veg"
+        ? `<span style="display:inline-block;width:12px;height:12px;background:#2e7d32;border-radius:2px;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>`
+        : "";
       html += `
         <div class="item-card">
           <img src="${item.imageUrl || ""}" alt="${escapeHtml(item.name)}">
           <div class="item-card-info">
-            <b>${escapeHtml(item.name)}</b><br>
-            Rs. ${escapeHtml(item.price)}<br>
+            <b style="display:flex;align-items:center;">${vegSquare}${escapeHtml(item.name)}</b>
+            Rs. ${escapeHtml(item.price)} &nbsp;·&nbsp; <small style="color:#777;">${escapeHtml(item.category || "")}</small><br>
             <small>${escapeHtml(item.description || "")}</small>
           </div>
           <div>
@@ -560,7 +637,8 @@ window.addItem = async function () {
   await uploadBytes(storageRef, file);
   const imageUrl = await getDownloadURL(storageRef);
 
-  await setDoc(itemRef, { name, price, description: desc, category, imageUrl });
+  const veg = document.querySelector('input[name="vegType"]:checked').value;
+  await setDoc(itemRef, { name, price, description: desc, category, imageUrl, veg });
   alert("Item Added");
   location.reload();
 };
@@ -577,18 +655,22 @@ window.editItem = async function (id) {
   if (!itemSnap.exists()) { alert("Item not found"); return; }
 
   const item        = itemSnap.data();
-  const newName     = prompt("Name",        item.name        || "");
-  const newPrice    = prompt("Price",       item.price       || "");
-  const newDesc     = prompt("Description", item.description || "");
-  const newCategory = prompt("Category",    item.category    || "Others");
+  const newName     = prompt("Name",           item.name        || "");
+  const newPrice    = prompt("Price",          item.price       || "");
+  const newDesc     = prompt("Description",    item.description || "");
+  const newCategory = prompt("Category",       item.category    || "Others");
+  const newVegRaw   = prompt("Type (veg / nonveg)", item.veg   || "veg");
   if (!newName) return;
+
+  const newVeg = (newVegRaw || "veg").trim().toLowerCase() === "nonveg" ? "nonveg" : "veg";
 
   await setDoc(itemRef, {
     name:        newName.trim(),
     price:       (newPrice    || "").trim(),
     description: (newDesc     || "").trim(),
     category:    (newCategory || "Others").trim(),
-    imageUrl:    item.imageUrl || ""
+    imageUrl:    item.imageUrl || "",
+    veg:         newVeg
   });
   alert("Updated");
   location.reload();
