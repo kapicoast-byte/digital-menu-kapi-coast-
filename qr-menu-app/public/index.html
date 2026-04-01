@@ -27,9 +27,15 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.35);
     }
     .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-brand { display: flex; flex-direction: column; }
     .logo {
       font-size: 20px; font-weight: 800;
       color: #fff; letter-spacing: 0.3px;
+    }
+    .outlet-name {
+      font-size: 11px; font-weight: 600;
+      color: #C8894A; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-top: 1px;
     }
     .table-badge {
       background: #C8894A; color: #fff;
@@ -232,7 +238,10 @@
 <!-- ── Header ── -->
 <header class="header">
   <div class="header-left">
-    <span class="logo">Kapi Coast</span>
+    <div class="header-brand">
+      <span class="logo">Kapi Coast</span>
+      <span class="outlet-name" id="outletName"></span>
+    </div>
     <span class="table-badge" id="tableBadge"></span>
   </div>
   <div class="header-right">
@@ -298,7 +307,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getFirestore, collection, query, where, onSnapshot
+  getFirestore, collection, doc, getDoc, query, where, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -319,16 +328,24 @@ function escapeHtml(v) {
     c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-// ── Table badge ──
-const tableNum = new URLSearchParams(location.search).get("table");
+// ── Outlet + table from URL ──
+const params  = new URLSearchParams(location.search);
+const outlet  = params.get("outlet") || "ecr";
+const tableNum = params.get("table");
+
+// Show outlet name in header
+getDoc(doc(db, "outlets", outlet)).then(snap => {
+  const name = snap.exists() ? (snap.data().name || outlet.toUpperCase()) : outlet.toUpperCase();
+  document.getElementById("outletName").textContent = name;
+});
 if (tableNum) {
   const badge = document.getElementById("tableBadge");
-  badge.textContent  = "Table " + tableNum;
+  badge.textContent   = "Table " + tableNum;
   badge.style.display = "inline-block";
 }
 
 // ── Active ad — real-time ──
-onSnapshot(query(collection(db, "ads"), where("active", "==", true)), snap => {
+onSnapshot(query(collection(db, "outlets", outlet, "ads"), where("active", "==", true)), snap => {
   const banner = document.getElementById("offerBanner");
   if (snap.empty) { banner.style.display = "none"; return; }
   const ad = snap.docs[0].data();
@@ -408,7 +425,7 @@ function renderMenu() {
   container.innerHTML = html;
 }
 
-onSnapshot(collection(db, "menu"), snap => {
+onSnapshot(collection(db, "outlets", outlet, "menu"), snap => {
   allItems = [];
   const catSet = new Set();
   snap.forEach(d => {
