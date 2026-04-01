@@ -358,6 +358,9 @@ function boldGradient(cat) {
   return BOLD_GRADS[Math.abs(h) % BOLD_GRADS.length];
 }
 
+// ── Outlet from URL ──
+const outlet = new URLSearchParams(location.search).get("outlet") || "ecr";
+
 // ── State ──
 let menuItems   = [];
 let activeOffer = null;
