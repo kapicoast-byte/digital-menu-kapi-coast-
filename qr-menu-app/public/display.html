@@ -536,7 +536,7 @@ function rebuild() {
 }
 
 // ── Live: menu items ──
-onSnapshot(collection(db, "menu"), snap => {
+onSnapshot(collection(db, "outlets", outlet, "menu"), snap => {
   menuItems = [];
   snap.forEach(d => {
     const item = { ...d.data(), id: d.id };
@@ -549,7 +549,7 @@ onSnapshot(collection(db, "menu"), snap => {
 });
 
 // ── Live: active offer ──
-onSnapshot(query(collection(db, "ads"), where("active", "==", true)), snap => {
+onSnapshot(query(collection(db, "outlets", outlet, "ads"), where("active", "==", true)), snap => {
   activeOffer = snap.empty ? null : snap.docs[0].data();
   rebuild();
 });

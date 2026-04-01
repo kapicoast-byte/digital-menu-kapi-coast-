@@ -327,6 +327,16 @@
 <!-- ── Main content ── -->
 <div class="main">
 
+  <!-- ── Migration banner (shown only when outlets/ecr/menu is empty) ── -->
+  <div id="migrationBanner" style="display:none; background:#fff8ed; border:1.5px solid #C8894A; border-radius:12px; padding:18px 20px; margin-bottom:20px;">
+    <div style="font-size:15px; font-weight:800; color:#2C1A0E; margin-bottom:6px;">Migrate existing menu to ECR outlet</div>
+    <div style="font-size:13px; color:#9A7D6B; margin-bottom:14px;">
+      The ECR outlet menu is empty. Copy all existing menu items and ads from the legacy collection into the ECR outlet.
+    </div>
+    <button class="btn btn-primary" id="migrateBtn" onclick="runMigration()">Migrate to ECR</button>
+    <span id="migrateStatus" style="font-size:13px; color:#2C1A0E; font-weight:600; margin-left:14px;"></span>
+  </div>
+
   <!-- Section: Menu Items -->
   <div id="menuItems" class="section active">
     <h2>Menu Items</h2>
@@ -1011,6 +1021,49 @@ window.showSection = function (id, navEl) {
   if (id === "reports") loadReports();
   if (id === "castTV")  loadCategoryToggles();
 };
+
+// ── Migration: legacy menu/ → outlets/ecr/menu/ ──
+async function checkMigration() {
+  const snap = await getDocs(collection(db, "outlets", "ecr", "menu"));
+  if (snap.empty) {
+    document.getElementById("migrationBanner").style.display = "block";
+  }
+}
+
+window.runMigration = async function () {
+  const btn = document.getElementById("migrateBtn");
+  const st  = document.getElementById("migrateStatus");
+  btn.disabled = true;
+  btn.textContent = "Migrating…";
+
+  try {
+    // Migrate menu items
+    const menuSnap = await getDocs(collection(db, "menu"));
+    let count = 0;
+    for (const d of menuSnap.docs) {
+      await setDoc(doc(db, "outlets", "ecr", "menu", d.id), d.data());
+      count++;
+      st.textContent = `Copied ${count} menu item${count !== 1 ? "s" : ""}…`;
+    }
+
+    // Migrate ads
+    const adsSnap = await getDocs(collection(db, "ads"));
+    let adCount = 0;
+    for (const d of adsSnap.docs) {
+      await setDoc(doc(db, "outlets", "ecr", "ads", d.id), d.data());
+      adCount++;
+    }
+
+    st.textContent = `Done — ${count} items and ${adCount} ads copied to ECR.`;
+    document.getElementById("migrationBanner").style.display = "none";
+  } catch (e) {
+    st.textContent = "Error: " + e.message;
+    btn.disabled = false;
+    btn.textContent = "Retry";
+  }
+};
+
+checkMigration();
 
 // ── Push notification trigger (writes to Firestore; index.html picks it up) ──
 async function triggerPushNotification(title, body) {
