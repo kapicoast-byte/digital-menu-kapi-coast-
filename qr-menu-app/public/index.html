@@ -135,10 +135,12 @@
     }
     .veg-dot {
       position: absolute; top: 8px; left: 8px;
-      width: 11px; height: 11px; border-radius: 50%;
-      background: #22C55E; border: 2px solid #fff;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      width: 12px; height: 12px; border-radius: 2px;
+      border: 1.5px solid rgba(255,255,255,0.8);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
     }
+    .veg-dot.is-veg    { background: #22C55E; }
+    .veg-dot.is-nonveg { background: #EF4444; }
     .sold-out-badge {
       position: absolute; top: 8px; right: 8px;
       background: #EF4444; color: #fff;
@@ -495,7 +497,7 @@ function renderMenu() {
           <div class="card-img-wrap">
             <img src="${escapeHtml(item.imageUrl || "")}"
                  alt="${escapeHtml(item.name)}" loading="lazy">
-            <span class="veg-dot"></span>
+            ${item.veg === "veg" ? '<span class="veg-dot is-veg"></span>' : item.veg === "nonveg" ? '<span class="veg-dot is-nonveg"></span>' : ""}
             <span class="sold-out-badge">Sold Out</span>
           </div>
           <div class="card-body">
