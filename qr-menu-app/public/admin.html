@@ -100,97 +100,6 @@
     .ad-status-badge.off { background: #f5f5f5; color: #999; }
     .ad-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
 
-    /* ── Customers – stat cards ── */
-    #customers h2 {
-      font-family: 'Manrope', sans-serif;
-      font-size: 22px; font-weight: 800;
-      color: #2C1A0E; margin-bottom: 24px; letter-spacing: -0.3px;
-    }
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      background: #fff; border-radius: 14px;
-      padding: 22px 20px 18px;
-      box-shadow: 0 2px 12px rgba(44,26,14,0.07);
-      border-left: 4px solid #C8894A;
-      display: flex; flex-direction: column; gap: 6px;
-    }
-    .stat-value {
-      font-size: 36px; font-weight: 800; color: #2C1A0E; line-height: 1;
-    }
-    .stat-label {
-      font-size: 12px; font-weight: 600; color: #9A7D6B;
-      text-transform: uppercase; letter-spacing: 0.7px;
-    }
-
-    /* ── Customers – search bar ── */
-    #customerSearch {
-      width: 100%; padding: 12px 18px;
-      border: 1.5px solid #E8DDD5; border-radius: 10px;
-      font-family: 'Manrope', sans-serif; font-size: 14px; color: #2C1A0E;
-      background: #fff; margin-bottom: 8px; display: block;
-      box-shadow: 0 1px 4px rgba(44,26,14,0.05);
-      transition: border-color 0.2s;
-      outline: none;
-    }
-    #customerSearch::placeholder { color: #B8A898; }
-    #customerSearch:focus { border-color: #C8894A; }
-    #customerCount {
-      font-size: 12px; font-weight: 600; color: #9A7D6B;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 16px;
-    }
-
-    /* ── Customers – table container ── */
-    .customer-table-wrap {
-      background: #fff; border-radius: 14px;
-      box-shadow: 0 2px 16px rgba(44,26,14,0.08);
-      overflow: hidden;
-    }
-
-    /* ── Customer table ── */
-    .customer-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .customer-table thead tr {
-      background: #FAF6F0;
-    }
-    .customer-table th {
-      padding: 13px 16px; font-size: 10.5px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1px; color: #9A7D6B;
-      text-align: left; border-bottom: 1px solid #EDE5DB;
-      white-space: nowrap;
-    }
-    .customer-table td {
-      padding: 14px 16px; border-bottom: 1px solid #F4EDE6;
-      vertical-align: middle; color: #2C1A0E;
-    }
-    .customer-table tbody tr:last-child td { border-bottom: none; }
-    .customer-table tbody tr:hover td { background: #FAF6F0; }
-
-    .cust-name { font-weight: 700; font-size: 14px; color: #2C1A0E; }
-    .cust-contact { font-size: 12px; color: #9A7D6B; margin-top: 2px; }
-    .cust-visits { font-weight: 800; font-size: 16px; color: #2C1A0E; text-align: center; display: block; }
-
-    /* method badges */
-    .method-pill {
-      display: inline-block; border-radius: 20px; padding: 3px 11px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap;
-    }
-    .method-google { background: #E8F0FE; color: #1A56DB; }
-    .method-phone  { background: #DCFCE7; color: #15803D; }
-    .method-other  { background: #F3F4F6; color: #6B7280; }
-
-    /* loyalty badges */
-    .loyalty-pill {
-      display: inline-block; border-radius: 20px; padding: 4px 12px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap;
-    }
-    .pill-first   { background: #F3F4F6; color: #6B7280; }
-    .pill-regular { background: #FEF3C7; color: #92400E; }
-    .pill-vip     { background: #2C1A0E; color: #C8894A; }
-
-    .cust-date { font-size: 12px; color: #9A7D6B; }
 
     /* ── Cast panel ── */
     .cast-panel {
@@ -380,11 +289,6 @@
       }
       .item-card > div:last-child br { display: none; }
 
-      /* ── Customers — hide table, show cards ── */
-      .customer-table-wrap { display: none; }
-      #customerCards { display: block !important; }
-      #customerCards > div { font-size: 14px; }
-
       /* ── Cast panel ── */
       .cast-panel { max-width: 100%; }
       .cast-actions { flex-direction: column; }
@@ -408,9 +312,6 @@
   </div>
   <div class="nav-item" onclick="showSection('adsBanners', this)">
     <span class="nav-icon">📢</span><span>Ads</span>
-  </div>
-  <div class="nav-item" onclick="showSection('customers', this)">
-    <span class="nav-icon">👥</span><span>Guests</span>
   </div>
   <a href="/qr.html" id="navQR" class="nav-item" style="text-decoration:none;">
     <span class="nav-icon">📱</span><span>QR</span>
@@ -465,38 +366,6 @@
     <input type="text" id="offerInput" placeholder="Enter offer message (leave empty to disable)">
     <button class="btn btn-primary" onclick="saveOffer()">Save Offer</button>
     <p id="status"></p>
-  </div>
-
-  <!-- Section: Customers -->
-  <div id="customers" class="section">
-    <h2>Customers</h2>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="statTotal">0</div>
-        <div class="stat-label">Total Customers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statToday">0</div>
-        <div class="stat-label">Visits Today</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statRepeat">0</div>
-        <div class="stat-label">Repeat Visitors</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statVip">0</div>
-        <div class="stat-label">VIP Customers</div>
-      </div>
-    </div>
-    <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
-      <button class="btn btn-success btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
-    </div>
-    <input type="text" id="customerSearch" placeholder="Search by name, email or phone…" oninput="filterCustomers()">
-    <div id="customerCount"></div>
-    <div class="customer-table-wrap">
-      <div id="customerTable" style="overflow-x:auto;">Loading...</div>
-    </div>
-    <div id="customerCards" style="display:none;"></div>
   </div>
 
   <!-- Section: Reports -->
@@ -908,147 +777,12 @@ async function loadAds() {
   }).join("");
 }
 
-// ── Customers ──
-let allCustomers = [];
 let allMenuItems = [];
 let currentHiddenCategories = [];
-
-function loyaltyPill(visits) {
-  if (visits >= 6) return `<span class="loyalty-pill pill-vip">VIP</span>`;
-  if (visits >= 2) return `<span class="loyalty-pill pill-regular">Regular</span>`;
-  return `<span class="loyalty-pill pill-first">First Timer</span>`;
-}
-
-function methodPill(method) {
-  const m = (method || "").toLowerCase();
-  if (m === "google") return `<span class="method-pill method-google">Google</span>`;
-  if (m === "phone")  return `<span class="method-pill method-phone">Phone</span>`;
-  return `<span class="method-pill method-other">${escapeHtml(method || "—")}</span>`;
-}
-
-function fmtDate(ts) {
-  if (!ts) return "—";
-  const d = ts.toDate ? ts.toDate() : new Date(ts.seconds * 1000);
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-}
-
-function renderCustomers(list) {
-  const div = document.getElementById("customerTable");
-  const cards = document.getElementById("customerCards");
-  const count = list.length;
-  document.getElementById("customerCount").textContent =
-    `${count} customer${count !== 1 ? "s" : ""}`;
-
-  if (!count) {
-    div.innerHTML = `<p style="padding:40px;text-align:center;color:#9A7D6B;font-size:14px;font-weight:600;">No customers found.</p>`;
-    cards.innerHTML = `<p style="padding:20px;text-align:center;color:#9A7D6B;font-size:14px;font-weight:600;">No customers found.</p>`;
-    return;
-  }
-
-  div.innerHTML = `
-    <table class="customer-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Contact</th>
-          <th>Method</th>
-          <th style="text-align:center;">Visits</th>
-          <th>Badge</th>
-          <th>First Visit</th>
-          <th>Last Login</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${list.map(c => `
-          <tr>
-            <td><div class="cust-name">${escapeHtml(c.name || "Customer")}</div></td>
-            <td>
-              <div class="cust-contact">
-                ${escapeHtml(c.email || "")}
-                ${c.email && c.phone ? "<br>" : ""}
-                ${escapeHtml(c.phone || "")}
-                ${!c.email && !c.phone ? "—" : ""}
-              </div>
-            </td>
-            <td>${methodPill(c.loginMethod)}</td>
-            <td style="text-align:center;"><span class="cust-visits">${c.visits ?? 1}</span></td>
-            <td>${loyaltyPill(c.visits || 1)}</td>
-            <td><span class="cust-date">${fmtDate(c.firstVisit)}</span></td>
-            <td><span class="cust-date">${fmtDate(c.lastLogin)}</span></td>
-          </tr>`).join("")}
-      </tbody>
-    </table>`;
-
-  cards.innerHTML = list.map(c => `
-    <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 8px rgba(44,26,14,0.07);">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div>
-          <div class="cust-name">${escapeHtml(c.name || "Customer")}</div>
-          <div class="cust-contact">${escapeHtml(c.email || "")}${c.email && c.phone ? " · " : ""}${escapeHtml(c.phone || "")}${!c.email && !c.phone ? "—" : ""}</div>
-        </div>
-        <div style="background:#2C1A0E;color:#C8894A;font-weight:800;font-size:14px;border-radius:8px;padding:4px 10px;min-width:40px;text-align:center;">${c.visits ?? 1} visits</div>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        ${methodPill(c.loginMethod)}
-        ${loyaltyPill(c.visits || 1)}
-        <span style="font-size:11px;color:#9A7D6B;margin-left:auto;">Last: ${fmtDate(c.lastLogin)}</span>
-      </div>
-    </div>`).join("");
-}
-
-async function loadCustomers() {
-  try {
-    const snap = await getDocs(collection(db, "customers"));
-    const today = new Date().toDateString();
-    let total = 0, todayCount = 0, repeat = 0, vip = 0;
-
-    allCustomers = [];
-    snap.forEach(d => {
-      const c = { ...d.data(), id: d.id };
-      const visits = c.visits || 1;
-      total++;
-      if (visits > 1)  repeat++;
-      if (visits >= 6) vip++;
-      const lastDate = c.lastLogin ? new Date(c.lastLogin.seconds * 1000).toDateString() : null;
-      if (lastDate === today) todayCount++;
-      allCustomers.push(c);
-    });
-
-    // Sort by visits descending
-    allCustomers.sort((a, b) => (b.visits || 1) - (a.visits || 1));
-
-    document.getElementById("statTotal").textContent  = total;
-    document.getElementById("statToday").textContent  = todayCount;
-    document.getElementById("statRepeat").textContent = repeat;
-    document.getElementById("statVip").textContent    = vip;
-
-    if (total === 0) {
-      document.getElementById("customerTable").innerHTML =
-        `<p style="padding:40px;text-align:center;color:#9A7D6B;font-size:14px;font-weight:600;">No customers yet — they will appear after first login.</p>`;
-    } else {
-      renderCustomers(allCustomers);
-    }
-  } catch (e) {
-    console.error("Customer load error:", e);
-    document.getElementById("customerTable").innerHTML =
-      `<p style="padding:30px;color:red;">Error loading customers: ${escapeHtml(e.message)}</p>`;
-  }
-}
-
-window.filterCustomers = function () {
-  const q = document.getElementById("customerSearch").value.toLowerCase();
-  if (!q) { renderCustomers(allCustomers); return; }
-  renderCustomers(allCustomers.filter(c =>
-    (c.name  || "").toLowerCase().includes(q) ||
-    (c.email || "").toLowerCase().includes(q) ||
-    (c.phone || "").toLowerCase().includes(q)
-  ));
-};
 
 await loadOffer();
 await loadItems();
 await loadAds();
-await loadCustomers();
 await loadDisplaySettings();
 
 // ── Display settings ──
@@ -1196,26 +930,6 @@ window.stopCasting = function () {
   document.getElementById("startCastBtn").style.display = "inline-block";
 };
 
-// ── CSV Export ──
-window.exportCSV = function () {
-  if (!allCustomers.length) { alert("No customer data loaded yet."); return; }
-  const rows = [["Name","Email","Phone","Method","Visits","Badge","First Visit","Last Login"]];
-  allCustomers.forEach(c => {
-    const badge = c.visits >= 6 ? "VIP" : c.visits >= 2 ? "Regular" : "First Timer";
-    const firstVisit = c.firstVisit ? new Date(c.firstVisit.seconds*1000).toLocaleDateString("en-IN") : "";
-    const lastLogin  = c.lastLogin  ? new Date(c.lastLogin.seconds*1000).toLocaleDateString("en-IN")  : "";
-    rows.push([c.name||"", c.email||"", c.phone||"", c.loginMethod||"", c.visits||1, badge, firstVisit, lastLogin]);
-  });
-  const csv  = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href     = url;
-  a.download = "kapi-coast-customers-" + new Date().toLocaleDateString("en-IN").replace(/\//g, "-") + ".csv";
-  a.click();
-  URL.revokeObjectURL(url);
-};
-
 // ── Weekly Reports ──
 let visitsChartInstance = null;
 
@@ -1238,33 +952,6 @@ function loadReports() {
   let weekNew    = 0;
   let weekRepeat = 0;
   const weekStart = days[0];
-
-  allCustomers.forEach(c => {
-    if (!c.lastLogin) return;
-    const lastDate = new Date(c.lastLogin.seconds * 1000);
-    lastDate.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < 7; i++) {
-      if (lastDate.getTime() === days[i].getTime()) {
-        counts[i]++;
-        weekTotal++;
-        if ((c.visits || 1) > 1) weekRepeat++; else weekNew++;
-        break;
-      }
-    }
-    // New customers: firstVisit in last 7 days
-    if (c.firstVisit) {
-      const fv = new Date(c.firstVisit.seconds * 1000);
-      if (fv >= weekStart) weekNew++;
-    }
-  });
-
-  // Remove double-counting (new customer already counted above)
-  weekNew = allCustomers.filter(c => {
-    if (!c.firstVisit) return false;
-    const fv = new Date(c.firstVisit.seconds * 1000);
-    return fv >= weekStart;
-  }).length;
 
   const busiestIdx = counts.indexOf(Math.max(...counts));
 

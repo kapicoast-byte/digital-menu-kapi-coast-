@@ -79,6 +79,35 @@
       margin-bottom: 32px;
     }
 
+    /* Outlet selector */
+    .outlet-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .outlet-row label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #9A7D6B;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .outlet-select {
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #2C1A0E;
+      background: #FAF6F0;
+      border: 1.5px solid #E0D5CC;
+      border-radius: 10px;
+      padding: 9px 14px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .outlet-select:focus { border-color: #C8894A; }
+
     /* Single generator */
     .gen-row {
       display: flex;
@@ -280,6 +309,15 @@
 
   <div class="container">
 
+    <!-- Outlet selector (shared) -->
+    <div class="outlet-row">
+      <label for="outletSelect">Outlet</label>
+      <select class="outlet-select" id="outletSelect">
+        <option value="ecr">ECR</option>
+        <option value="omr">OMR</option>
+      </select>
+    </div>
+
     <!-- Single QR -->
     <p class="section-title">Single Table</p>
     <div class="card single-card">
@@ -323,10 +361,15 @@
   <script>
     let singleQR = null;
 
+    function getOutlet() {
+      return document.getElementById("outletSelect").value;
+    }
+
     function generateSingle() {
       const tableNum = document.getElementById("tableNumber").value.trim();
       if (!tableNum) { alert("Enter a table number"); return; }
-      const url = "https://kapicoast.org/index.html?table=" + tableNum;
+      const outlet = getOutlet();
+      const url = "https://kapicoast.org/index.html?outlet=" + outlet + "&table=" + tableNum;
       const n = parseInt(tableNum, 10);
 
       // Clear previous
@@ -365,16 +408,18 @@
     }
 
     function generateAll() {
+      const outlet = getOutlet();
+      const outletLabel = outlet.toUpperCase();
       const grid = document.getElementById("bulkGrid");
       grid.innerHTML = "";
       document.getElementById("bulkStatus").textContent = "Generating…";
 
       for (let i = 1; i <= 10; i++) {
-        const url = "https://kapicoast.org/index.html?table=" + i;
+        const url = "https://kapicoast.org/index.html?outlet=" + outlet + "&table=" + i;
         const card = document.createElement("div");
         card.className = "qr-card";
         card.innerHTML = `
-          <div class="qr-card-label">Table</div>
+          <div class="qr-card-label">${outletLabel} · Table</div>
           <div class="qr-card-num">${i}</div>
           <div class="qr-card-canvas" id="bulk-qr-${i}"></div>
           <div class="qr-card-dl">
@@ -393,7 +438,7 @@
         });
       }
 
-      document.getElementById("bulkStatus").textContent = "10 QR codes ready";
+      document.getElementById("bulkStatus").textContent = "10 QR codes ready (" + outletLabel + ")";
     }
 
     function downloadBulk(n) {
