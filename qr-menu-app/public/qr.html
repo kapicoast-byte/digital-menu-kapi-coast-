@@ -326,7 +326,7 @@
     function generateSingle() {
       const tableNum = document.getElementById("tableNumber").value.trim();
       if (!tableNum) { alert("Enter a table number"); return; }
-      const url = "https://kapicoast.org/login.html?table=" + tableNum;
+      const url = "https://kapicoast.org/index.html?table=" + tableNum;
       const n = parseInt(tableNum, 10);
 
       // Clear previous
@@ -370,7 +370,7 @@
       document.getElementById("bulkStatus").textContent = "Generating…";
 
       for (let i = 1; i <= 10; i++) {
-        const url = "https://kapicoast.org/login.html?table=" + i;
+        const url = "https://kapicoast.org/index.html?table=" + i;
         const card = document.createElement("div");
         card.className = "qr-card";
         card.innerHTML = `
