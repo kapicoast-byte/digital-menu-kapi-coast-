@@ -223,7 +223,66 @@
       .sidebar-title { display: none; }
     }
 
-    :root { --caramel: #C8894A; }
+    /* ── Template selector ── */
+    .tmpl-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 14px; margin: 12px 0;
+    }
+    .tmpl-card {
+      border: 2px solid #EDE5DB; border-radius: 12px;
+      cursor: pointer; overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .tmpl-card:hover { border-color: #C8894A; }
+    .tmpl-card.selected { border-color: #C8894A; box-shadow: 0 0 0 3px rgba(200,137,74,0.2); }
+    .tmpl-preview {
+      height: 80px; display: flex;
+      flex-direction: column; overflow: hidden;
+    }
+    .tmpl-preview.dark   { background: #0D0D0D; }
+    .tmpl-preview.bright { background: #FAF6F0; }
+    .tmpl-preview.bold   { background: linear-gradient(135deg,#0F2027,#2C5364); }
+    .tmpl-label { font-size: 13px; font-weight: 700; color: #2C1A0E; padding: 8px 12px 2px; }
+    .tmpl-sub   { font-size: 11px; color: #9A7D6B; padding: 0 12px 10px; }
+
+    /* ── Items-per-page buttons ── */
+    .ipp-btn {
+      padding: 8px 18px;
+      border: 2px solid #EDE5DB; border-radius: 8px;
+      background: #fff; cursor: pointer;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px; font-weight: 600; color: #2C1A0E;
+      transition: border-color 0.15s;
+    }
+    .ipp-btn:hover  { border-color: #C8894A; }
+    .ipp-btn.active { border-color: #C8894A; background: #FFF5EC; color: #C8894A; }
+
+    /* ── Display settings sub-panels ── */
+    .dsetting-panel {
+      background: #fff; border-radius: 14px;
+      padding: 20px 24px; margin-top: 16px;
+      box-shadow: 0 2px 12px rgba(44,26,14,0.07);
+      max-width: 680px;
+    }
+    .dsetting-panel h3 { margin-top: 0; color: #2C1A0E; font-size: 16px; margin-bottom: 6px; }
+    .dsetting-panel p  { font-size: 13px; color: #9A7D6B; margin-bottom: 12px; }
+
+    /* ── Category toggle chips ── */
+    .cat-toggle-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .cat-toggle-item {
+      display: flex; align-items: center; gap: 6px;
+      background: #FAF6F0; border: 1px solid #EDE5DB;
+      border-radius: 8px; padding: 6px 12px;
+      cursor: pointer; font-size: 13px; font-weight: 600; color: #2C1A0E;
+    }
+    .cat-toggle-item input[type="checkbox"] { accent-color: #C8894A; cursor: pointer; }
+
+    @media (max-width: 768px) {
+      .tmpl-grid { grid-template-columns: 1fr; }
+      .dsetting-panel { padding: 16px; }
+    }
+
+
 
     @media (max-width: 768px) {
       /* ── Bottom nav ── */
@@ -470,6 +529,8 @@
   <!-- Section: Cast to TV -->
   <div id="castTV" class="section">
     <h2>Cast to TV</h2>
+
+    <!-- Casting controls -->
     <div class="cast-panel">
       <h3>📺 Cast Display Screen</h3>
       <p>Opens the Kapi Coast menu display on a nearby Chromecast or smart TV on the same WiFi network.</p>
@@ -486,16 +547,97 @@
 
       <div class="display-settings">
         <h3 style="margin-bottom:6px;">Slide Duration</h3>
-        <p style="margin-bottom:8px;">How long each slide stays on screen before rotating.</p>
+        <p style="margin-bottom:8px;">Seconds per category slide (each slide shows all items in a category).</p>
         <div class="slider-row">
-          <input type="range" id="intervalSlider" min="3" max="15" step="1" value="7"
+          <input type="range" id="intervalSlider" min="5" max="20" step="1" value="10"
                  oninput="document.getElementById('intervalVal').textContent = this.value + 's'">
-          <span class="slider-val" id="intervalVal">7s</span>
+          <span class="slider-val" id="intervalVal">10s</span>
           <button class="btn btn-primary btn-sm" onclick="saveDisplaySettings()">Save</button>
         </div>
         <p id="displaySettingsStatus" style="font-size:13px; color:green; margin-top:6px; font-weight:600;"></p>
       </div>
     </div>
+
+    <!-- Template selector -->
+    <div class="dsetting-panel">
+      <h3>Display Template</h3>
+      <p>Visual theme shown on the TV. Changes take effect instantly — no reload needed.</p>
+      <div class="tmpl-grid">
+
+        <div class="tmpl-card selected" id="tmplCard-dark" onclick="selectTemplate('dark')">
+          <div class="tmpl-preview dark">
+            <div style="height:45%;background:#1A1A1A;border-bottom:2px solid #C8894A;display:flex;align-items:center;padding:0 10px;font-size:9px;font-weight:800;color:#C8894A;letter-spacing:2px;">KAPI COAST</div>
+            <div style="flex:1;display:flex;gap:4px;padding:6px;">
+              <div style="flex:1;background:#1A1A1A;border-radius:4px;border:1px solid #2A2A2A;"></div>
+              <div style="flex:1;background:#1A1A1A;border-radius:4px;border:1px solid #2A2A2A;"></div>
+            </div>
+          </div>
+          <div class="tmpl-label">Elegant Dark</div>
+          <div class="tmpl-sub">Premium / evening vibe</div>
+        </div>
+
+        <div class="tmpl-card" id="tmplCard-bright" onclick="selectTemplate('bright')">
+          <div class="tmpl-preview bright">
+            <div style="height:45%;background:#fff;border-bottom:2px solid #C8894A;display:flex;align-items:center;padding:0 10px;font-size:9px;font-weight:800;color:#2C1A0E;letter-spacing:2px;">KAPI COAST</div>
+            <div style="flex:1;display:flex;gap:4px;padding:6px;">
+              <div style="flex:1;background:#fff;border-radius:4px;border:1px solid #EDE5DB;"></div>
+              <div style="flex:1;background:#fff;border-radius:4px;border:1px solid #EDE5DB;"></div>
+            </div>
+          </div>
+          <div class="tmpl-label">Bright Cafe</div>
+          <div class="tmpl-sub">Fresh / daytime vibe</div>
+        </div>
+
+        <div class="tmpl-card" id="tmplCard-bold" onclick="selectTemplate('bold')">
+          <div class="tmpl-preview bold">
+            <div style="height:45%;background:rgba(0,0,0,0.5);display:flex;align-items:center;padding:0 10px;font-size:9px;font-weight:800;color:#FFD166;letter-spacing:2px;">KAPI COAST</div>
+            <div style="flex:1;display:flex;gap:4px;padding:6px;">
+              <div style="flex:1;background:rgba(0,0,0,0.4);border-radius:4px;border:1px solid rgba(255,255,255,0.15);"></div>
+              <div style="flex:1;background:rgba(0,0,0,0.4);border-radius:4px;border:1px solid rgba(255,255,255,0.15);"></div>
+            </div>
+          </div>
+          <div class="tmpl-label">Bold Promo</div>
+          <div class="tmpl-sub">High impact / promotions</div>
+        </div>
+
+      </div>
+      <p id="templateStatus" style="font-size:13px;color:green;font-weight:600;margin-top:4px;"></p>
+    </div>
+
+    <!-- Items per slide -->
+    <div class="dsetting-panel">
+      <h3>Items Per Slide</h3>
+      <p>Max items shown per category slide. Categories larger than this split into multiple slides automatically.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="ipp-btn" data-val="4" onclick="setMaxItems(4)">4 items</button>
+        <button class="ipp-btn active" data-val="6" onclick="setMaxItems(6)">6 items</button>
+        <button class="ipp-btn" data-val="8" onclick="setMaxItems(8)">8 items</button>
+        <button class="ipp-btn" data-val="9" onclick="setMaxItems(9)">9 items</button>
+      </div>
+      <p id="maxItemsStatus" style="font-size:13px;color:green;font-weight:600;margin-top:8px;"></p>
+    </div>
+
+    <!-- Show offers toggle -->
+    <div class="dsetting-panel">
+      <h3>Offer Slide</h3>
+      <p>Include the active offer as a slide in the rotation.</p>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600;color:#2C1A0E;">
+        <input type="checkbox" id="showOffersToggle"
+               style="width:18px;height:18px;accent-color:#C8894A;cursor:pointer;"
+               onchange="saveShowOffers(this.checked)" checked>
+        Show offer slide when an active offer exists
+      </label>
+    </div>
+
+    <!-- Category visibility -->
+    <div class="dsetting-panel">
+      <h3>Categories to Show</h3>
+      <p>Uncheck any category to hide it from the TV display.</p>
+      <div id="categoryToggles" class="cat-toggle-list">
+        <span style="color:#9A7D6B;font-size:13px;">Open this section to load categories…</span>
+      </div>
+    </div>
+
   </div>
 
   <!-- Section: Ads & Banners -->
@@ -585,12 +727,14 @@ async function loadItems() {
   const snapshot = await getDocs(collection(db, "menu"));
   const categories = {};
   let html = "";
+  allMenuItems = [];
 
   snapshot.forEach(docSnap => {
     const item = docSnap.data();
     const cat  = (item.category || "Others").trim();
     if (!categories[cat]) categories[cat] = [];
     categories[cat].push({ ...item, id: docSnap.id });
+    allMenuItems.push({ ...item, id: docSnap.id });
   });
 
   Object.keys(categories).forEach(cat => {
@@ -766,6 +910,8 @@ async function loadAds() {
 
 // ── Customers ──
 let allCustomers = [];
+let allMenuItems = [];
+let currentHiddenCategories = [];
 
 function loyaltyPill(visits) {
   if (visits >= 6) return `<span class="loyalty-pill pill-vip">VIP</span>`;
@@ -908,19 +1054,93 @@ await loadDisplaySettings();
 // ── Display settings ──
 async function loadDisplaySettings() {
   const snap = await getDoc(doc(db, "settings", "display"));
-  if (snap.exists()) {
-    const secs = snap.data().intervalSeconds || 7;
-    document.getElementById("intervalSlider").value = secs;
-    document.getElementById("intervalVal").textContent = secs + "s";
-  }
+  if (!snap.exists()) return;
+  const d = snap.data();
+
+  // Interval slider
+  const secs = d.intervalSeconds || 10;
+  document.getElementById("intervalSlider").value = secs;
+  document.getElementById("intervalVal").textContent = secs + "s";
+
+  // Template cards
+  const tmpl = d.template || "dark";
+  document.querySelectorAll(".tmpl-card").forEach(c => c.classList.remove("selected"));
+  const tc = document.getElementById("tmplCard-" + tmpl);
+  if (tc) tc.classList.add("selected");
+
+  // Items per page buttons
+  const maxItems = d.maxItemsPerSlide || 6;
+  document.querySelectorAll(".ipp-btn").forEach(b => {
+    b.classList.toggle("active", parseInt(b.dataset.val) === maxItems);
+  });
+
+  // Show offers checkbox
+  document.getElementById("showOffersToggle").checked = d.showOffers !== false;
+
+  // Hidden categories (stored for use in toggles)
+  currentHiddenCategories = d.hiddenCategories || [];
 }
 
 window.saveDisplaySettings = async function () {
   const secs = parseInt(document.getElementById("intervalSlider").value, 10);
-  await setDoc(doc(db, "settings", "display"), { intervalSeconds: secs });
+  await setDoc(doc(db, "settings", "display"), { intervalSeconds: secs }, { merge: true });
   const st = document.getElementById("displaySettingsStatus");
   st.textContent = "Saved!";
   setTimeout(() => { st.textContent = ""; }, 2000);
+};
+
+// ── Template selector ──
+window.selectTemplate = async function (tmpl) {
+  document.querySelectorAll(".tmpl-card").forEach(c => c.classList.remove("selected"));
+  const card = document.getElementById("tmplCard-" + tmpl);
+  if (card) card.classList.add("selected");
+  await setDoc(doc(db, "settings", "display"), { template: tmpl }, { merge: true });
+  const st = document.getElementById("templateStatus");
+  st.textContent = "Template saved!";
+  setTimeout(() => { st.textContent = ""; }, 2000);
+};
+
+// ── Items per slide ──
+window.setMaxItems = async function (n) {
+  document.querySelectorAll(".ipp-btn").forEach(b => {
+    b.classList.toggle("active", parseInt(b.dataset.val) === n);
+  });
+  await setDoc(doc(db, "settings", "display"), { maxItemsPerSlide: n }, { merge: true });
+  const st = document.getElementById("maxItemsStatus");
+  st.textContent = "Saved!";
+  setTimeout(() => { st.textContent = ""; }, 2000);
+};
+
+// ── Show offers toggle ──
+window.saveShowOffers = async function (checked) {
+  await setDoc(doc(db, "settings", "display"), { showOffers: checked }, { merge: true });
+};
+
+// ── Category visibility toggles ──
+function loadCategoryToggles() {
+  const container = document.getElementById("categoryToggles");
+  if (!allMenuItems.length) {
+    container.innerHTML = `<span style="color:#9A7D6B;font-size:13px;">No menu items yet — add items first.</span>`;
+    return;
+  }
+  const cats = [...new Set(allMenuItems.map(i => (i.category || "Others").trim()))].sort();
+  container.innerHTML = cats.map(cat => `
+    <label class="cat-toggle-item">
+      <input type="checkbox"
+             data-cat="${escapeHtml(cat)}"
+             ${!currentHiddenCategories.includes(cat) ? "checked" : ""}
+             onchange="saveCategoryToggle(this.getAttribute('data-cat'), this.checked)">
+      ${escapeHtml(cat)}
+    </label>`).join("");
+}
+
+window.saveCategoryToggle = async function (cat, show) {
+  if (show) {
+    currentHiddenCategories = currentHiddenCategories.filter(c => c !== cat);
+  } else {
+    if (!currentHiddenCategories.includes(cat)) currentHiddenCategories.push(cat);
+  }
+  await setDoc(doc(db, "settings", "display"), { hiddenCategories: currentHiddenCategories }, { merge: true });
 };
 
 // ── Cast to TV ──
@@ -1097,11 +1317,12 @@ function loadReports() {
   });
 }
 
-// ── Section nav (extended to trigger report loading) ──
+// ── Section nav (extended to trigger lazy loading) ──
 const _origShowSection = window.showSection;
 window.showSection = function (id, navEl) {
   _origShowSection(id, navEl);
   if (id === "reports") loadReports();
+  if (id === "castTV")  loadCategoryToggles();
 };
 
 // ── Push notification trigger (writes to Firestore; index.html picks it up) ──

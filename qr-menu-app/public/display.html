@@ -7,79 +7,119 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      background: #0D0D0D;
       font-family: 'Manrope', Arial, sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      color: #fff;
+      height: 100vh; overflow: hidden;
     }
 
     /* ─────────────────────────────────────────
-       TOP BAR — always on top, never part of a slide
+       TEMPLATE CSS VARIABLES
+       Set via body class: tmpl-dark | tmpl-bright | tmpl-bold
+    ───────────────────────────────────────── */
+    body, body.tmpl-dark {
+      --bg:           #0D0D0D;
+      --bar-bg:       #1A1A1A;
+      --bar-border:   1px solid #C8894A;
+      --bar-text:     #fff;
+      --bar-sub:      rgba(255,255,255,0.35);
+      --cat-name-clr: #C8894A;
+      --slide-bg:     #0D0D0D;
+      --card-bg:      #1A1A1A;
+      --card-name:    #fff;
+      --card-price:   #C8894A;
+      --card-border:  #2A2A2A;
+      --prog-bg:      rgba(255,255,255,0.08);
+      --prog-fill:    #C8894A;
+      --divider-grad: linear-gradient(90deg, #C8894A, transparent);
+      --empty-sub:    rgba(255,255,255,0.25);
+    }
+    body.tmpl-bright {
+      --bg:           #FAF6F0;
+      --bar-bg:       #fff;
+      --bar-border:   2px solid #C8894A;
+      --bar-text:     #2C1A0E;
+      --bar-sub:      #9A7D6B;
+      --cat-name-clr: #2C1A0E;
+      --slide-bg:     #FAF6F0;
+      --card-bg:      #fff;
+      --card-name:    #2C1A0E;
+      --card-price:   #C8894A;
+      --card-border:  #EDE5DB;
+      --prog-bg:      rgba(44,26,14,0.1);
+      --prog-fill:    #C8894A;
+      --divider-grad: linear-gradient(90deg, #C8894A, transparent);
+      --empty-sub:    #9A7D6B;
+    }
+    body.tmpl-bold {
+      --bg:           #0F2027;
+      --bar-bg:       rgba(0,0,0,0.55);
+      --bar-border:   none;
+      --bar-text:     #fff;
+      --bar-sub:      rgba(255,255,255,0.5);
+      --cat-name-clr: #fff;
+      --slide-bg:     #0F2027;
+      --card-bg:      rgba(0,0,0,0.55);
+      --card-name:    #fff;
+      --card-price:   #FFD166;
+      --card-border:  rgba(255,255,255,0.15);
+      --prog-bg:      rgba(255,255,255,0.1);
+      --prog-fill:    #FFD166;
+      --divider-grad: linear-gradient(90deg, rgba(255,255,255,0.4), transparent);
+      --empty-sub:    rgba(255,255,255,0.35);
+    }
+
+    /* ─────────────────────────────────────────
+       TOP BAR — fixed, always on top
     ───────────────────────────────────────── */
     .top-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
+      position: fixed; top: 0; left: 0; right: 0;
       height: 64px;
-      background: #1A1A1A;
-      border-bottom: 1px solid #C8894A;
-      display: flex;
-      align-items: center;
+      background: var(--bar-bg);
+      border-bottom: var(--bar-border);
+      display: flex; align-items: center;
       justify-content: space-between;
       padding: 0 48px;
       z-index: 200;
+      backdrop-filter: blur(8px);
     }
     .top-logo {
-      font-size: 22px;
-      font-weight: 800;
+      font-size: 18px; font-weight: 800;
       color: #C8894A;
-      letter-spacing: 3px;
-      text-transform: uppercase;
+      letter-spacing: 3px; text-transform: uppercase;
+      flex-shrink: 0;
     }
-    .top-handle {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 16px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.45);
-      letter-spacing: 1px;
+    .top-category {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      font-size: 13px; font-weight: 700;
+      color: var(--bar-sub);
+      letter-spacing: 2.5px; text-transform: uppercase;
+      max-width: 46%; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
     }
     .top-clock {
-      font-size: 22px;
-      font-weight: 700;
-      color: #fff;
+      font-size: 20px; font-weight: 700;
+      color: var(--bar-text);
       font-variant-numeric: tabular-nums;
-      letter-spacing: 1px;
+      letter-spacing: 1px; flex-shrink: 0;
     }
 
     /* ─────────────────────────────────────────
        PROGRESS BAR — fixed at very bottom
     ───────────────────────────────────────── */
     .progress-wrap {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 4px;
-      background: rgba(255,255,255,0.07);
-      z-index: 200;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 4px; background: var(--prog-bg); z-index: 200;
     }
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: #C8894A;
-    }
+    .progress-bar { height: 100%; width: 0%; background: var(--prog-fill); }
 
     /* ─────────────────────────────────────────
-       SLIDE VIEWPORT — sits between top bar and progress bar
+       SLIDE VIEWPORT — between top bar and progress bar
     ───────────────────────────────────────── */
     .slide-viewport {
-      position: fixed;
-      top: 64px;
-      bottom: 4px;
+      position: fixed; top: 64px; bottom: 4px;
       left: 0; right: 0;
       overflow: hidden;
+      background: var(--bg);
     }
 
     /* ─────────────────────────────────────────
@@ -87,142 +127,148 @@
        Content is swapped while opacity = 0
     ───────────────────────────────────────── */
     .slide {
-      position: absolute;
-      inset: 0;
-      opacity: 1;
-      transition: opacity 0.7s ease;
-      pointer-events: none;
+      position: absolute; inset: 0;
+      opacity: 1; transition: opacity 0.7s ease;
     }
-    .slide.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    .slide.hidden { opacity: 0; }
 
     /* ─────────────────────────────────────────
-       OFFER SLIDE
+       CATEGORY SLIDE
+    ───────────────────────────────────────── */
+    .cat-slide {
+      width: 100%; height: 100%;
+      background: var(--slide-bg);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .cat-header {
+      padding: 20px 52px 8px;
+      flex-shrink: 0;
+      display: flex; align-items: baseline; gap: 14px;
+    }
+    .cat-name {
+      font-size: 28px; font-weight: 800;
+      color: var(--cat-name-clr);
+      letter-spacing: -0.3px; line-height: 1;
+    }
+    .page-indicator {
+      font-size: 13px; font-weight: 600;
+      color: var(--bar-sub); letter-spacing: 1px;
+    }
+    .cat-divider {
+      height: 2px; margin: 0 52px 12px; flex-shrink: 0;
+      background: var(--divider-grad);
+    }
+
+    /* ─── Grid layouts ─── */
+    .cat-grid {
+      flex: 1; display: grid;
+      gap: 12px; padding: 0 44px 20px;
+      min-height: 0; align-content: stretch;
+    }
+    .cat-grid.cols-1 {
+      grid-template-columns: 1fr;
+      max-width: 600px; margin: 0 auto; width: 100%;
+    }
+    .cat-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .cat-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+    /* ─────────────────────────────────────────
+       ITEM CARD
+    ───────────────────────────────────────── */
+    .item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      min-height: 0;
+    }
+    .item-card.sold-out { opacity: 0.45; }
+
+    .card-img-wrap {
+      flex: 1; position: relative;
+      overflow: hidden; min-height: 0;
+    }
+    .card-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+
+    /* Veg indicator dot */
+    .veg-ind {
+      position: absolute; top: 8px; left: 8px;
+      width: 12px; height: 12px; border-radius: 2px;
+      border: 1.5px solid rgba(255,255,255,0.7);
+    }
+    .veg-green { background: #22C55E; }
+    .veg-red   { background: #EF4444; }
+
+    .sold-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 800;
+      color: #fff; letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    .card-info { padding: 9px 12px 11px; flex-shrink: 0; }
+    .card-name {
+      font-size: 13px; font-weight: 700;
+      color: var(--card-name); line-height: 1.3; margin-bottom: 3px;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-price { font-size: 13px; font-weight: 800; color: var(--card-price); }
+
+    /* ── Single-item: row layout, big text ── */
+    .cols-1 .item-card  { flex-direction: row; height: 100%; border-radius: 14px; }
+    .cols-1 .card-img-wrap { width: 50%; height: auto; flex: none; }
+    .cols-1 .card-info  {
+      flex: 1; padding: 56px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .cols-1 .card-name  { font-size: 36px; -webkit-line-clamp: 3; margin-bottom: 16px; }
+    .cols-1 .card-price { font-size: 28px; }
+
+    /* ── 3-col: tighter text ── */
+    .cols-3 .card-name  { font-size: 12px; }
+    .cols-3 .card-price { font-size: 12px; }
+    .cols-3 .card-info  { padding: 7px 9px 9px; }
+
+    /* ─────────────────────────────────────────
+       OFFER SLIDE — same across all templates
     ───────────────────────────────────────── */
     .offer-slide {
       width: 100%; height: 100%;
       background: linear-gradient(135deg, #1A0E06 0%, #2C1A0E 60%, #1A0E06 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 80px 120px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 80px 120px;
     }
     .offer-pill {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #C8894A;
+      display: inline-block; font-size: 12px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; color: #C8894A;
       border: 1px solid rgba(200,137,74,0.4);
-      padding: 7px 28px;
-      border-radius: 32px;
-      margin-bottom: 40px;
+      padding: 7px 28px; border-radius: 32px; margin-bottom: 40px;
     }
     .offer-deco {
-      width: 80px;
-      height: 2px;
+      width: 80px; height: 2px;
       background: linear-gradient(90deg, transparent, #C8894A, transparent);
       margin: 0 auto 32px;
     }
     .offer-deco.below { margin: 32px auto 40px; }
     .offer-title {
-      font-size: 72px;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.08;
-      letter-spacing: -1px;
-      max-width: 900px;
-      margin-bottom: 0;
+      font-size: 72px; font-weight: 800; color: #fff;
+      line-height: 1.08; letter-spacing: -1px; max-width: 900px;
     }
     .offer-body {
-      font-size: 32px;
-      font-weight: 500;
-      color: #C8894A;
-      line-height: 1.5;
-      max-width: 760px;
+      font-size: 32px; font-weight: 500;
+      color: #C8894A; line-height: 1.5; max-width: 760px;
     }
     .offer-footer {
-      margin-top: 48px;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.2);
-      text-transform: uppercase;
-    }
-
-    /* ─────────────────────────────────────────
-       MENU ITEM SLIDE — clean split layout
-       Left half: image only, no text overlay
-       Right half: dark bg, text only
-    ───────────────────────────────────────── */
-    .item-slide {
-      width: 100%; height: 100%;
-      display: flex;
-    }
-    .item-img-half {
-      width: 50%;
-      height: 100%;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-    .item-img-half img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .item-text-half {
-      flex: 1;
-      background: #111111;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 80px 72px;
-    }
-    .item-category {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #C8894A;
-      margin-bottom: 24px;
-    }
-    .item-name {
-      font-size: 64px;
-      font-weight: 800;
-      color: #ffffff;
-      line-height: 1.05;
-      letter-spacing: -1px;
-      margin-bottom: 28px;
-    }
-    .item-divider {
-      width: 60px;
-      height: 3px;
-      background: #C8894A;
-      margin-bottom: 28px;
-      border-radius: 2px;
-    }
-    .item-price {
-      font-size: 48px;
-      font-weight: 800;
-      color: #C8894A;
-      margin-bottom: 24px;
-    }
-    .item-desc {
-      font-size: 20px;
-      font-weight: 400;
-      color: rgba(255,255,255,0.45);
-      line-height: 1.6;
-      max-width: 420px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      margin-top: 48px; font-size: 14px; font-weight: 600;
+      letter-spacing: 2px; color: rgba(255,255,255,0.2); text-transform: uppercase;
     }
 
     /* ─────────────────────────────────────────
@@ -230,30 +276,25 @@
     ───────────────────────────────────────── */
     .empty-slide {
       width: 100%; height: 100%;
-      background: #0D0D0D;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
     }
     .empty-logo { font-size: 64px; font-weight: 800; color: #C8894A; letter-spacing: 2px; }
-    .empty-sub  { font-size: 18px; color: rgba(255,255,255,0.25); font-weight: 500; }
+    .empty-sub  { font-size: 18px; color: var(--empty-sub, rgba(255,255,255,0.25)); font-weight: 500; }
   </style>
 </head>
-<body>
+<body class="tmpl-dark">
 
-<!-- ── Top bar (always visible) ── -->
+<!-- ── Top bar ── -->
 <div class="top-bar">
   <div class="top-logo">Kapi Coast</div>
-  <div class="top-handle">@kapicoast</div>
+  <div class="top-category" id="topCategory"></div>
   <div class="top-clock" id="clock"></div>
 </div>
 
 <!-- ── Slide viewport ── -->
 <div class="slide-viewport">
   <div class="slide" id="slide">
-    <!-- content injected by JS -->
     <div class="empty-slide">
       <div class="empty-logo">KAPI COAST</div>
       <div class="empty-sub">Loading…</div>
@@ -261,7 +302,7 @@
   </div>
 </div>
 
-<!-- ── Progress bar (always visible) ── -->
+<!-- ── Progress bar ── -->
 <div class="progress-wrap">
   <div class="progress-bar" id="progressBar"></div>
 </div>
@@ -281,7 +322,6 @@ const firebaseConfig = {
   appId: "1:426256600838:web:e8f5b8f4be326d482c5887",
   measurementId: "G-YSBZE6JDTY"
 };
-
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
@@ -302,56 +342,136 @@ function esc(v) {
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+// ── Bold Promo: per-category gradient palette ──
+const BOLD_GRADS = [
+  "linear-gradient(135deg,#0F2027,#203A43,#2C5364)",
+  "linear-gradient(135deg,#1a0533,#3a0d6e,#5a1fa8)",
+  "linear-gradient(135deg,#0a1628,#0e2d4a,#155a8a)",
+  "linear-gradient(135deg,#1a2a00,#2e5200,#3d7000)",
+  "linear-gradient(135deg,#2C1A0E,#7a3d0d,#C8894A)",
+  "linear-gradient(135deg,#1a0010,#4d0030,#8b0050)",
+  "linear-gradient(135deg,#001a1a,#004d4d,#007878)",
+];
+function boldGradient(cat) {
+  let h = 0;
+  for (let i = 0; i < cat.length; i++) h = cat.charCodeAt(i) + ((h << 5) - h);
+  return BOLD_GRADS[Math.abs(h) % BOLD_GRADS.length];
+}
+
 // ── State ──
-let menuItems    = [];
-let activeOffer  = null;
-let intervalSec  = 7;
+let menuItems   = [];
+let activeOffer = null;
+let cfg = {
+  template:        "dark",
+  intervalSeconds: 10,
+  hiddenCategories: [],
+  maxItemsPerSlide: 6,
+  showOffers:      true
+};
 let slides       = [];
 let slideIndex   = 0;
 let rotateTimer  = null;
 let transitioning = false;
 
-// ── Build slide list ──
-function buildSlides() {
-  slides = [];
-  if (activeOffer) slides.push({ type: "offer", data: activeOffer });
-  menuItems.forEach(item => slides.push({ type: "item", data: item }));
+// ── Grid columns by item count ──
+function gridCols(n) {
+  if (n === 1) return 1;
+  if (n <= 4)  return 2;
+  return 3;
 }
 
-// ── Generate inner HTML for a slide ──
+// ── Build slide list from categories ──
+function buildSlides() {
+  slides = [];
+  const { hiddenCategories = [], maxItemsPerSlide = 6, showOffers = true } = cfg;
+
+  // Group items by category
+  const catMap = {};
+  menuItems.forEach(item => {
+    const cat = (item.category || "Others").trim();
+    if (hiddenCategories.includes(cat)) return;
+    if (!catMap[cat]) catMap[cat] = [];
+    catMap[cat].push(item);
+  });
+
+  // One (or more split) slide per category
+  Object.keys(catMap).sort().forEach(cat => {
+    const items     = catMap[cat];
+    const pageCount = Math.ceil(items.length / maxItemsPerSlide);
+    for (let p = 0; p < pageCount; p++) {
+      slides.push({
+        type: "category", category: cat,
+        items: items.slice(p * maxItemsPerSlide, (p + 1) * maxItemsPerSlide),
+        page: p + 1, totalPages: pageCount
+      });
+    }
+  });
+
+  // Offer slide at end
+  if (showOffers && activeOffer) slides.push({ type: "offer", data: activeOffer });
+}
+
+// ── HTML: single item card ──
+function itemCardHTML(item) {
+  const vegDot = item.veg === "veg"
+    ? `<span class="veg-ind veg-green"></span>`
+    : item.veg === "nonveg"
+    ? `<span class="veg-ind veg-red"></span>`
+    : "";
+  const out = item.available === false || item.soldOut === true;
+  return `<div class="item-card${out ? " sold-out" : ""}">
+    <div class="card-img-wrap">
+      <img src="${esc(item.imageUrl || "")}" alt="${esc(item.name)}" loading="lazy">
+      ${vegDot}${out ? '<div class="sold-overlay">Sold Out</div>' : ""}
+    </div>
+    <div class="card-info">
+      <div class="card-name">${esc(item.name)}</div>
+      <div class="card-price">Rs. ${esc(item.price)}</div>
+    </div>
+  </div>`;
+}
+
+// ── HTML: category slide ──
+function catSlideHTML(slide) {
+  const { category, items, page, totalPages } = slide;
+  const cols    = gridCols(items.length);
+  const pgLabel = totalPages > 1
+    ? ` <span class="page-indicator">${page}/${totalPages}</span>` : "";
+  const bgAttr  = cfg.template === "bold"
+    ? ` style="background:${boldGradient(category)};"` : "";
+  return `<div class="cat-slide"${bgAttr}>
+    <div class="cat-header">
+      <div class="cat-name">${esc(category)}${pgLabel}</div>
+    </div>
+    <div class="cat-divider"></div>
+    <div class="cat-grid cols-${cols}">
+      ${items.map(itemCardHTML).join("")}
+    </div>
+  </div>`;
+}
+
+// ── HTML: offer slide ──
+function offerHTML(d) {
+  return `<div class="offer-slide">
+    <span class="offer-pill">Today's Offer</span>
+    <div class="offer-deco"></div>
+    <div class="offer-title">${esc(d.title)}</div>
+    <div class="offer-deco below"></div>
+    <div class="offer-body">${esc(d.body)}</div>
+    <div class="offer-footer">kapicoast.org</div>
+  </div>`;
+}
+
 function makeSlideHTML(slide) {
-  if (!slide) {
-    return `<div class="empty-slide">
-      <div class="empty-logo">KAPI COAST</div>
-      <div class="empty-sub">No content</div>
-    </div>`;
-  }
-
-  if (slide.type === "offer") {
-    const d = slide.data;
-    return `<div class="offer-slide">
-      <span class="offer-pill">Today's Offer</span>
-      <div class="offer-deco"></div>
-      <div class="offer-title">${esc(d.title)}</div>
-      <div class="offer-deco below"></div>
-      <div class="offer-body">${esc(d.body)}</div>
-      <div class="offer-footer">kapicoast.org</div>
-    </div>`;
-  }
-
-  // item slide — clean split, text NEVER on top of image
-  const d = slide.data;
-  return `<div class="item-slide">
-    <div class="item-img-half">
-      <img src="${esc(d.imageUrl || "")}" alt="${esc(d.name)}">
-    </div>
-    <div class="item-text-half">
-      <div class="item-category">${esc(d.category)}</div>
-      <div class="item-name">${esc(d.name)}</div>
-      <div class="item-divider"></div>
-      <div class="item-price">Rs. ${esc(d.price)}</div>
-      <div class="item-desc">${esc(d.description || "")}</div>
-    </div>
+  if (!slide) return emptyHTML("No content");
+  if (slide.type === "offer")    return offerHTML(slide.data);
+  if (slide.type === "category") return catSlideHTML(slide);
+  return emptyHTML("No content");
+}
+function emptyHTML(msg) {
+  return `<div class="empty-slide">
+    <div class="empty-logo">KAPI COAST</div>
+    <div class="empty-sub">${esc(msg)}</div>
   </div>`;
 }
 
@@ -361,51 +481,49 @@ function startProgress() {
   bar.style.transition = "none";
   bar.style.width = "0%";
   bar.offsetWidth; // force reflow
-  bar.style.transition = `width ${intervalSec}s linear`;
+  bar.style.transition = `width ${cfg.intervalSeconds}s linear`;
   bar.style.width = "100%";
 }
 
-// ── Transition to a slide: fade out → swap content → fade in ──
-// This is the key fix: content is swapped only while opacity = 0,
-// so two slides are NEVER visible at the same time.
+// ── Update top bar category label ──
+function updateTopLabel(slide) {
+  document.getElementById("topCategory").textContent =
+    !slide ? "" : slide.type === "offer" ? "Today's Offer" : slide.category;
+}
+
+// ── Transition: fade out → swap content → fade in ──
 async function transitionTo(idx) {
   if (transitioning) return;
   transitioning = true;
 
   const slideEl = document.getElementById("slide");
-
-  // 1. Fade out
   slideEl.classList.add("hidden");
-  await sleep(720); // match CSS transition duration
+  await sleep(720); // match CSS transition
 
-  // 2. Swap content while invisible
+  const slide = slides[idx];
   slideEl.innerHTML = slides.length
-    ? makeSlideHTML(slides[idx])
-    : `<div class="empty-slide"><div class="empty-logo">KAPI COAST</div><div class="empty-sub">No menu items</div></div>`;
+    ? makeSlideHTML(slide)
+    : emptyHTML("No menu items yet");
 
-  // 3. Fade in
+  updateTopLabel(slide || null);
   slideEl.classList.remove("hidden");
-
-  // 4. Start progress bar for this slide
   startProgress();
-
   transitioning = false;
 }
 
 // ── Auto-rotation ──
 function startRotation() {
   clearInterval(rotateTimer);
+  slideIndex = 0;
   if (!slides.length) {
-    transitionTo(0);
+    document.getElementById("slide").innerHTML = emptyHTML("No menu items yet");
     return;
   }
-  slideIndex = 0;
-  transitionTo(slideIndex);
-
+  transitionTo(0);
   rotateTimer = setInterval(async () => {
     slideIndex = (slideIndex + 1) % slides.length;
     await transitionTo(slideIndex);
-  }, intervalSec * 1000);
+  }, cfg.intervalSeconds * 1000);
 }
 
 function rebuild() {
@@ -414,12 +532,11 @@ function rebuild() {
   startRotation();
 }
 
-// ── Live: menu ──
+// ── Live: menu items ──
 onSnapshot(collection(db, "menu"), snap => {
   menuItems = [];
   snap.forEach(d => {
     const item = { ...d.data(), id: d.id };
-    if (item.available === false || item.visible === false) return;
     item.category = (item.category || "Others").trim();
     menuItems.push(item);
   });
@@ -434,15 +551,20 @@ onSnapshot(query(collection(db, "ads"), where("active", "==", true)), snap => {
   rebuild();
 });
 
-// ── Live: display settings ──
+// ── Live: display settings — instant template switch + rebuild ──
 onSnapshot(doc(db, "settings", "display"), snap => {
-  if (snap.exists()) {
-    const secs = snap.data().intervalSeconds;
-    if (secs && secs !== intervalSec) {
-      intervalSec = secs;
-      rebuild();
-    }
-  }
+  if (!snap.exists()) return;
+  const d = snap.data();
+  cfg = {
+    template:         d.template         || "dark",
+    intervalSeconds:  d.intervalSeconds  || 10,
+    hiddenCategories: d.hiddenCategories || [],
+    maxItemsPerSlide: d.maxItemsPerSlide || 6,
+    showOffers:       d.showOffers !== false
+  };
+  // Apply template class immediately (CSS variable switch — no reload needed)
+  document.body.className = "tmpl-" + cfg.template;
+  rebuild();
 });
 </script>
 
