@@ -333,7 +333,7 @@
     <div style="font-size:13px; color:#9A7D6B; margin-bottom:14px;">
       The ECR outlet menu is empty. Copy all existing menu items and ads from the legacy collection into the ECR outlet.
     </div>
-    <button class="btn btn-primary" id="migrateBtn" onclick="runMigration()">Migrate to ECR</button>
+    <button class="btn btn-primary" id="migrateBtn" onclick="migrateToOutlet()">Migrate to ECR</button>
     <span id="migrateStatus" style="font-size:13px; color:#2C1A0E; font-weight:600; margin-left:14px;"></span>
   </div>
 
@@ -1030,36 +1030,44 @@ async function checkMigration() {
   }
 }
 
-window.runMigration = async function () {
+window.migrateToOutlet = async function () {
   const btn = document.getElementById("migrateBtn");
-  const st  = document.getElementById("migrateStatus");
   btn.disabled = true;
-  btn.textContent = "Migrating…";
+  btn.textContent = "Migrating...";
 
   try {
-    // Migrate menu items
-    const menuSnap = await getDocs(collection(db, "menu"));
+    // Read from old menu/ collection
+    const oldMenuSnap = await getDocs(collection(db, "menu"));
     let count = 0;
-    for (const d of menuSnap.docs) {
-      await setDoc(doc(db, "outlets", "ecr", "menu", d.id), d.data());
+
+    for (const docSnap of oldMenuSnap.docs) {
+      const data = docSnap.data();
+      // Write to outlets/ecr/menu/
+      await setDoc(doc(db, "outlets", "ecr", "menu", docSnap.id), data);
       count++;
-      st.textContent = `Copied ${count} menu item${count !== 1 ? "s" : ""}…`;
+      btn.textContent = "Migrating... " + count + " items";
     }
 
-    // Migrate ads
-    const adsSnap = await getDocs(collection(db, "ads"));
-    let adCount = 0;
-    for (const d of adsSnap.docs) {
-      await setDoc(doc(db, "outlets", "ecr", "ads", d.id), d.data());
-      adCount++;
+    // Read from old ads/ collection
+    const oldAdsSnap = await getDocs(collection(db, "ads"));
+    for (const docSnap of oldAdsSnap.docs) {
+      await setDoc(doc(db, "outlets", "ecr", "ads", docSnap.id), docSnap.data());
     }
 
-    st.textContent = `Done — ${count} items and ${adCount} ads copied to ECR.`;
-    document.getElementById("migrationBanner").style.display = "none";
-  } catch (e) {
-    st.textContent = "Error: " + e.message;
-    btn.disabled = false;
-    btn.textContent = "Retry";
+    // Copy settings/offer
+    const offerSnap = await getDoc(doc(db, "settings", "offer"));
+    if (offerSnap.exists()) {
+      await setDoc(doc(db, "outlets", "ecr", "settings", "offer"), offerSnap.data());
+    }
+
+    btn.textContent = "Done! " + count + " items migrated";
+    alert("Migration complete! " + count + " menu items copied to ECR outlet.");
+    loadItems();
+
+  } catch(e) {
+    btn.textContent = "Error - check console";
+    console.error("Migration error:", e);
+    alert("Error: " + e.message);
   }
 };
 
