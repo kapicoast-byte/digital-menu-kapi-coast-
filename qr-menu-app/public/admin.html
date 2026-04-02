@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Manrope', Arial, sans-serif; background: #f5f5f5; display: flex; min-height: 100vh; }
@@ -294,9 +293,50 @@
       .cast-actions { flex-direction: column; }
       .cast-actions .btn { width: 100%; text-align: center; }
 
-      /* ── Reports ── */
-      #reportStats { grid-template-columns: 1fr 1fr; }
     }
+
+    /* ── Outlet switcher (sidebar) ── */
+    .outlet-switcher {
+      padding: 10px 12px;
+      border-bottom: 1px solid #333;
+    }
+    .outlet-switcher-label {
+      font-size: 10px; font-weight: 700; color: #9A7D6B;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px;
+    }
+    .outlet-select {
+      width: 100%;
+      background: #2a2a2a; color: #fff;
+      border: 1px solid #444; border-radius: 6px;
+      padding: 7px 10px;
+      font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; outline: none;
+    }
+    .outlet-select:focus { border-color: #C8894A; }
+
+    /* ── Current outlet banner (mobile top bar) ── */
+    #outletBar {
+      display: none;
+      background: #2C1A0E; color: #C8894A;
+      font-size: 12px; font-weight: 700;
+      padding: 8px 16px; letter-spacing: 0.05em;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      #outletBar { display: block; }
+      .outlet-switcher { display: none; }
+    }
+
+    /* ── Outlet list cards ── */
+    .outlet-card {
+      background: #fff; border-radius: 10px; padding: 14px 16px;
+      margin-bottom: 10px; border-left: 4px solid #C8894A;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .outlet-card-info { flex: 1; }
+    .outlet-card-name { font-weight: 700; font-size: 15px; color: #2C1A0E; }
+    .outlet-card-meta { font-size: 12px; color: #9A7D6B; margin-top: 2px; }
+    .outlet-card-id   { font-size: 11px; color: #C8894A; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -304,6 +344,12 @@
 <!-- ── Sidebar nav ── -->
 <nav class="sidebar">
   <div class="sidebar-title">Kapi Coast</div>
+  <div class="outlet-switcher">
+    <div class="outlet-switcher-label">Outlet</div>
+    <select class="outlet-select" id="outletSelect" onchange="changeOutlet(this.value)">
+      <option value="">Loading…</option>
+    </select>
+  </div>
   <div class="nav-item active" onclick="showSection('menuItems', this)">
     <span class="nav-icon">🍽️</span><span>Menu Items</span>
   </div>
@@ -319,13 +365,13 @@
   <div class="nav-item" onclick="showSection('castTV', this)">
     <span class="nav-icon">📺</span><span>Cast</span>
   </div>
-  <div class="nav-item" onclick="showSection('reports', this)">
-    <span class="nav-icon">📊</span><span>Reports</span>
-  </div>
   <div class="nav-item" onclick="showSection('manageOutlets', this)">
     <span class="nav-icon">🏪</span><span>Outlets</span>
   </div>
 </nav>
+
+<!-- ── Mobile outlet bar ── -->
+<div id="outletBar">Outlet: <span id="outletBarName">—</span></div>
 
 <!-- ── Main content ── -->
 <div class="main">
@@ -369,33 +415,6 @@
     <input type="text" id="offerInput" placeholder="Enter offer message (leave empty to disable)">
     <button class="btn btn-primary" onclick="saveOffer()">Save Offer</button>
     <p id="status"></p>
-  </div>
-
-  <!-- Section: Reports -->
-  <div id="reports" class="section">
-    <h2>Weekly Report</h2>
-    <div class="stats-grid" id="reportStats" style="margin-bottom:24px;">
-      <div class="stat-card">
-        <div class="stat-value" id="rptTotal">—</div>
-        <div class="stat-label">Visits This Week</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="rptNew">—</div>
-        <div class="stat-label">New Customers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="rptRepeat">—</div>
-        <div class="stat-label">Repeat Visitors</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="rptBusiest" style="font-size:18px;">—</div>
-        <div class="stat-label">Busiest Day</div>
-      </div>
-    </div>
-    <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 12px rgba(44,26,14,0.08); max-width:680px;">
-      <h3 style="margin-bottom:16px; color:#2C1A0E;">Visits Per Day — Last 7 Days</h3>
-      <canvas id="visitsChart" height="200"></canvas>
-    </div>
   </div>
 
   <!-- Section: Cast to TV -->
@@ -535,15 +554,25 @@
   <div id="manageOutlets" class="section">
     <h2>Manage Outlets</h2>
 
-    <div style="margin-top:20px;padding:16px;background:#fff3cd;border-radius:10px;border-left:4px solid #C8894A;">
-      <p style="font-size:13px;color:#2C1A0E;margin-bottom:12px;">
-        <b>First time setup:</b> Click below to copy your existing menu items to the ECR outlet.
-      </p>
-      <button id="migrateBtn" onclick="migrateToOutlet()"
-        style="padding:12px 24px;background:#2C1A0E;color:#C8894A;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif;font-size:14px;">
-        Migrate Existing Menu to ECR
-      </button>
-    </div>
+    <h3>Add New Outlet</h3>
+    <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Outlet Name</label>
+    <input type="text" id="newOutletName" placeholder="e.g. Kapi Coast ECR"
+           oninput="autoGenOutletId(this.value)">
+    <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Outlet ID <span style="color:#C8894A;font-size:11px;">(auto-generated, editable)</span></label>
+    <input type="text" id="newOutletId" placeholder="e.g. ecr">
+    <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Location / Area</label>
+    <input type="text" id="newOutletLocation" placeholder="e.g. ECR Chennai">
+    <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">City</label>
+    <input type="text" id="newOutletCity" placeholder="e.g. Chennai">
+    <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Phone</label>
+    <input type="text" id="newOutletPhone" placeholder="e.g. +91 98765 43210">
+    <button class="btn btn-primary" onclick="addOutlet()">Create Outlet</button>
+    <p id="outletFormStatus" style="font-size:13px;margin-top:8px;"></p>
+
+    <hr>
+
+    <h3>All Outlets</h3>
+    <div id="outletList">Loading…</div>
   </div>
 
 </div>
@@ -580,6 +609,15 @@ const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
 
+// ── Outlet selection ──
+let selectedOutlet = sessionStorage.getItem("adminOutlet") || "ecr";
+
+const menuCol    = ()   => collection(db, "outlets", selectedOutlet, "menu");
+const adsCol     = ()   => collection(db, "outlets", selectedOutlet, "ads");
+const offerDocRef = ()  => doc(db, "outlets", selectedOutlet, "settings", "offer");
+const menuDocRef = (id) => doc(db, "outlets", selectedOutlet, "menu", id);
+const adsDocRef  = (id) => doc(db, "outlets", selectedOutlet, "ads", id);
+
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -596,22 +634,24 @@ window.showSection = function (id, navEl) {
 
 // ── Offer Banner ──
 async function loadOffer() {
-  const offerDoc = await getDoc(doc(db, "settings", "offer"));
+  const offerDoc = await getDoc(offerDocRef());
   if (offerDoc.exists()) {
     document.getElementById("offerInput").value = offerDoc.data().message || "";
+  } else {
+    document.getElementById("offerInput").value = "";
   }
 }
 
 window.saveOffer = async function () {
   const offer = document.getElementById("offerInput").value.trim();
-  await setDoc(doc(db, "settings", "offer"), { message: offer });
+  await setDoc(offerDocRef(), { message: offer });
   document.getElementById("status").innerText = "Offer saved!";
 };
 
 // ── Menu Items ──
 async function loadItems() {
   const div      = document.getElementById("menuList");
-  const snapshot = await getDocs(collection(db, "menu"));
+  const snapshot = await getDocs(menuCol());
   const categories = {};
   let html = "";
   allMenuItems = [];
@@ -661,7 +701,7 @@ window.addItem = async function () {
   if (!name || !price || !category || !file) { alert("Fill all fields"); return; }
 
   const id      = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-  const itemRef = doc(db, "menu", id);
+  const itemRef = menuDocRef(id);
   if ((await getDoc(itemRef)).exists()) { alert("Item already exists"); return; }
 
   const storageRef = ref(storage, "menu/" + Date.now() + "-" + file.name);
@@ -671,17 +711,17 @@ window.addItem = async function () {
   const veg = document.querySelector('input[name="vegType"]:checked').value;
   await setDoc(itemRef, { name, price, description: desc, category, imageUrl, veg });
   alert("Item Added");
-  location.reload();
+  loadItems();
 };
 
 window.deleteItem = async function (id) {
   if (!confirm("Delete this item?")) return;
-  await deleteDoc(doc(db, "menu", id));
-  location.reload();
+  await deleteDoc(menuDocRef(id));
+  loadItems();
 };
 
 window.editItem = async function (id) {
-  const itemRef  = doc(db, "menu", id);
+  const itemRef  = menuDocRef(id);
   const itemSnap = await getDoc(itemRef);
   if (!itemSnap.exists()) { alert("Item not found"); return; }
 
@@ -704,7 +744,7 @@ window.editItem = async function (id) {
     veg:         newVeg
   });
   alert("Updated");
-  location.reload();
+  loadItems();
 };
 
 // ── Ads & Banners ──
@@ -719,7 +759,7 @@ window.saveAd = async function () {
     return;
   }
 
-  await addDoc(collection(db, "ads"), {
+  await addDoc(adsCol(), {
     title,
     body,
     color,
@@ -737,33 +777,31 @@ window.saveAd = async function () {
 
 window.toggleAd = async function (id, makeActive) {
   if (makeActive) {
-    // Deactivate all other ads first
-    const snapshot = await getDocs(query(collection(db, "ads"), where("active", "==", true)));
+    const snapshot = await getDocs(query(adsCol(), where("active", "==", true)));
     const batch    = writeBatch(db);
     snapshot.forEach(d => { if (d.id !== id) batch.update(d.ref, { active: false }); });
-    batch.update(doc(db, "ads", id), { active: true });
+    batch.update(adsDocRef(id), { active: true });
     await batch.commit();
-    // Trigger push notification to customers with the page open
-    const adSnap = await getDoc(doc(db, "ads", id));
+    const adSnap = await getDoc(adsDocRef(id));
     if (adSnap.exists()) {
       const ad = adSnap.data();
       triggerPushNotification("Kapi Coast — New Offer! ☕", ad.title + (ad.body ? ": " + ad.body : ""));
     }
   } else {
-    await updateDoc(doc(db, "ads", id), { active: false });
+    await updateDoc(adsDocRef(id), { active: false });
   }
   loadAds();
 };
 
 window.deleteAd = async function (id) {
   if (!confirm("Delete this ad?")) return;
-  await deleteDoc(doc(db, "ads", id));
+  await deleteDoc(adsDocRef(id));
   loadAds();
 };
 
 async function loadAds() {
   const div      = document.getElementById("adList");
-  const snapshot = await getDocs(collection(db, "ads"));
+  const snapshot = await getDocs(adsCol());
 
   if (snapshot.empty) { div.innerHTML = "<p style='color:#999; font-size:14px;'>No ads yet.</p>"; return; }
 
@@ -798,6 +836,7 @@ async function loadAds() {
 let allMenuItems = [];
 let currentHiddenCategories = [];
 
+await loadOutletSwitcher();
 await loadOffer();
 await loadItems();
 await loadAds();
@@ -948,128 +987,138 @@ window.stopCasting = function () {
   document.getElementById("startCastBtn").style.display = "inline-block";
 };
 
-// ── Weekly Reports ──
-let visitsChartInstance = null;
-
-function loadReports() {
-  const now   = new Date();
-  const days  = [];
-  const labels = [];
-
-  // Build last-7-days buckets (oldest → newest)
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    d.setHours(0, 0, 0, 0);
-    days.push(d);
-    labels.push(d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric" }));
-  }
-
-  const counts   = new Array(7).fill(0);
-  let weekTotal  = 0;
-  let weekNew    = 0;
-  let weekRepeat = 0;
-  const weekStart = days[0];
-
-  const busiestIdx = counts.indexOf(Math.max(...counts));
-
-  document.getElementById("rptTotal").textContent   = weekTotal;
-  document.getElementById("rptNew").textContent     = weekNew;
-  document.getElementById("rptRepeat").textContent  = weekRepeat;
-  document.getElementById("rptBusiest").textContent = Math.max(...counts) > 0
-    ? days[busiestIdx].toLocaleDateString("en-IN", { weekday: "short" })
-    : "—";
-
-  // Chart
-  const ctx = document.getElementById("visitsChart").getContext("2d");
-  if (visitsChartInstance) visitsChartInstance.destroy();
-  visitsChartInstance = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [{
-        label: "Visits",
-        data: counts,
-        backgroundColor: "rgba(200,137,74,0.75)",
-        borderColor: "#C8894A",
-        borderWidth: 2,
-        borderRadius: 6,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.parsed.y} visit${ctx.parsed.y !== 1 ? "s" : ""}`
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { stepSize: 1, color: "#9A7D6B", font: { family: "Manrope" } },
-          grid: { color: "rgba(154,125,107,0.15)" }
-        },
-        x: {
-          ticks: { color: "#9A7D6B", font: { family: "Manrope", size: 11 } },
-          grid: { display: false }
-        }
-      }
-    }
-  });
-}
-
 // ── Section nav (extended to trigger lazy loading) ──
 const _origShowSection = window.showSection;
 window.showSection = function (id, navEl) {
   _origShowSection(id, navEl);
-  if (id === "reports") loadReports();
-  if (id === "castTV")  loadCategoryToggles();
+  if (id === "castTV")       loadCategoryToggles();
+  if (id === "manageOutlets") loadOutletList();
 };
 
-// ── Migration: legacy menu/ → outlets/ecr/menu/ ──
-window.migrateToOutlet = async function () {
-  const btn = document.getElementById("migrateBtn");
-  btn.disabled = true;
-  btn.textContent = "Migrating...";
-
-  try {
-    // Read from old menu/ collection
-    const oldMenuSnap = await getDocs(collection(db, "menu"));
-    let count = 0;
-
-    for (const docSnap of oldMenuSnap.docs) {
-      const data = docSnap.data();
-      // Write to outlets/ecr/menu/
-      await setDoc(doc(db, "outlets", "ecr", "menu", docSnap.id), data);
-      count++;
-      btn.textContent = "Migrating... " + count + " items";
-    }
-
-    // Read from old ads/ collection
-    const oldAdsSnap = await getDocs(collection(db, "ads"));
-    for (const docSnap of oldAdsSnap.docs) {
-      await setDoc(doc(db, "outlets", "ecr", "ads", docSnap.id), docSnap.data());
-    }
-
-    // Copy settings/offer
-    const offerSnap = await getDoc(doc(db, "settings", "offer"));
-    if (offerSnap.exists()) {
-      await setDoc(doc(db, "outlets", "ecr", "settings", "offer"), offerSnap.data());
-    }
-
-    btn.textContent = "Done! " + count + " items migrated";
-    alert("Migration complete! " + count + " menu items copied to ECR outlet.");
-    loadItems();
-
-  } catch(e) {
-    btn.textContent = "Error - check console";
-    console.error("Migration error:", e);
-    alert("Error: " + e.message);
+// ── Outlet switcher ──
+async function loadOutletSwitcher() {
+  const snap = await getDocs(collection(db, "outlets"));
+  const sel  = document.getElementById("outletSelect");
+  if (snap.empty) {
+    sel.innerHTML = `<option value="">No outlets yet</option>`;
+    return;
   }
+  sel.innerHTML = "";
+  snap.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value       = d.id;
+    opt.textContent = d.data().name || d.id;
+    opt.selected    = d.id === selectedOutlet;
+    sel.appendChild(opt);
+  });
+  updateOutletBadge();
+}
+
+function updateOutletBadge() {
+  const sel  = document.getElementById("outletSelect");
+  const name = sel.options[sel.selectedIndex]?.text || selectedOutlet;
+  document.getElementById("outletBarName").textContent = name;
+}
+
+window.changeOutlet = async function (val) {
+  selectedOutlet = val;
+  sessionStorage.setItem("adminOutlet", val);
+  updateOutletBadge();
+  await loadOffer();
+  await loadItems();
+  await loadAds();
+};
+
+// ── Outlet management ──
+window.autoGenOutletId = function (name) {
+  const id = name.toLowerCase().trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .slice(0, 20);
+  document.getElementById("newOutletId").value = id;
+};
+
+window.addOutlet = async function () {
+  const name     = document.getElementById("newOutletName").value.trim();
+  const id       = document.getElementById("newOutletId").value.trim().toLowerCase();
+  const location = document.getElementById("newOutletLocation").value.trim();
+  const city     = document.getElementById("newOutletCity").value.trim();
+  const phone    = document.getElementById("newOutletPhone").value.trim();
+  const st       = document.getElementById("outletFormStatus");
+
+  if (!name || !id) {
+    st.style.color = "red"; st.textContent = "Name and Outlet ID are required."; return;
+  }
+  if (!/^[a-z0-9-]+$/.test(id)) {
+    st.style.color = "red"; st.textContent = "Outlet ID can only contain lowercase letters, numbers, hyphens."; return;
+  }
+
+  const ref = doc(db, "outlets", id);
+  if ((await getDoc(ref)).exists()) {
+    st.style.color = "red"; st.textContent = `Outlet ID "${id}" already exists.`; return;
+  }
+
+  await setDoc(ref, { name, location, city, phone, createdAt: new Date().toISOString() });
+
+  st.style.color = "green"; st.textContent = `Outlet "${name}" created!`;
+  document.getElementById("newOutletName").value     = "";
+  document.getElementById("newOutletId").value       = "";
+  document.getElementById("newOutletLocation").value = "";
+  document.getElementById("newOutletCity").value     = "";
+  document.getElementById("newOutletPhone").value    = "";
+
+  // Switch to new outlet automatically
+  selectedOutlet = id;
+  sessionStorage.setItem("adminOutlet", id);
+  await loadOutletSwitcher();
+  await loadOffer();
+  await loadItems();
+  await loadAds();
+  loadOutletList();
+};
+
+async function loadOutletList() {
+  const div  = document.getElementById("outletList");
+  const snap = await getDocs(collection(db, "outlets"));
+  if (snap.empty) { div.innerHTML = "<p style='color:#999;font-size:14px;'>No outlets yet.</p>"; return; }
+
+  const outlets = [];
+  snap.forEach(d => outlets.push({ id: d.id, ...d.data() }));
+
+  div.innerHTML = outlets.map(o => `
+    <div class="outlet-card">
+      <div class="outlet-card-info">
+        <div class="outlet-card-name">${escapeHtml(o.name || o.id)}</div>
+        <div class="outlet-card-meta">${escapeHtml(o.location || "")}${o.city ? " · " + escapeHtml(o.city) : ""}${o.phone ? " · " + escapeHtml(o.phone) : ""}</div>
+        <div class="outlet-card-id">${escapeHtml(o.id)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        <button class="btn btn-sm btn-primary" onclick="switchToOutlet('${escapeHtml(o.id)}')">Switch</button>
+        <button class="btn btn-sm btn-danger"  onclick="deleteOutlet('${escapeHtml(o.id)}')">Delete</button>
+      </div>
+    </div>`).join("");
+}
+
+window.switchToOutlet = async function (id) {
+  selectedOutlet = id;
+  sessionStorage.setItem("adminOutlet", id);
+  await loadOutletSwitcher();
+  await loadOffer();
+  await loadItems();
+  await loadAds();
+  // Navigate to Menu Items
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("menuItems").classList.add("active");
+  document.querySelector(".nav-item").classList.add("active");
+};
+
+window.deleteOutlet = async function (id) {
+  if (!confirm(`Delete outlet "${id}"?\nThis removes the outlet record only.`)) return;
+  await deleteDoc(doc(db, "outlets", id));
+  loadOutletList();
+  loadOutletSwitcher();
 };
 
 // ── Push notification trigger (writes to Firestore; index.html picks it up) ──
