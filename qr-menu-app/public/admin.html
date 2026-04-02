@@ -556,17 +556,17 @@
 
     <h3>Add New Outlet</h3>
     <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Outlet Name</label>
-    <input type="text" id="newOutletName" placeholder="e.g. Kapi Coast ECR"
+    <input type="text" id="outletName" placeholder="e.g. Kapi Coast ECR"
            oninput="autoGenOutletId(this.value)">
     <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Outlet ID <span style="color:#C8894A;font-size:11px;">(auto-generated, editable)</span></label>
-    <input type="text" id="newOutletId" placeholder="e.g. ecr">
+    <input type="text" id="outletId" placeholder="e.g. ecr">
     <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Location / Area</label>
-    <input type="text" id="newOutletLocation" placeholder="e.g. ECR Chennai">
+    <input type="text" id="outletLocation" placeholder="e.g. ECR Chennai">
     <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">City</label>
-    <input type="text" id="newOutletCity" placeholder="e.g. Chennai">
+    <input type="text" id="outletCity" placeholder="e.g. Chennai">
     <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Phone</label>
-    <input type="text" id="newOutletPhone" placeholder="e.g. +91 98765 43210">
-    <button class="btn btn-primary" onclick="addOutlet()">Create Outlet</button>
+    <input type="text" id="outletPhone" placeholder="e.g. +91 98765 43210">
+    <button class="btn btn-primary" onclick="createOutlet()">Create Outlet</button>
     <p id="outletFormStatus" style="font-size:13px;margin-top:8px;"></p>
 
     <hr>
@@ -1036,47 +1036,62 @@ window.autoGenOutletId = function (name) {
     .replace(/[^a-z0-9-]/g, "")
     .replace(/-+/g, "-")
     .slice(0, 20);
-  document.getElementById("newOutletId").value = id;
+  document.getElementById("outletId").value = id;
 };
 
-window.addOutlet = async function () {
-  const name     = document.getElementById("newOutletName").value.trim();
-  const id       = document.getElementById("newOutletId").value.trim().toLowerCase();
-  const location = document.getElementById("newOutletLocation").value.trim();
-  const city     = document.getElementById("newOutletCity").value.trim();
-  const phone    = document.getElementById("newOutletPhone").value.trim();
-  const st       = document.getElementById("outletFormStatus");
+async function createOutlet() {
+  const name = document.getElementById("outletName").value.trim();
+  const id = document.getElementById("outletId").value.trim().toLowerCase().replace(/\s+/g, "-");
+  const location = document.getElementById("outletLocation").value.trim();
+  const city = document.getElementById("outletCity").value.trim();
+  const phone = document.getElementById("outletPhone").value.trim();
 
   if (!name || !id) {
-    st.style.color = "red"; st.textContent = "Name and Outlet ID are required."; return;
-  }
-  if (!/^[a-z0-9-]+$/.test(id)) {
-    st.style.color = "red"; st.textContent = "Outlet ID can only contain lowercase letters, numbers, hyphens."; return;
+    alert("Name and ID are required");
+    return;
   }
 
-  const ref = doc(db, "outlets", id);
-  if ((await getDoc(ref)).exists()) {
-    st.style.color = "red"; st.textContent = `Outlet ID "${id}" already exists.`; return;
+  try {
+    const outletRef = doc(db, "outlets", id);
+    const existing = await getDoc(outletRef);
+
+    if (existing.exists()) {
+      alert("Outlet ID already exists. Please choose a different ID.");
+      return;
+    }
+
+    await setDoc(outletRef, {
+      name,
+      id,
+      location,
+      city,
+      phone,
+      createdAt: new Date()
+    });
+
+    alert("Outlet created successfully!");
+
+    // Switch to new outlet
+    selectedOutlet = id;
+    sessionStorage.setItem("selectedOutlet", id);
+
+    // Reload outlets list
+    loadOutlets();
+    loadItems();
+
+    // Clear form
+    document.getElementById("outletName").value = "";
+    document.getElementById("outletId").value = "";
+    document.getElementById("outletLocation").value = "";
+    document.getElementById("outletCity").value = "";
+    document.getElementById("outletPhone").value = "";
+
+  } catch(e) {
+    console.error("Error creating outlet:", e);
+    alert("Error: " + e.message);
   }
-
-  await setDoc(ref, { name, location, city, phone, createdAt: new Date().toISOString() });
-
-  st.style.color = "green"; st.textContent = `Outlet "${name}" created!`;
-  document.getElementById("newOutletName").value     = "";
-  document.getElementById("newOutletId").value       = "";
-  document.getElementById("newOutletLocation").value = "";
-  document.getElementById("newOutletCity").value     = "";
-  document.getElementById("newOutletPhone").value    = "";
-
-  // Switch to new outlet automatically
-  selectedOutlet = id;
-  sessionStorage.setItem("adminOutlet", id);
-  await loadOutletSwitcher();
-  await loadOffer();
-  await loadItems();
-  await loadAds();
-  loadOutletList();
-};
+}
+window.createOutlet = createOutlet;
 
 async function loadOutletList() {
   const div  = document.getElementById("outletList");
@@ -1099,6 +1114,7 @@ async function loadOutletList() {
       </div>
     </div>`).join("");
 }
+const loadOutlets = loadOutletList;
 
 window.switchToOutlet = async function (id) {
   selectedOutlet = id;
