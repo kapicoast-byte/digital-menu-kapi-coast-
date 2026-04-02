@@ -609,7 +609,9 @@ const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
 
-// ── Outlet selection ──
+// ── Outlet selection — URL param takes priority over sessionStorage ──
+const _urlOutlet = new URLSearchParams(location.search).get("outlet");
+if (_urlOutlet) sessionStorage.setItem("adminOutlet", _urlOutlet);
 let selectedOutlet = sessionStorage.getItem("adminOutlet") || "ecr";
 
 const menuCol    = ()   => collection(db, "outlets", selectedOutlet, "menu");
@@ -844,7 +846,7 @@ await loadDisplaySettings();
 
 // ── Display settings ──
 async function loadDisplaySettings() {
-  const snap = await getDoc(doc(db, "settings", "display"));
+  const snap = await getDoc(doc(db, "outlets", selectedOutlet, "settings", "display"));
   if (!snap.exists()) return;
   const d = snap.data();
 
@@ -874,7 +876,7 @@ async function loadDisplaySettings() {
 
 window.saveDisplaySettings = async function () {
   const secs = parseInt(document.getElementById("intervalSlider").value, 10);
-  await setDoc(doc(db, "settings", "display"), { intervalSeconds: secs }, { merge: true });
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { intervalSeconds: secs }, { merge: true });
   const st = document.getElementById("displaySettingsStatus");
   st.textContent = "Saved!";
   setTimeout(() => { st.textContent = ""; }, 2000);
@@ -885,7 +887,7 @@ window.selectTemplate = async function (tmpl) {
   document.querySelectorAll(".tmpl-card").forEach(c => c.classList.remove("selected"));
   const card = document.getElementById("tmplCard-" + tmpl);
   if (card) card.classList.add("selected");
-  await setDoc(doc(db, "settings", "display"), { template: tmpl }, { merge: true });
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { template: tmpl }, { merge: true });
   const st = document.getElementById("templateStatus");
   st.textContent = "Template saved!";
   setTimeout(() => { st.textContent = ""; }, 2000);
@@ -896,7 +898,7 @@ window.setMaxItems = async function (n) {
   document.querySelectorAll(".ipp-btn").forEach(b => {
     b.classList.toggle("active", parseInt(b.dataset.val) === n);
   });
-  await setDoc(doc(db, "settings", "display"), { maxItemsPerSlide: n }, { merge: true });
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { maxItemsPerSlide: n }, { merge: true });
   const st = document.getElementById("maxItemsStatus");
   st.textContent = "Saved!";
   setTimeout(() => { st.textContent = ""; }, 2000);
@@ -904,7 +906,7 @@ window.setMaxItems = async function (n) {
 
 // ── Show offers toggle ──
 window.saveShowOffers = async function (checked) {
-  await setDoc(doc(db, "settings", "display"), { showOffers: checked }, { merge: true });
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { showOffers: checked }, { merge: true });
 };
 
 // ── Category visibility toggles ──
@@ -931,7 +933,7 @@ window.saveCategoryToggle = async function (cat, show) {
   } else {
     if (!currentHiddenCategories.includes(cat)) currentHiddenCategories.push(cat);
   }
-  await setDoc(doc(db, "settings", "display"), { hiddenCategories: currentHiddenCategories }, { merge: true });
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { hiddenCategories: currentHiddenCategories }, { merge: true });
 };
 
 // ── Cast to TV ──
