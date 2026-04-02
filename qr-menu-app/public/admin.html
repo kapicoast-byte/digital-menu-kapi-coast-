@@ -322,20 +322,13 @@
   <div class="nav-item" onclick="showSection('reports', this)">
     <span class="nav-icon">📊</span><span>Reports</span>
   </div>
+  <div class="nav-item" onclick="showSection('manageOutlets', this)">
+    <span class="nav-icon">🏪</span><span>Outlets</span>
+  </div>
 </nav>
 
 <!-- ── Main content ── -->
 <div class="main">
-
-  <!-- ── Migration banner (shown only when outlets/ecr/menu is empty) ── -->
-  <div id="migrationBanner" style="display:none; background:#fff8ed; border:1.5px solid #C8894A; border-radius:12px; padding:18px 20px; margin-bottom:20px;">
-    <div style="font-size:15px; font-weight:800; color:#2C1A0E; margin-bottom:6px;">Migrate existing menu to ECR outlet</div>
-    <div style="font-size:13px; color:#9A7D6B; margin-bottom:14px;">
-      The ECR outlet menu is empty. Copy all existing menu items and ads from the legacy collection into the ECR outlet.
-    </div>
-    <button class="btn btn-primary" id="migrateBtn" onclick="migrateToOutlet()">Migrate to ECR</button>
-    <span id="migrateStatus" style="font-size:13px; color:#2C1A0E; font-weight:600; margin-left:14px;"></span>
-  </div>
 
   <!-- Section: Menu Items -->
   <div id="menuItems" class="section active">
@@ -536,6 +529,21 @@
 
     <h3>All Ads</h3>
     <div id="adList">Loading...</div>
+  </div>
+
+  <!-- Section: Manage Outlets -->
+  <div id="manageOutlets" class="section">
+    <h2>Manage Outlets</h2>
+
+    <div style="margin-top:20px;padding:16px;background:#fff3cd;border-radius:10px;border-left:4px solid #C8894A;">
+      <p style="font-size:13px;color:#2C1A0E;margin-bottom:12px;">
+        <b>First time setup:</b> Click below to copy your existing menu items to the ECR outlet.
+      </p>
+      <button id="migrateBtn" onclick="migrateToOutlet()"
+        style="padding:12px 24px;background:#2C1A0E;color:#C8894A;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif;font-size:14px;">
+        Migrate Existing Menu to ECR
+      </button>
+    </div>
   </div>
 
 </div>
@@ -1023,13 +1031,6 @@ window.showSection = function (id, navEl) {
 };
 
 // ── Migration: legacy menu/ → outlets/ecr/menu/ ──
-async function checkMigration() {
-  const snap = await getDocs(collection(db, "outlets", "ecr", "menu"));
-  if (snap.empty) {
-    document.getElementById("migrationBanner").style.display = "block";
-  }
-}
-
 window.migrateToOutlet = async function () {
   const btn = document.getElementById("migrateBtn");
   btn.disabled = true;
@@ -1070,8 +1071,6 @@ window.migrateToOutlet = async function () {
     alert("Error: " + e.message);
   }
 };
-
-checkMigration();
 
 // ── Push notification trigger (writes to Firestore; index.html picks it up) ──
 async function triggerPushNotification(title, body) {
