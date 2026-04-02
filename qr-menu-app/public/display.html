@@ -555,7 +555,7 @@ onSnapshot(query(collection(db, "outlets", outlet, "ads"), where("active", "==",
 });
 
 // ── Live: display settings — instant template switch + rebuild ──
-onSnapshot(doc(db, "settings", "display"), snap => {
+onSnapshot(doc(db, "outlets", outlet, "settings", "display"), snap => {
   if (!snap.exists()) return;
   const d = snap.data();
   cfg = {

@@ -333,10 +333,16 @@ const params  = new URLSearchParams(location.search);
 const outlet  = params.get("outlet") || "ecr";
 const tableNum = params.get("table");
 
-// Show outlet name in header
+// Show outlet name in header; hide page if outlet doesn't exist
 getDoc(doc(db, "outlets", outlet)).then(snap => {
-  const name = snap.exists() ? (snap.data().name || outlet.toUpperCase()) : outlet.toUpperCase();
-  document.getElementById("outletName").textContent = name;
+  if (!snap.exists()) {
+    document.getElementById("menuContainer").innerHTML =
+      `<div style="text-align:center;padding:60px 20px;color:#9A7D6B;font-size:16px;font-weight:600;">Menu not available</div>`;
+    document.getElementById("filterPills").style.display = "none";
+    document.querySelector(".search-area").style.display = "none";
+    return;
+  }
+  document.getElementById("outletName").textContent = snap.data().name || outlet.toUpperCase();
 });
 if (tableNum) {
   const badge = document.getElementById("tableBadge");
@@ -354,6 +360,23 @@ onSnapshot(query(collection(db, "outlets", outlet, "ads"), where("active", "==",
   banner.style.background =
     `linear-gradient(135deg, ${ad.color || "#C8894A"} 0%, #6B3F22 100%)`;
   banner.style.display = "block";
+});
+
+// ── Offer message — real-time ──
+onSnapshot(doc(db, "outlets", outlet, "settings", "offer"), snap => {
+  const msg = snap.exists() ? (snap.data().message || "") : "";
+  const el  = document.getElementById("offerBanner");
+  // Only show offer message if no active ad is visible
+  if (msg && el.style.display === "none") {
+    document.getElementById("offerTitle").textContent = msg;
+    document.getElementById("offerBody").textContent  = "";
+    el.style.background = "linear-gradient(135deg, #C8894A 0%, #6B3F22 100%)";
+    el.style.display = "block";
+    el.dataset.fromOffer = "1";
+  } else if (!msg && el.dataset.fromOffer === "1") {
+    el.style.display = "none";
+    delete el.dataset.fromOffer;
+  }
 });
 
 // ── Menu — real-time ──
