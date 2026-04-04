@@ -700,15 +700,18 @@ window.addItem = async function () {
   const category = document.getElementById("category").value.trim();
   const file     = document.getElementById("image").files[0];
 
-  if (!name || !price || !category || !file) { alert("Fill all fields"); return; }
+  if (!name || !price || !category) { alert("Name, price and category are required"); return; }
 
   const id      = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   const itemRef = menuDocRef(id);
   if ((await getDoc(itemRef)).exists()) { alert("Item already exists"); return; }
 
-  const storageRef = ref(storage, "menu/" + Date.now() + "-" + file.name);
-  await uploadBytes(storageRef, file);
-  const imageUrl = await getDownloadURL(storageRef);
+  let imageUrl = "";
+  if (file) {
+    const storageRef = ref(storage, "menu/" + Date.now() + "-" + file.name);
+    await uploadBytes(storageRef, file);
+    imageUrl = await getDownloadURL(storageRef);
+  }
 
   const veg = document.querySelector('input[name="vegType"]:checked').value;
   await setDoc(itemRef, { name, price, description: desc, category, imageUrl, veg });
