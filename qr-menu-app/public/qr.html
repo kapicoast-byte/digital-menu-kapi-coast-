@@ -326,7 +326,7 @@
           <input type="number" id="tableNumber" min="1" max="50" placeholder="e.g. 5">
         </div>
         <button class="btn btn-dark" onclick="generateSingle()">Generate QR</button>
-        <button class="btn btn-outline" onclick="printSingle()">Print</button>
+        <button class="btn btn-outline" onclick="printQR()">Print</button>
       </div>
 
       <div id="singleResult">
@@ -337,7 +337,7 @@
             <div class="qr-table-num" id="singleTableNum"></div>
             <div class="qr-url" id="singleUrl"></div>
             <div class="qr-actions">
-              <button class="btn btn-caramel btn-sm" onclick="downloadSingle()">Download PNG</button>
+              <button class="btn btn-caramel btn-sm" onclick="downloadQR()">Download PNG</button>
             </div>
           </div>
         </div>
@@ -348,7 +348,7 @@
     <p class="section-title">All Tables</p>
     <div class="card bulk-card">
       <div class="bulk-controls gen-controls">
-        <button class="btn btn-dark" onclick="generateAll()">Generate Tables 1 – 10</button>
+        <button class="btn btn-dark" onclick="generateBulk()">Generate Tables 1 – 10</button>
         <button class="btn btn-outline" onclick="window.print()">Print All</button>
         <span class="bulk-label" id="bulkStatus"></span>
       </div>
@@ -391,15 +391,11 @@
 
     let singleQR = null;
 
-    window.getOutlet = function() {
-      return document.getElementById("outletSelect").value;
-    }
-
     function getOutlet() {
       return document.getElementById("outletSelect").value;
     }
 
-    function generateSingle() {
+    window.generateSingle = function generateSingle() {
       const tableNum = document.getElementById("tableNumber").value.trim();
       if (!tableNum) { alert("Enter a table number"); return; }
       const outlet = getOutlet();
@@ -425,7 +421,7 @@
       document.getElementById("singleResult").style.display = "block";
     }
 
-    function downloadSingle() {
+    window.downloadQR = function downloadQR() {
       const canvas = document.querySelector("#singleQrCanvas canvas");
       if (!canvas) { alert("Generate a QR code first."); return; }
       const n = document.getElementById("singleTableNum").textContent;
@@ -435,13 +431,13 @@
       link.click();
     }
 
-    function printSingle() {
+    window.printQR = function printQR() {
       const n = document.getElementById("tableNumber").value.trim();
       if (!n) { alert("Generate a QR code first."); return; }
       window.print();
     }
 
-    function generateAll() {
+    window.generateBulk = function generateBulk() {
       const outlet = getOutlet();
       const outletLabel = outlet.toUpperCase();
       const grid = document.getElementById("bulkGrid");
@@ -475,7 +471,7 @@
       document.getElementById("bulkStatus").textContent = "10 QR codes ready (" + outletLabel + ")";
     }
 
-    function downloadBulk(n) {
+    window.downloadBulk = function downloadBulk(n) {
       // QRCode.js renders an img tag on some browsers; prefer canvas
       const container = document.getElementById(`bulk-qr-${n}`);
       const canvas = container.querySelector("canvas");
