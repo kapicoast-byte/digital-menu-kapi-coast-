@@ -202,59 +202,12 @@
       border: 1.5px solid #D4C4B4;
     }
 
-    /* ── Section tabs ── */
-    .section-tabs {
-      display: flex; gap: 0; margin-bottom: 28px;
-      border-bottom: 2px solid #EDE5DB;
-    }
-    .tab-btn {
-      padding: 10px 22px; font-family: 'Manrope', sans-serif;
-      font-size: 14px; font-weight: 700; color: #9A7D6B;
-      background: none; border: none; cursor: pointer;
-      border-bottom: 3px solid transparent; margin-bottom: -2px;
-      transition: color 0.15s;
-    }
-    .tab-btn.active { color: #2C1A0E; border-bottom-color: #C8894A; }
-    .tab-section { display: none; }
-    .tab-section.active { display: block; }
-
-    /* ── Manager cards ── */
-    .managers-list { margin-bottom: 28px; }
-    .mgr-card {
-      background: #fff; border-radius: 14px;
-      padding: 18px 20px; margin-bottom: 12px;
-      border: 1.5px solid #EDE5DB;
-      display: flex; align-items: center; gap: 16px;
-      box-shadow: 0 2px 8px rgba(44,26,14,0.05);
-    }
-    .mgr-card-info { flex: 1; }
-    .mgr-card-code {
-      font-size: 18px; font-weight: 800; color: #2C1A0E;
-      letter-spacing: 0.1em; font-family: monospace;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .mgr-show-btn {
-      font-size: 11px; font-weight: 600; color: #9A7D6B;
-      background: #FAF6F0; border: 1px solid #EDE5DB;
-      border-radius: 4px; padding: 2px 7px; cursor: pointer;
-    }
-    .mgr-outlet { font-size: 13px; color: #9A7D6B; margin-top: 3px; }
-    .mgr-date   { font-size: 11px; color: #C4B5A8; margin-top: 2px; }
-    .mgr-badge {
-      font-size: 11px; font-weight: 700; padding: 3px 10px;
-      border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .mgr-badge.on  { background: #e8f5e9; color: #2e7d32; }
-    .mgr-badge.off { background: #f5f5f5; color: #999; }
-    .mgr-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-
     @media (max-width: 600px) {
       .header { padding: 14px 16px; }
       .page { padding: 20px 14px 60px; }
       .page-title { font-size: 20px; }
       .outlets-grid { grid-template-columns: 1fr; }
       .add-panel { padding: 20px; }
-      .mgr-card { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -273,56 +226,66 @@
   <div class="page-title">Super Admin</div>
   <div class="page-sub">Manage all outlets and access codes from one place.</div>
 
-  <div class="section-tabs">
-    <button class="tab-btn active" onclick="switchTab('outlets', this)">Outlets</button>
-    <button class="tab-btn" onclick="switchTab('managers', this)">Managers</button>
+  <!-- ── Tab Navigation ── -->
+  <div style="display:flex;gap:12px;margin-bottom:28px;">
+    <button onclick="showTab('outlets')" id="tab-outlets"
+      style="padding:10px 24px;border-radius:30px;border:none;background:#2C1A0E;color:#C8894A;font-family:Manrope,sans-serif;font-weight:700;cursor:pointer;">
+      Outlets
+    </button>
+    <button onclick="showTab('managers')" id="tab-managers"
+      style="padding:10px 24px;border-radius:30px;border:1.5px solid #2C1A0E;background:white;color:#2C1A0E;font-family:Manrope,sans-serif;font-weight:700;cursor:pointer;">
+      Managers
+    </button>
   </div>
 
-  <!-- ── Tab: Outlets ── -->
-  <div id="tab-outlets" class="tab-section active">
+  <!-- ── Section: Outlets ── -->
+  <div id="section-outlets">
     <div id="outletGrid" class="outlets-grid">
       <div class="loading-msg">Loading outlets…</div>
     </div>
 
     <!-- Add new outlet -->
     <div class="add-panel">
-    <h3>Add New Outlet</h3>
-    <label class="field-label" for="newOutletId">Outlet ID</label>
-    <input class="field-input" type="text" id="newOutletId" placeholder="e.g. omr, tnagar">
+      <h3>Add New Outlet</h3>
+      <label class="field-label" for="newOutletId">Outlet ID</label>
+      <input class="field-input" type="text" id="newOutletId" placeholder="e.g. omr, tnagar">
 
-    <label class="field-label" for="newOutletName">Outlet Name</label>
-    <input class="field-input" type="text" id="newOutletName" placeholder="e.g. OMR Food Street">
+      <label class="field-label" for="newOutletName">Outlet Name</label>
+      <input class="field-input" type="text" id="newOutletName" placeholder="e.g. OMR Food Street">
 
-    <label class="field-label" for="newOutletLocation">Location</label>
-    <input class="field-input" type="text" id="newOutletLocation" placeholder="e.g. Old Mahabalipuram Road">
+      <label class="field-label" for="newOutletLocation">Location</label>
+      <input class="field-input" type="text" id="newOutletLocation" placeholder="e.g. Old Mahabalipuram Road">
 
-    <button class="btn btn-primary" onclick="addOutlet()">Add Outlet</button>
-    <div id="addOutletStatus"></div>
-  </div>
-  </div><!-- end tab-outlets -->
+      <button class="btn btn-primary" onclick="addOutlet()">Add Outlet</button>
+      <div id="addOutletStatus"></div>
+    </div>
+  </div><!-- end section-outlets -->
 
-  <!-- ── Tab: Managers ── -->
-  <div id="tab-managers" class="tab-section">
+  <!-- ── Section: Managers ── -->
+  <div id="section-managers" style="display:none;">
 
-    <div class="managers-list" id="managerList">
-      <div class="loading-msg">Loading managers…</div>
+    <!-- Add Manager Form -->
+    <div style="background:white;border-radius:16px;padding:24px;margin-bottom:24px;box-shadow:0 2px 14px rgba(44,26,14,0.08);">
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;color:#2C1A0E;">Create Manager Access Code</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#9A7D6B;display:block;margin-bottom:4px;">Select Outlet</label>
+          <select id="mgr-outlet" style="width:100%;padding:11px;border:1.5px solid #E0D5C8;border-radius:10px;font-family:Manrope,sans-serif;"></select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#9A7D6B;display:block;margin-bottom:4px;">Access Code</label>
+          <input id="mgr-code" placeholder="e.g. ECRMGR2024" style="width:100%;padding:11px;border:1.5px solid #E0D5C8;border-radius:10px;font-family:Manrope,sans-serif;text-transform:uppercase;letter-spacing:2px;">
+        </div>
+      </div>
+      <button onclick="createManager()" style="padding:12px 28px;background:#2C1A0E;color:#C8894A;border:none;border-radius:10px;font-family:Manrope,sans-serif;font-weight:700;cursor:pointer;">
+        Create Manager
+      </button>
     </div>
 
-    <div class="add-panel">
-      <h3>Add Manager Access Code</h3>
+    <!-- Managers List -->
+    <div id="managersList">Loading managers...</div>
 
-      <label class="field-label">Outlet</label>
-      <select class="field-input" id="mgrOutletSelect" style="height:44px;">
-        <option value="">Loading outlets…</option>
-      </select>
-
-      <label class="field-label">Access Code <span style="color:#C8894A;font-size:11px;">(leave blank to auto-generate)</span></label>
-      <input class="field-input" type="text" id="mgrCode" placeholder="e.g. ECR2024" style="text-transform:uppercase;">
-
-      <button class="btn btn-primary" onclick="createManager()">Create Manager Code</button>
-      <div id="mgrStatus" style="font-size:13px;font-weight:600;margin-top:10px;"></div>
-    </div>
-  </div><!-- end tab-managers -->
+  </div><!-- end section-managers -->
 
 </div><!-- end page -->
 
@@ -378,6 +341,18 @@ function escapeHtml(v) {
     c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
+// ── Tab switching ──
+window.showTab = function (tab) {
+  document.getElementById("section-outlets").style.display = tab === "outlets" ? "block" : "none";
+  document.getElementById("section-managers").style.display = tab === "managers" ? "block" : "none";
+  document.getElementById("tab-outlets").style.background = tab === "outlets" ? "#2C1A0E" : "white";
+  document.getElementById("tab-outlets").style.color = tab === "outlets" ? "#C8894A" : "#2C1A0E";
+  document.getElementById("tab-managers").style.background = tab === "managers" ? "#2C1A0E" : "white";
+  document.getElementById("tab-managers").style.color = tab === "managers" ? "#C8894A" : "#2C1A0E";
+  if (tab === "managers") { loadManagers(); loadOutletsForSelect(); }
+};
+
+// ── Outlets ──
 async function loadOutlets() {
   const grid = document.getElementById("outletGrid");
   const snap = await getDocs(collection(db, "outlets"));
@@ -387,7 +362,6 @@ async function loadOutlets() {
     return;
   }
 
-  // Load each outlet with its menu item count + active ad status in parallel
   const outlets = [];
   for (const d of snap.docs) {
     outlets.push({ id: d.id, ...d.data() });
@@ -492,117 +466,82 @@ window.confirmDeleteOutlet = async function (id) {
 
 loadOutlets();
 
-// ── Tab switching ──
-window.switchTab = function (name, btn) {
-  document.querySelectorAll(".tab-section").forEach(s => s.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.getElementById("tab-" + name).classList.add("active");
-  btn.classList.add("active");
-  if (name === "managers") { loadManagers(); loadOutletSelectForMgr(); }
-};
-
-// ── Manager functions ──
-async function loadManagers() {
-  const list = document.getElementById("managerList");
-  const snap = await getDocs(collection(db, "managers"));
-  if (snap.empty) {
-    list.innerHTML = `<div class="loading-msg">No managers yet. Add one below.</div>`;
-    return;
-  }
-  const mgrs = [];
-  snap.forEach(d => mgrs.push({ id: d.id, ...d.data() }));
-  mgrs.sort((a, b) => (b.createdAt || "") > (a.createdAt || "") ? 1 : -1);
-
-  list.innerHTML = mgrs.map(m => {
-    const masked = "****" + m.code.slice(-4);
-    const date   = m.createdAt
-      ? new Date(m.createdAt.seconds ? m.createdAt.seconds * 1000 : m.createdAt).toLocaleDateString("en-IN")
-      : "—";
-    return `
-    <div class="mgr-card">
-      <div class="mgr-card-info">
-        <div class="mgr-card-code">
-          <span id="codeDisplay-${escapeHtml(m.id)}">${escapeHtml(masked)}</span>
-          <button class="mgr-show-btn" onclick="toggleCodeDisplay('${escapeHtml(m.id)}','${escapeHtml(m.code)}')">Show</button>
-        </div>
-        <div class="mgr-outlet">${escapeHtml(m.outletName || m.outletId || "—")}</div>
-        <div class="mgr-date">Created ${date}</div>
-      </div>
-      <span class="mgr-badge ${m.active !== false ? "on" : "off"}">
-        ${m.active !== false ? "Active" : "Inactive"}
-      </span>
-      <div class="mgr-actions">
-        <button class="btn btn-sm" style="background:#f5f5f5;color:#2C1A0E;border:1px solid #ddd;"
-          onclick="toggleManager('${escapeHtml(m.id)}', ${m.active !== false})">
-          ${m.active !== false ? "Deactivate" : "Activate"}
-        </button>
-        <button class="btn btn-sm btn-danger" onclick="deleteManager('${escapeHtml(m.id)}')">Delete</button>
-      </div>
-    </div>`;
-  }).join("");
-}
-
-window.toggleCodeDisplay = function (id, code) {
-  const el  = document.getElementById("codeDisplay-" + id);
-  const btn = el.nextElementSibling;
-  if (btn.textContent === "Show") {
-    el.textContent  = code;
-    btn.textContent = "Hide";
-  } else {
-    el.textContent  = "****" + code.slice(-4);
-    btn.textContent = "Show";
-  }
-};
-
-async function loadOutletSelectForMgr() {
-  const sel  = document.getElementById("mgrOutletSelect");
+// ── Managers ──
+async function loadOutletsForSelect() {
   const snap = await getDocs(collection(db, "outlets"));
-  if (snap.empty) { sel.innerHTML = `<option value="">No outlets found</option>`; return; }
-  sel.innerHTML = `<option value="">Select outlet…</option>`;
+  const sel = document.getElementById("mgr-outlet");
+  sel.innerHTML = "";
   snap.forEach(d => {
     const opt = document.createElement("option");
     opt.value = d.id;
-    opt.textContent = (d.data().name || d.id) + " (" + d.id + ")";
+    opt.textContent = d.data().name || d.id;
     sel.appendChild(opt);
   });
 }
 
 window.createManager = async function () {
-  const outletId = document.getElementById("mgrOutletSelect").value;
-  const codeRaw  = document.getElementById("mgrCode").value.trim().toUpperCase();
-  const st       = document.getElementById("mgrStatus");
+  const outletId = document.getElementById("mgr-outlet").value;
+  const code = document.getElementById("mgr-code").value.trim().toUpperCase();
+  if (!code || !outletId) { alert("Fill all fields"); return; }
 
-  if (!outletId) { st.style.color = "#c62828"; st.textContent = "Select an outlet."; return; }
-
-  const code = codeRaw || Math.random().toString(36).slice(2, 8).toUpperCase();
-
-  // Get outlet name
   const outletSnap = await getDoc(doc(db, "outlets", outletId));
-  const outletName = outletSnap.exists() ? (outletSnap.data().name || outletId) : outletId;
+  const outletName = outletSnap.exists() ? outletSnap.data().name : outletId;
 
-  const mgrRef = doc(db, "managers", code);
-  if ((await getDoc(mgrRef)).exists()) {
-    st.style.color = "#c62828"; st.textContent = `Code "${code}" already exists.`; return;
-  }
+  const existing = await getDoc(doc(db, "managers", code));
+  if (existing.exists()) { alert("Code already exists"); return; }
 
-  await setDoc(mgrRef, {
-    code, outletId, outletName, active: true, createdAt: new Date()
+  await setDoc(doc(db, "managers", code), {
+    code, outletId, outletName,
+    active: true,
+    createdAt: new Date()
   });
 
-  st.style.color = "#2e7d32";
-  st.textContent = `Manager code "${code}" created for ${outletName}!`;
-  document.getElementById("mgrCode").value = "";
-  document.getElementById("mgrOutletSelect").value = "";
+  alert("Manager created! Code: " + code);
+  document.getElementById("mgr-code").value = "";
   loadManagers();
 };
 
-window.toggleManager = async function (code, currentlyActive) {
-  await updateDoc(doc(db, "managers", code), { active: !currentlyActive });
+async function loadManagers() {
+  const snap = await getDocs(collection(db, "managers"));
+  const div = document.getElementById("managersList");
+
+  if (snap.empty) {
+    div.innerHTML = "<p style='color:#9A7D6B;text-align:center;padding:40px;'>No managers yet. Create one above.</p>";
+    return;
+  }
+
+  let html = "<div style='display:flex;flex-direction:column;gap:12px;'>";
+  snap.forEach(d => {
+    const m = d.data();
+    html += `
+      <div style="background:white;border-radius:12px;padding:18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(44,26,14,0.06);">
+        <div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:3px;color:#2C1A0E;">${escapeHtml(m.code)}</div>
+          <div style="font-size:13px;color:#9A7D6B;margin-top:2px;">${escapeHtml(m.outletName)} · ${m.active ? "Active" : "Inactive"}</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="toggleManager('${escapeHtml(m.code)}', ${m.active})"
+            style="padding:8px 16px;border-radius:8px;border:none;background:${m.active ? '#fee' : '#efe'};color:${m.active ? '#c00' : '#060'};font-weight:600;cursor:pointer;font-family:Manrope,sans-serif;">
+            ${m.active ? "Deactivate" : "Activate"}
+          </button>
+          <button onclick="deleteManager('${escapeHtml(m.code)}')"
+            style="padding:8px 16px;border-radius:8px;border:none;background:#fee;color:#c00;font-weight:600;cursor:pointer;font-family:Manrope,sans-serif;">
+            Delete
+          </button>
+        </div>
+      </div>`;
+  });
+  html += "</div>";
+  div.innerHTML = html;
+}
+
+window.toggleManager = async function (code, currentActive) {
+  await setDoc(doc(db, "managers", code), { active: !currentActive }, { merge: true });
   loadManagers();
 };
 
 window.deleteManager = async function (code) {
-  if (!confirm(`Delete manager code "${code}"? They will lose access immediately.`)) return;
+  if (!confirm("Delete manager code " + code + "?")) return;
   await deleteDoc(doc(db, "managers", code));
   loadManagers();
 };
