@@ -9,7 +9,60 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Manrope', Arial, sans-serif; background: #f5f5f5; display: flex; min-height: 100vh; }
 
-    /* ── Sidebar ── */
+    /* ── Login screen ── */
+    #loginScreen {
+      display: none;
+      position: fixed; inset: 0; z-index: 9999;
+      background: #FAF6F0;
+      align-items: center; justify-content: center;
+    }
+    #loginScreen.visible { display: flex; }
+    .login-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 48px 40px;
+      width: 360px; max-width: calc(100vw - 32px);
+      box-shadow: 0 8px 48px rgba(44,26,14,0.14);
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+    }
+    .login-brand {
+      font-size: 22px; font-weight: 800;
+      color: #2C1A0E; letter-spacing: 0.12em;
+      margin-bottom: 6px;
+    }
+    .login-sub {
+      font-size: 13px; font-weight: 600; color: #9A7D6B;
+      letter-spacing: 0.04em; margin-bottom: 32px;
+    }
+    .login-input {
+      width: 100%; padding: 14px 16px;
+      border: 1.5px solid #E0D5CC; border-radius: 12px;
+      font-family: 'Manrope', monospace; font-size: 18px;
+      font-weight: 700; letter-spacing: 0.15em;
+      text-align: center; color: #2C1A0E;
+      background: #FAF6F0; outline: none;
+      margin-bottom: 14px;
+      transition: border-color 0.15s;
+    }
+    .login-input:focus { border-color: #C8894A; background: #fff; }
+    .login-input::placeholder { font-size: 14px; letter-spacing: 0.04em; color: #C4B5A8; font-weight: 500; }
+    .login-btn {
+      width: 100%; padding: 14px;
+      background: #2C1A0E; color: #C8894A;
+      border: none; border-radius: 12px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.04em;
+      transition: opacity 0.15s;
+    }
+    .login-btn:hover { opacity: 0.88; }
+    .login-btn:active { opacity: 0.75; }
+    .login-error {
+      font-size: 13px; font-weight: 600; color: #c62828;
+      margin-top: 12px; min-height: 18px; text-align: center;
+    }
+
+    /* ── Sidebar title ── */
     .sidebar {
       width: 200px;
       background: #1a1a1a;
@@ -341,10 +394,24 @@
 </head>
 <body>
 
+<!-- ── Login screen ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">KAPI COAST</div>
+    <div class="login-sub">Admin Access</div>
+    <input class="login-input" type="text" id="codeInput"
+           placeholder="Enter Access Code"
+           autocomplete="off" spellcheck="false"
+           onkeydown="if(event.key==='Enter') submitLogin()">
+    <button class="login-btn" onclick="submitLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
 <!-- ── Sidebar nav ── -->
 <nav class="sidebar">
-  <div class="sidebar-title">Kapi Coast</div>
-  <div class="outlet-switcher">
+  <div class="sidebar-title" id="sidebarTitle">Kapi Coast</div>
+  <div class="outlet-switcher" id="outletSwitcher">
     <div class="outlet-switcher-label">Outlet</div>
     <select class="outlet-select" id="outletSelect" onchange="changeOutlet(this.value)">
       <option value="">Loading…</option>
@@ -365,7 +432,7 @@
   <div class="nav-item" onclick="showSection('castTV', this)">
     <span class="nav-icon">📺</span><span>Cast</span>
   </div>
-  <div class="nav-item" onclick="showSection('manageOutlets', this)">
+  <div class="nav-item" id="navOutlets" onclick="showSection('manageOutlets', this)">
     <span class="nav-icon">🏪</span><span>Outlets</span>
   </div>
 </nav>
@@ -578,16 +645,6 @@
 </div>
 
 <script type="module">
-const pass = sessionStorage.getItem("adminAuth");
-if (!pass) {
-  const entered = prompt("Enter admin password:");
-  if (entered !== "kapi2024") {
-    alert("Wrong password!");
-    window.location.href = "index.html";
-  } else {
-    sessionStorage.setItem("adminAuth", "true");
-  }
-}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, deleteDoc, doc, setDoc, getDoc,
@@ -700,15 +757,18 @@ window.addItem = async function () {
   const category = document.getElementById("category").value.trim();
   const file     = document.getElementById("image").files[0];
 
-  if (!name || !price || !category || !file) { alert("Fill all fields"); return; }
+  if (!name || !price || !category) { alert("Name, price and category are required"); return; }
 
   const id      = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   const itemRef = menuDocRef(id);
   if ((await getDoc(itemRef)).exists()) { alert("Item already exists"); return; }
 
-  const storageRef = ref(storage, "menu/" + Date.now() + "-" + file.name);
-  await uploadBytes(storageRef, file);
-  const imageUrl = await getDownloadURL(storageRef);
+  let imageUrl = "";
+  if (file) {
+    const storageRef = ref(storage, "menu/" + Date.now() + "-" + file.name);
+    await uploadBytes(storageRef, file);
+    imageUrl = await getDownloadURL(storageRef);
+  }
 
   const veg = document.querySelector('input[name="vegType"]:checked').value;
   await setDoc(itemRef, { name, price, description: desc, category, imageUrl, veg });
@@ -838,11 +898,74 @@ async function loadAds() {
 let allMenuItems = [];
 let currentHiddenCategories = [];
 
-await loadOutletSwitcher();
-await loadOffer();
-await loadItems();
-await loadAds();
-await loadDisplaySettings();
+// ── Auth & login ──
+async function initApp() {
+  await loadOutletSwitcher();
+  await loadOffer();
+  await loadItems();
+  await loadAds();
+  await loadDisplaySettings();
+}
+
+function applyMode(mode, mgr) {
+  document.getElementById("loginScreen").classList.remove("visible");
+  if (mode === "manager" && mgr) {
+    selectedOutlet = mgr.outletId;
+    sessionStorage.setItem("adminOutlet", mgr.outletId);
+    sessionStorage.setItem("adminOutletName", mgr.outletName || mgr.outletId);
+    document.getElementById("outletSwitcher").style.display = "none";
+    document.getElementById("navOutlets").style.display     = "none";
+    document.getElementById("navQR").style.display          = "none";
+    document.getElementById("sidebarTitle").textContent =
+      "Manager — " + (mgr.outletName || mgr.outletId.toUpperCase());
+    document.getElementById("outletBarName").textContent =
+      mgr.outletName || mgr.outletId.toUpperCase();
+  }
+  initApp();
+}
+
+window.submitLogin = async function () {
+  const code = document.getElementById("codeInput").value.trim();
+  const errEl = document.getElementById("loginError");
+  errEl.textContent = "";
+  if (!code) return;
+
+  if (code === "kapi2024") {
+    sessionStorage.setItem("adminCode", code);
+    sessionStorage.setItem("adminMode", "super");
+    applyMode("super", null);
+    return;
+  }
+
+  // Check Firestore managers collection
+  try {
+    const mgrSnap = await getDoc(doc(db, "managers", code));
+    if (!mgrSnap.exists() || mgrSnap.data().active === false) {
+      errEl.textContent = "Invalid code. Please try again.";
+      return;
+    }
+    const mgr = mgrSnap.data();
+    sessionStorage.setItem("adminCode", code);
+    sessionStorage.setItem("adminMode", "manager");
+    applyMode("manager", mgr);
+  } catch (e) {
+    errEl.textContent = "Error checking code. Try again.";
+    console.error(e);
+  }
+};
+
+// ── Boot: check session then show login or go ──
+const _savedMode = sessionStorage.getItem("adminMode");
+if (_savedMode === "super") {
+  applyMode("super", null);
+} else if (_savedMode === "manager") {
+  applyMode("manager", {
+    outletId:   sessionStorage.getItem("adminOutlet") || "ecr",
+    outletName: sessionStorage.getItem("adminOutletName") || ""
+  });
+} else {
+  document.getElementById("loginScreen").classList.add("visible");
+}
 
 // ── Display settings ──
 async function loadDisplaySettings() {
