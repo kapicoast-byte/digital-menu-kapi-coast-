@@ -260,6 +260,7 @@
       .sidebar-logo { display: none; }
       .sidebar-footer { display: none; }
       #navQR { display: none; }
+      #superAdminLink { display: none !important; }
       .nav-item {
         flex-direction: column;
         padding: 6px 4px;
@@ -435,6 +436,10 @@
   <div class="nav-item" id="navOutlets" onclick="showSection('manageOutlets', this)">
     <span class="nav-icon">🏪</span><span>Outlets</span>
   </div>
+  <a href="/superadmin.html" id="superAdminLink"
+     style="display:none;text-align:center;padding:10px;background:rgba(200,137,74,0.15);color:#C8894A;border-radius:8px;font-size:13px;text-decoration:none;margin:8px 12px 4px;font-weight:600;">
+    Super Admin
+  </a>
 </nav>
 
 <!-- ── Mobile outlet bar ── -->
@@ -909,7 +914,10 @@ async function initApp() {
 
 function applyMode(mode, mgr) {
   document.getElementById("loginScreen").classList.remove("visible");
-  if (mode === "manager" && mgr) {
+  if (mode === "super") {
+    document.getElementById("superAdminLink").style.display = "block";
+  } else if (mode === "manager" && mgr) {
+    document.getElementById("superAdminLink").style.display = "none";
     selectedOutlet = mgr.outletId;
     sessionStorage.setItem("adminOutlet", mgr.outletId);
     sessionStorage.setItem("adminOutletName", mgr.outletName || mgr.outletId);
