@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kapi Coast — Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --espresso: #2C1A0E;
+      --caramel:  #C8894A;
+      --cream:    #FAF6F0;
+      --muted:    #9A7D6B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', Arial, sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+    }
+
+    /* ── Login screen ── */
+    #loginScreen {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #loginScreen.hidden { display: none; }
+
+    .login-card {
+      background: #fff;
+      border-radius: 22px;
+      padding: 52px 44px 44px;
+      width: 380px; max-width: calc(100vw - 32px);
+      box-shadow: 0 8px 48px rgba(44,26,14,0.14);
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .login-brand {
+      font-size: 24px; font-weight: 800;
+      color: var(--espresso); letter-spacing: 0.14em;
+      margin-bottom: 6px;
+    }
+    .login-sub {
+      font-size: 13px; font-weight: 600;
+      color: var(--caramel); letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 36px;
+    }
+    .login-input {
+      width: 100%; padding: 16px;
+      border: 1.5px solid #E0D5CC; border-radius: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 20px; font-weight: 700;
+      letter-spacing: 0.18em; text-align: center;
+      text-transform: uppercase;
+      color: var(--espresso); background: var(--cream);
+      outline: none; margin-bottom: 14px;
+      transition: border-color 0.15s;
+    }
+    .login-input:focus { border-color: var(--caramel); background: #fff; }
+    .login-input::placeholder {
+      font-size: 14px; letter-spacing: 0.04em;
+      color: #C4B5A8; font-weight: 500;
+      font-family: 'Manrope', sans-serif;
+    }
+    .login-btn {
+      width: 100%; padding: 15px;
+      background: var(--espresso); color: var(--caramel);
+      border: none; border-radius: 12px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.04em;
+      transition: opacity 0.15s;
+    }
+    .login-btn:hover  { opacity: 0.88; }
+    .login-btn:active { opacity: 0.75; }
+    .login-error {
+      font-size: 13px; font-weight: 600;
+      color: #c62828; margin-top: 14px;
+      min-height: 18px; text-align: center;
+    }
+
+    /* ── App shell (hidden until login) ── */
+    #appShell { display: none; }
+    #appShell.visible { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Header ── */
+    .header {
+      background: var(--espresso);
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .header-brand { display: flex; flex-direction: column; gap: 1px; }
+    .header-logo  { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: 0.3px; }
+    .header-outlet { font-size: 12px; font-weight: 600; color: var(--caramel); letter-spacing: 0.05em; }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .header-outlet-name {
+      font-size: 14px; font-weight: 700; color: var(--caramel);
+    }
+    .signout-btn {
+      padding: 7px 16px;
+      background: rgba(200,137,74,0.15);
+      color: var(--caramel);
+      border: 1px solid rgba(200,137,74,0.3);
+      border-radius: 8px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .signout-btn:hover { background: rgba(200,137,74,0.28); }
+
+    /* ── Body layout ── */
+    .body-wrap {
+      display: flex; flex: 1; overflow: hidden;
+    }
+
+    /* ── Desktop sidebar ── */
+    .sidebar {
+      width: 210px; flex-shrink: 0;
+      background: #1a1a1a;
+      display: flex; flex-direction: column;
+      min-height: calc(100vh - 50px);
+    }
+    .sidebar-outlet {
+      padding: 20px 18px 14px;
+      font-size: 13px; font-weight: 800;
+      color: var(--caramel); letter-spacing: 0.04em;
+      border-bottom: 1px solid #2a2a2a;
+      line-height: 1.4;
+    }
+    .sidebar-outlet-label {
+      font-size: 10px; font-weight: 600; color: #555;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .nav-item {
+      padding: 13px 18px;
+      cursor: pointer; font-size: 14px; font-weight: 600;
+      color: #aaa; border-left: 3px solid transparent;
+      transition: background 0.15s, color 0.15s;
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: #2a2a2a; color: #fff; }
+    .nav-item.active { background: #2a2a2a; border-left-color: var(--caramel); color: #fff; }
+    .nav-icon { font-size: 16px; }
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 18px;
+      border-top: 1px solid #2a2a2a;
+    }
+    .sidebar-signout {
+      width: 100%; padding: 10px;
+      background: rgba(200,137,74,0.12);
+      color: var(--caramel);
+      border: 1px solid rgba(200,137,74,0.25);
+      border-radius: 8px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .sidebar-signout:hover { background: rgba(200,137,74,0.25); }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1; padding: 28px 24px;
+      overflow-y: auto;
+      background: var(--cream);
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    h2 { font-size: 22px; font-weight: 800; color: var(--espresso); margin-bottom: 20px; }
+
+    /* ── Mobile bottom nav ── */
+    .mobile-nav {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #1a1a1a; height: 60px; z-index: 500;
+      justify-content: space-around; align-items: center;
+    }
+    .mobile-nav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px;
+      cursor: pointer; padding: 6px 4px;
+      font-size: 10px; font-weight: 600; color: #888;
+      border-top: 3px solid transparent;
+      transition: color 0.15s;
+    }
+    .mobile-nav-item.active { color: #fff; border-top-color: var(--caramel); }
+    .mobile-nav-icon { font-size: 18px; line-height: 1; }
+
+    @media (max-width: 768px) {
+      .sidebar   { display: none; }
+      .header    { padding: 12px 16px; }
+      .header-outlet-name { display: none; }
+      .header .signout-btn { display: none; }
+      .mobile-nav { display: flex; }
+      .main { padding: 16px; margin-bottom: 68px; }
+      h2 { font-size: 18px; }
+    }
+    @media (min-width: 769px) {
+      .mobile-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Login screen ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">KAPI COAST</div>
+    <div class="login-sub">Manager Access</div>
+    <input class="login-input" type="text" id="codeInput"
+           placeholder="Enter Access Code"
+           autocomplete="off" spellcheck="false"
+           oninput="this.value = this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter') submitLogin()">
+    <button class="login-btn" onclick="submitLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ── App shell ── -->
+<div id="appShell">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-brand">
+      <span class="header-logo">Kapi Coast</span>
+      <span class="header-outlet">Manager Panel</span>
+    </div>
+    <div class="header-right">
+      <span class="header-outlet-name" id="headerOutletName"></span>
+      <button class="signout-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="body-wrap">
+
+    <!-- Desktop sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-outlet">
+        <div class="sidebar-outlet-label">Outlet</div>
+        <div id="sidebarOutletName">—</div>
+      </div>
+      <div class="nav-item active" id="sidebarNav-menuItems" onclick="showSection('menuItems', this)">
+        <span class="nav-icon">🍽️</span><span>Menu Items</span>
+      </div>
+      <div class="nav-item" id="sidebarNav-offerBanner" onclick="showSection('offerBanner', this)">
+        <span class="nav-icon">🏷️</span><span>Offer Banner</span>
+      </div>
+      <div class="nav-item" id="sidebarNav-adsBanners" onclick="showSection('adsBanners', this)">
+        <span class="nav-icon">📢</span><span>Ads &amp; Banners</span>
+      </div>
+      <div class="nav-item" id="sidebarNav-castTV" onclick="showSection('castTV', this)">
+        <span class="nav-icon">📺</span><span>Cast TV</span>
+      </div>
+      <div class="sidebar-footer">
+        <button class="sidebar-signout" onclick="signOut()">Sign Out</button>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="main">
+      <div id="menuItems" class="section active">
+        <h2>Menu Items</h2>
+        <p style="color:var(--muted);font-size:14px;">Coming soon.</p>
+      </div>
+      <div id="offerBanner" class="section">
+        <h2>Offer Banner</h2>
+        <p style="color:var(--muted);font-size:14px;">Coming soon.</p>
+      </div>
+      <div id="adsBanners" class="section">
+        <h2>Ads &amp; Banners</h2>
+        <p style="color:var(--muted);font-size:14px;">Coming soon.</p>
+      </div>
+      <div id="castTV" class="section">
+        <h2>Cast TV</h2>
+        <p style="color:var(--muted);font-size:14px;">Coming soon.</p>
+      </div>
+    </div>
+
+  </div><!-- end body-wrap -->
+
+  <!-- Mobile bottom nav -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-item active" id="mobileNav-menuItems" onclick="showSection('menuItems', this)">
+      <span class="mobile-nav-icon">🍽️</span>
+      <span>Menu</span>
+    </div>
+    <div class="mobile-nav-item" id="mobileNav-offerBanner" onclick="showSection('offerBanner', this)">
+      <span class="mobile-nav-icon">🏷️</span>
+      <span>Offer</span>
+    </div>
+    <div class="mobile-nav-item" id="mobileNav-adsBanners" onclick="showSection('adsBanners', this)">
+      <span class="mobile-nav-icon">📢</span>
+      <span>Ads</span>
+    </div>
+    <div class="mobile-nav-item" id="mobileNav-castTV" onclick="showSection('castTV', this)">
+      <span class="mobile-nav-icon">📺</span>
+      <span>Cast</span>
+    </div>
+  </nav>
+
+</div><!-- end appShell -->
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import {
+  getFirestore, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB_gtI05K2B7GUEslsMjU_pN4B7rV8kkbM",
+  authDomain: "pspk-c5298.firebaseapp.com",
+  projectId: "pspk-c5298",
+  storageBucket: "pspk-c5298.firebasestorage.app",
+  messagingSenderId: "426256600838",
+  appId: "1:426256600838:web:e8f5b8f4be326d482c5887"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ── Section navigation ──
+window.showSection = function (id, navEl) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+
+  // Sync both sidebar and mobile nav active states
+  document.querySelectorAll(".nav-item, .mobile-nav-item").forEach(n => n.classList.remove("active"));
+  const sidebar = document.getElementById("sidebarNav-" + id);
+  const mobile  = document.getElementById("mobileNav-" + id);
+  if (sidebar) sidebar.classList.add("active");
+  if (mobile)  mobile.classList.add("active");
+
+  document.getElementById(id).classList.add("active");
+};
+
+// ── Show panel after login ──
+function showPanel(outletId, outletName) {
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("appShell").classList.add("visible");
+  document.getElementById("headerOutletName").textContent = outletName;
+  document.getElementById("sidebarOutletName").textContent = outletName;
+}
+
+// ── Submit login ──
+window.submitLogin = async function () {
+  const code  = document.getElementById("codeInput").value.trim().toUpperCase();
+  const errEl = document.getElementById("loginError");
+  errEl.textContent = "";
+  if (!code) return;
+
+  try {
+    const snap = await getDoc(doc(db, "managers", code));
+
+    if (!snap.exists()) {
+      errEl.textContent = "Invalid code.";
+      return;
+    }
+
+    const data = snap.data();
+
+    if (data.active === false) {
+      errEl.textContent = "Access deactivated. Contact admin.";
+      return;
+    }
+
+    sessionStorage.setItem("mgrCode",       code);
+    sessionStorage.setItem("mgrOutletId",   data.outletId   || "");
+    sessionStorage.setItem("mgrOutletName", data.outletName || data.outletId || "");
+
+    showPanel(data.outletId, data.outletName || data.outletId);
+
+  } catch (e) {
+    errEl.textContent = "Error. Please try again.";
+    console.error(e);
+  }
+};
+
+// ── Sign out ──
+window.signOut = function () {
+  sessionStorage.removeItem("mgrCode");
+  sessionStorage.removeItem("mgrOutletId");
+  sessionStorage.removeItem("mgrOutletName");
+  location.reload();
+};
+
+// ── Boot: check existing session ──
+const savedCode       = sessionStorage.getItem("mgrCode");
+const savedOutletId   = sessionStorage.getItem("mgrOutletId");
+const savedOutletName = sessionStorage.getItem("mgrOutletName");
+
+if (savedCode && savedOutletId) {
+  showPanel(savedOutletId, savedOutletName || savedOutletId);
+}
+</script>
+
+</body>
+</html>
