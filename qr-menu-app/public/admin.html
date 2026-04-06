@@ -1093,24 +1093,28 @@ let presentationConnection = null;
 
 async function loadCastOutlets() {
   const snap = await getDocs(collection(db, "outlets"));
-  const sel  = document.getElementById("castOutletSelect");
+  const sel = document.getElementById("castOutletSelect");
   if (!sel) return;
   sel.innerHTML = "";
   snap.forEach(d => {
     const opt = document.createElement("option");
-    opt.value       = d.id;
+    opt.value = d.id;
     opt.textContent = d.data().name || d.id;
     if (d.id === selectedOutlet) opt.selected = true;
     sel.appendChild(opt);
   });
 
-  // Set castOutletId to currently selected value
   castOutletId = sel.value;
 
-  // Update preview link immediately after loading
   const previewLink = document.getElementById("previewDisplayLink");
   if (previewLink) {
     previewLink.href = "/display.html?outlet=" + castOutletId;
+    previewLink.textContent = "Preview Display";
+  }
+
+  const status = document.getElementById("castStatus");
+  if (status && status.textContent === "Not casting") {
+    status.textContent = "Ready to cast: " + (sel.options[sel.selectedIndex]?.text || castOutletId);
   }
 }
 
