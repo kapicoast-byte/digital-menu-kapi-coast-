@@ -119,17 +119,16 @@
     }
     .menu-card.sold-out { opacity: 0.6; }
     .card-img-wrap {
-      position: relative; width: 100%; padding-top: 72%; background: #EDE5DB;
+      position: relative; width: 100%; height: 100px; background: #EDE5DB;
+      overflow: hidden;
     }
     .card-img-wrap img {
-      position: absolute; top: 0; left: 0;
       width: 100%; height: 100%; object-fit: cover;
     }
     .veg-dot {
-      position: absolute; top: 8px; left: 8px;
-      width: 12px; height: 12px; border-radius: 2px;
-      border: 1.5px solid rgba(255,255,255,0.8);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      width: 9px; height: 9px; border-radius: 2px;
+      flex-shrink: 0; display: inline-block; margin-right: 5px;
+      vertical-align: middle;
     }
     .veg-dot.is-veg    { background: #22C55E; }
     .veg-dot.is-nonveg { background: #EF4444; }
@@ -143,16 +142,19 @@
     }
     .menu-card.sold-out .sold-out-badge { display: block; }
     .card-body {
-      padding: 10px 10px 12px;
+      padding: 9px 10px 11px;
       flex: 1; display: flex; flex-direction: column; gap: 3px;
     }
-    .card-name { font-size: 13px; font-weight: 700; color: #2C1A0E; line-height: 1.3; }
+    .card-name {
+      font-size: 15px; font-weight: 700; color: #2C1A0E; line-height: 1.3;
+      display: flex; align-items: center;
+    }
     .card-desc {
       font-size: 11px; color: #9A7D6B; line-height: 1.4;
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
     }
-    .card-price { font-size: 14px; font-weight: 800; color: #C8894A; margin-top: 4px; }
+    .card-price { font-size: 15px; font-weight: 800; color: #C8894A; margin-top: 4px; }
 
     /* ── No results ── */
     #noResults {
@@ -235,6 +237,63 @@
       z-index: 2;
     }
 
+    /* ── Daily special ribbon on card image ── */
+    .special-card-ribbon {
+      position: absolute; top: 8px; left: 0;
+      background: #C8894A; color: #fff;
+      font-size: 9px; font-weight: 800;
+      padding: 3px 8px; letter-spacing: 0.4px;
+      text-transform: uppercase;
+      border-radius: 0 4px 4px 0;
+      z-index: 2;
+    }
+
+    /* ── Image modal ── */
+    #imageModal {
+      display: none;
+      position: fixed; inset: 0; z-index: 800;
+      background: rgba(0,0,0,0.88);
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px;
+      animation: fadeInModal 0.2s ease;
+    }
+    #imageModal.open { display: flex; }
+    @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); border: none;
+      color: #fff; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #modalImg {
+      max-width: 88vw; max-height: 52vh;
+      border-radius: 16px; object-fit: contain;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+    .modal-body {
+      text-align: center; color: #fff; margin-top: 18px; max-width: 340px;
+    }
+    .modal-veg { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+    #modalName  { font-size: 20px; font-weight: 800; line-height: 1.2; }
+    #modalPrice { font-size: 18px; font-weight: 700; color: #C8894A; margin-top: 4px; }
+    #modalDesc  { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 8px; line-height: 1.5; }
+
+    /* ── Skeleton loading ── */
+    .skeleton-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; padding: 0 12px; margin-top: 8px;
+    }
+    .skeleton-card { background: #fff; border-radius: 14px; overflow: hidden; }
+    .skeleton-img  { height: 100px; background: #EDE5DB; }
+    .skeleton-body { padding: 10px; }
+    .skeleton-line { height: 12px; background: #EDE5DB; border-radius: 4px; margin-bottom: 7px; }
+    .skeleton-line.short { width: 55%; }
+    @keyframes skeletonPulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.45; }
+    }
+    .skeleton-card { animation: skeletonPulse 1.4s ease infinite; }
+
     /* ── Daily Specials ── */
     #dailySpecials { margin-top: 6px; }
     .specials-heading {
@@ -272,6 +331,65 @@
     .special-body { padding: 8px 10px 10px; }
     .special-name { font-size: 12px; font-weight: 700; color: #2C1A0E; margin-bottom: 2px; line-height: 1.3; }
     .special-price { font-size: 13px; font-weight: 800; color: #C8894A; }
+
+    /* ── Feedback button ── */
+    #feedbackBtn {
+      position: fixed; bottom: 82px; left: 16px;
+      background: #2C1A0E; color: #C8894A;
+      border: none; border-radius: 24px;
+      padding: 10px 16px;
+      font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 700;
+      cursor: pointer; z-index: 95;
+      box-shadow: 0 4px 16px rgba(44,26,14,0.35);
+      display: flex; align-items: center; gap: 5px;
+      transition: opacity 0.2s;
+    }
+    #feedbackBtn:active { opacity: 0.8; }
+
+    /* ── Feedback modal (bottom sheet) ── */
+    #feedbackModal {
+      display: none; position: fixed; inset: 0; z-index: 810;
+      background: rgba(0,0,0,0.6);
+      align-items: flex-end; justify-content: center;
+    }
+    #feedbackModal.open { display: flex; }
+    .feedback-sheet {
+      background: #fff; border-radius: 24px 24px 0 0;
+      padding: 28px 24px 44px;
+      width: 100%; max-width: 480px;
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .feedback-title { font-size: 18px; font-weight: 800; color: #2C1A0E; margin-bottom: 5px; }
+    .feedback-sub   { font-size: 13px; color: #9A7D6B; margin-bottom: 20px; }
+    .stars-row { display: flex; gap: 8px; margin-bottom: 18px; }
+    .star-btn {
+      font-size: 36px; cursor: pointer; background: none; border: none;
+      line-height: 1; color: #E0D5CC; transition: color 0.1s, transform 0.12s;
+      padding: 0; -webkit-tap-highlight-color: transparent;
+    }
+    .star-btn.lit { color: #C8894A; }
+    .star-btn:active { transform: scale(1.25); }
+    .feedback-textarea {
+      width: 100%; padding: 12px; border: 1.5px solid #E0D5CC; border-radius: 12px;
+      font-family: 'Manrope', sans-serif; font-size: 14px; color: #2C1A0E;
+      resize: none; min-height: 80px; outline: none; margin-bottom: 16px;
+      transition: border-color 0.15s;
+    }
+    .feedback-textarea:focus { border-color: #C8894A; }
+    .feedback-submit {
+      width: 100%; padding: 14px;
+      background: #2C1A0E; color: #C8894A;
+      border: none; border-radius: 12px;
+      font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .feedback-submit:hover { opacity: 0.88; }
+    .feedback-submit:active { opacity: 0.75; }
+    .feedback-thankyou { display: none; text-align: center; padding: 24px 0 8px; }
+    .feedback-ty-icon  { font-size: 52px; margin-bottom: 12px; }
+    .feedback-ty-title { font-size: 20px; font-weight: 800; color: #2C1A0E; }
+    .feedback-ty-sub   { font-size: 14px; color: #9A7D6B; margin-top: 6px; }
 
     /* ── Dark mode ── */
     body.dark { background: #0D0D0D; color: white; }
@@ -341,9 +459,30 @@
   <div class="specials-scroll" id="specialsScroll"></div>
 </div>
 
+<!-- ── Skeleton loading ── -->
+<div id="skeletonGrid" class="skeleton-grid">
+  <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+  <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+  <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+  <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+  <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+  <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+</div>
+
 <!-- ── Menu ── -->
 <div id="menuContainer"></div>
 <div id="noResults">No items match your search 🍵</div>
+
+<!-- ── Image modal ── -->
+<div id="imageModal" onclick="if(event.target===this)closeModal()">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <img id="modalImg" src="" alt="">
+  <div class="modal-body">
+    <div id="modalName"></div>
+    <div id="modalPrice"></div>
+    <div id="modalDesc"></div>
+  </div>
+</div>
 
 <!-- ── Social bar ── -->
 <div class="social-bar">
@@ -366,13 +505,40 @@
   </a>
 </div>
 
+<!-- ── Feedback button ── -->
+<button id="feedbackBtn" onclick="openFeedbackModal()">★ Rate Us</button>
+
+<!-- ── Feedback modal ── -->
+<div id="feedbackModal" onclick="if(event.target===this)closeFeedbackModal()">
+  <div class="feedback-sheet">
+    <div id="feedbackForm">
+      <div class="feedback-title">Rate your experience</div>
+      <div class="feedback-sub">How was your visit today?</div>
+      <div class="stars-row" id="starsRow">
+        <button class="star-btn" data-val="1" onclick="selectStar(1)">★</button>
+        <button class="star-btn" data-val="2" onclick="selectStar(2)">★</button>
+        <button class="star-btn" data-val="3" onclick="selectStar(3)">★</button>
+        <button class="star-btn" data-val="4" onclick="selectStar(4)">★</button>
+        <button class="star-btn" data-val="5" onclick="selectStar(5)">★</button>
+      </div>
+      <textarea class="feedback-textarea" id="feedbackComment" placeholder="Tell us more (optional)…"></textarea>
+      <button class="feedback-submit" onclick="submitFeedback()">Submit Feedback</button>
+    </div>
+    <div class="feedback-thankyou" id="feedbackThankyou">
+      <div class="feedback-ty-icon">☕</div>
+      <div class="feedback-ty-title">Thank you!</div>
+      <div class="feedback-ty-sub">We appreciate your feedback.</div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Scroll to top ── -->
 <button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, query, where, onSnapshot
+  getFirestore, collection, doc, getDoc, addDoc, query, where, onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -491,18 +657,24 @@ function renderMenu() {
     if (!byCat[cat]) return;
     html += `<div class="cat-heading">${escapeHtml(cat)}</div><div class="menu-grid">`;
     byCat[cat].forEach(item => {
-      const soldOut = item.available === false;
+      const soldOut  = item.available === false;
+      const vegDot   = item.veg === "veg"
+        ? `<span class="veg-dot is-veg"></span>`
+        : item.veg === "nonveg"
+        ? `<span class="veg-dot is-nonveg"></span>` : "";
+      const imgSrc   = escapeHtml(item.imageUrl || "");
+      const onImgClick = imgSrc
+        ? `onclick="openImageModal('${imgSrc}','${escapeHtml(item.name).replace(/'/g,"\\'")}','${escapeHtml(item.price)}','${escapeHtml(item.description||"").replace(/'/g,"\\'")}','${item.veg||""}')"` : "";
       html += `
         <div class="menu-card${soldOut ? " sold-out" : ""}">
-          <div class="card-img-wrap">
-            <img src="${escapeHtml(item.imageUrl || "")}"
-                 alt="${escapeHtml(item.name)}" loading="lazy">
-            ${item.veg === "veg" ? '<span class="veg-dot is-veg"></span>' : item.veg === "nonveg" ? '<span class="veg-dot is-nonveg"></span>' : ""}
+          <div class="card-img-wrap" ${onImgClick} style="${imgSrc ? "cursor:pointer;" : ""}">
+            <img src="${imgSrc}" alt="${escapeHtml(item.name)}" loading="lazy">
             <span class="sold-out-badge">Sold Out</span>
             ${item.popular ? '<span class="popular-badge">Popular</span>' : ""}
+            ${item.dailySpecial ? '<span class="special-card-ribbon">Special</span>' : ""}
           </div>
           <div class="card-body">
-            <div class="card-name">${escapeHtml(item.name)}</div>
+            <div class="card-name">${vegDot}${escapeHtml(item.name)}</div>
             <div class="card-desc">${escapeHtml(item.description || "")}</div>
             <div class="card-price">Rs. ${escapeHtml(item.price)}</div>
           </div>
@@ -543,10 +715,24 @@ onSnapshot(collection(db, "outlets", outlet, "menu"), snap => {
   });
   allItems.sort((a, b) =>
     a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+  document.getElementById("skeletonGrid").style.display = "none";
   buildPills([...catSet].sort());
   renderSpecials();
   renderMenu();
 });
+
+// ── Image modal ──
+window.openImageModal = function (imgSrc, name, price, desc, veg) {
+  document.getElementById("modalImg").src = imgSrc;
+  document.getElementById("modalName").textContent = name;
+  document.getElementById("modalPrice").textContent = "Rs. " + price;
+  document.getElementById("modalDesc").textContent  = desc || "";
+  document.getElementById("imageModal").classList.add("open");
+};
+window.closeModal = function () {
+  document.getElementById("imageModal").classList.remove("open");
+};
+document.addEventListener("keydown", e => { if (e.key === "Escape") window.closeModal(); });
 
 // ── Search handlers ──
 window.onSearch = function () {
@@ -592,6 +778,46 @@ window.addEventListener("scroll", () => {
   document.getElementById("scrollTop")
     .classList.toggle("visible", window.scrollY > 200);
 });
+
+// ── Feedback ──
+let feedbackRating = 0;
+const feedbackKey = "feedback_" + outlet + "_" + (tableNum || "0");
+if (sessionStorage.getItem(feedbackKey)) {
+  document.getElementById("feedbackBtn").style.display = "none";
+}
+
+window.openFeedbackModal = function () {
+  feedbackRating = 0;
+  document.querySelectorAll(".star-btn").forEach(s => s.classList.remove("lit"));
+  document.getElementById("feedbackComment").value = "";
+  document.getElementById("feedbackForm").style.display = "block";
+  document.getElementById("feedbackThankyou").style.display = "none";
+  document.getElementById("feedbackModal").classList.add("open");
+};
+window.closeFeedbackModal = function () {
+  document.getElementById("feedbackModal").classList.remove("open");
+};
+window.selectStar = function (n) {
+  feedbackRating = n;
+  document.querySelectorAll(".star-btn").forEach(s => {
+    s.classList.toggle("lit", parseInt(s.dataset.val) <= n);
+  });
+};
+window.submitFeedback = async function () {
+  if (!feedbackRating) { alert("Please select a star rating."); return; }
+  const comment = document.getElementById("feedbackComment").value.trim();
+  await addDoc(collection(db, "outlets", outlet, "feedback"), {
+    rating: feedbackRating,
+    comment,
+    table: tableNum || null,
+    createdAt: serverTimestamp()
+  });
+  sessionStorage.setItem(feedbackKey, "1");
+  document.getElementById("feedbackBtn").style.display = "none";
+  document.getElementById("feedbackForm").style.display = "none";
+  document.getElementById("feedbackThankyou").style.display = "block";
+  setTimeout(() => window.closeFeedbackModal(), 2200);
+};
 </script>
 
 </body>
