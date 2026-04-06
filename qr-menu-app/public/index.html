@@ -218,8 +218,64 @@
     .theme-switch input { display: none; }
     .theme-label { font-size: 11px; font-weight: 600; color: #9A7D6B; }
 
+    /* ── Sticky nav (pills + search) ── */
+    .sticky-nav {
+      position: sticky; top: 58px; z-index: 90;
+      background: #FAF6F0; padding-bottom: 4px;
+      box-shadow: 0 2px 8px rgba(44,26,14,0.04);
+    }
+
+    /* ── Popular badge ── */
+    .popular-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: #C8894A; color: #fff;
+      font-size: 9px; font-weight: 800;
+      padding: 3px 8px; border-radius: 10px;
+      letter-spacing: 0.3px; text-transform: uppercase;
+      z-index: 2;
+    }
+
+    /* ── Daily Specials ── */
+    #dailySpecials { margin-top: 6px; }
+    .specials-heading {
+      font-size: 15px; font-weight: 800; color: #2C1A0E;
+      padding: 10px 12px 6px;
+    }
+    .specials-scroll {
+      display: flex; gap: 12px; overflow-x: auto;
+      padding: 0 12px 14px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    .specials-scroll::-webkit-scrollbar { display: none; }
+    .special-card {
+      flex-shrink: 0; width: 140px;
+      background: #fff; border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(44,26,14,0.1);
+    }
+    .special-img-wrap {
+      position: relative; width: 100%; padding-top: 85%;
+      background: #EDE5DB;
+    }
+    .special-img-wrap img {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .special-ribbon {
+      position: absolute; top: 9px; right: 0;
+      background: #C8894A; color: #fff;
+      font-size: 9px; font-weight: 800;
+      padding: 3px 8px; letter-spacing: 0.4px;
+      text-transform: uppercase;
+      border-radius: 4px 0 0 4px;
+    }
+    .special-body { padding: 8px 10px 10px; }
+    .special-name { font-size: 12px; font-weight: 700; color: #2C1A0E; margin-bottom: 2px; line-height: 1.3; }
+    .special-price { font-size: 13px; font-weight: 800; color: #C8894A; }
+
     /* ── Dark mode ── */
     body.dark { background: #0D0D0D; color: white; }
+    body.dark .sticky-nav { background: #0D0D0D; }
     body.dark .menu-card { background: #1A1A1A; }
     body.dark .header { background: #1A1A1A; }
     body.dark .card-name { color: white; }
@@ -230,6 +286,9 @@
     body.dark .card-desc { color: #888; }
     body.dark .search-input { background: #1A1A1A; color: white; border-color: #333; }
     body.dark .search-input::placeholder { color: #666; }
+    body.dark .specials-heading { color: #fff; }
+    body.dark .special-card { background: #1A1A1A; }
+    body.dark .special-name { color: #fff; }
     body.light { background: #FAF6F0; color: #2C1A0E; }
   </style>
 </head>
@@ -261,19 +320,25 @@
   <div class="offer-body"  id="offerBody"></div>
 </div>
 
-<!-- ── Search ── -->
-<div class="search-area">
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input class="search-input" id="searchInput" type="text"
-           placeholder="Search coffee, food…" oninput="onSearch()">
-    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+<!-- ── Sticky nav: pills then search ── -->
+<div class="sticky-nav">
+  <div class="filter-pills" id="filterPills">
+    <div class="pill active" data-cat="all" onclick="setFilter('all', this)">All</div>
+  </div>
+  <div class="search-area">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="text"
+             placeholder="Search coffee, food…" oninput="onSearch()">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
   </div>
 </div>
 
-<!-- ── Filter pills ── -->
-<div class="filter-pills" id="filterPills">
-  <div class="pill active" data-cat="all" onclick="setFilter('all', this)">All</div>
+<!-- ── Daily Specials ── -->
+<div id="dailySpecials" style="display:none;">
+  <div class="specials-heading">Today's Specials ✨</div>
+  <div class="specials-scroll" id="specialsScroll"></div>
 </div>
 
 <!-- ── Menu ── -->
@@ -338,8 +403,7 @@ getDoc(doc(db, "outlets", outlet)).then(snap => {
   if (!snap.exists()) {
     document.getElementById("menuContainer").innerHTML =
       `<div style="text-align:center;padding:60px 20px;color:#9A7D6B;font-size:16px;font-weight:600;">Menu not available</div>`;
-    document.getElementById("filterPills").style.display = "none";
-    document.querySelector(".search-area").style.display = "none";
+    document.querySelector(".sticky-nav").style.display = "none";
     return;
   }
   document.getElementById("outletName").textContent = snap.data().name || outlet.toUpperCase();
@@ -435,6 +499,7 @@ function renderMenu() {
                  alt="${escapeHtml(item.name)}" loading="lazy">
             ${item.veg === "veg" ? '<span class="veg-dot is-veg"></span>' : item.veg === "nonveg" ? '<span class="veg-dot is-nonveg"></span>' : ""}
             <span class="sold-out-badge">Sold Out</span>
+            ${item.popular ? '<span class="popular-badge">Popular</span>' : ""}
           </div>
           <div class="card-body">
             <div class="card-name">${escapeHtml(item.name)}</div>
@@ -446,6 +511,25 @@ function renderMenu() {
     html += `</div>`;
   });
   container.innerHTML = html;
+}
+
+function renderSpecials() {
+  const specials = allItems.filter(i => i.dailySpecial === true);
+  const container = document.getElementById("dailySpecials");
+  const scroll    = document.getElementById("specialsScroll");
+  if (!specials.length) { container.style.display = "none"; return; }
+  container.style.display = "block";
+  scroll.innerHTML = specials.map(item => `
+    <div class="special-card">
+      <div class="special-img-wrap">
+        <img src="${escapeHtml(item.imageUrl || "")}" alt="${escapeHtml(item.name)}" loading="lazy">
+        <div class="special-ribbon">Special</div>
+      </div>
+      <div class="special-body">
+        <div class="special-name">${escapeHtml(item.name)}</div>
+        <div class="special-price">Rs. ${escapeHtml(item.price)}</div>
+      </div>
+    </div>`).join("");
 }
 
 onSnapshot(collection(db, "outlets", outlet, "menu"), snap => {
@@ -460,6 +544,7 @@ onSnapshot(collection(db, "outlets", outlet, "menu"), snap => {
   allItems.sort((a, b) =>
     a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
   buildPills([...catSet].sort());
+  renderSpecials();
   renderMenu();
 });
 

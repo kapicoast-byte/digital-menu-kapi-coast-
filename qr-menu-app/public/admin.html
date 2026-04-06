@@ -473,6 +473,16 @@
         </label>
       </div>
     </div>
+    <div style="display:flex;gap:20px;margin-bottom:12px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:#333;">
+        <input type="checkbox" id="itemPopular" style="width:16px;height:16px;accent-color:#C8894A;cursor:pointer;">
+        Mark as Popular
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:#333;">
+        <input type="checkbox" id="itemDailySpecial" style="width:16px;height:16px;accent-color:#C8894A;cursor:pointer;">
+        Daily Special
+      </label>
+    </div>
     <button class="btn btn-primary" onclick="addItem()">Add Item</button>
 
     <hr>
@@ -497,11 +507,17 @@
     <div class="cast-panel">
       <h3>📺 Cast Display Screen</h3>
       <p>Opens the Kapi Coast menu display on a nearby Chromecast or smart TV on the same WiFi network.</p>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:600;color:#9A7D6B;display:block;margin-bottom:6px;">Select Outlet to Cast</label>
+        <select id="castOutletSelect" onchange="updateCastOutlet()"
+          style="width:100%;padding:11px;border:1.5px solid #E0D5C8;border-radius:10px;font-family:Manrope,sans-serif;font-size:14px;">
+        </select>
+      </div>
       <div id="castStatus">Not casting</div>
       <div class="cast-actions">
         <button id="startCastBtn" class="btn btn-primary" onclick="startCasting()">Start Casting</button>
         <button id="stopCastBtn"  class="btn btn-danger"  onclick="stopCasting()" style="display:none;">Stop Casting</button>
-        <a href="/display.html" target="_blank" class="btn btn-success">Preview Display</a>
+        <a id="previewDisplayLink" href="/display.html" target="_blank" class="btn btn-success">Preview Display</a>
       </div>
       <div style="margin-top:16px; font-size:12px; color:#9A7D6B; line-height:1.6;">
         Works with: Chromecast, smart TVs with Chrome, any screen on the same WiFi.<br>
@@ -775,8 +791,12 @@ window.addItem = async function () {
     imageUrl = await getDownloadURL(storageRef);
   }
 
-  const veg = document.querySelector('input[name="vegType"]:checked').value;
-  await setDoc(itemRef, { name, price, description: desc, category, imageUrl, veg });
+  const veg          = document.querySelector('input[name="vegType"]:checked').value;
+  const popular      = document.getElementById("itemPopular").checked;
+  const dailySpecial = document.getElementById("itemDailySpecial").checked;
+  await setDoc(itemRef, { name, price, description: desc, category, imageUrl, veg, popular, dailySpecial });
+  document.getElementById("itemPopular").checked = false;
+  document.getElementById("itemDailySpecial").checked = false;
   alert("Item Added");
   loadItems();
 };
@@ -1068,44 +1088,79 @@ window.saveCategoryToggle = async function (cat, show) {
 };
 
 // ── Cast to TV ──
-const DISPLAY_URL = window.location.origin + "/display.html";
+let castOutletId = selectedOutlet;
 let presentationConnection = null;
 
+async function loadCastOutlets() {
+  const snap = await getDocs(collection(db, "outlets"));
+  const sel  = document.getElementById("castOutletSelect");
+  if (!sel) return;
+  sel.innerHTML = "";
+  snap.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value       = d.id;
+    opt.textContent = d.data().name || d.id;
+    if (d.id === selectedOutlet) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  // Set castOutletId to currently selected value
+  castOutletId = sel.value;
+
+  // Update preview link immediately after loading
+  const previewLink = document.getElementById("previewDisplayLink");
+  if (previewLink) {
+    previewLink.href = "/display.html?outlet=" + castOutletId;
+  }
+}
+
+window.updateCastOutlet = function () {
+  const sel = document.getElementById("castOutletSelect");
+  if (!sel) return;
+  castOutletId = sel.value;
+  console.log("Cast outlet changed to:", castOutletId);
+
+  const previewLink = document.getElementById("previewDisplayLink");
+  if (previewLink) {
+    previewLink.href = "/display.html?outlet=" + castOutletId;
+    previewLink.textContent = "Preview " + sel.options[sel.selectedIndex].text + " Display";
+  }
+
+  const status = document.getElementById("castStatus");
+  if (status) {
+    status.textContent = "Ready to cast: " + sel.options[sel.selectedIndex].text;
+  }
+};
+
 window.startCasting = async function () {
+  // Get fresh value from dropdown
+  const sel = document.getElementById("castOutletSelect");
+  if (sel) castOutletId = sel.value;
+
+  const displayUrl = window.location.origin + "/display.html?outlet=" + castOutletId;
+  console.log("Casting URL:", displayUrl);
+
   if (!window.PresentationRequest) {
-    document.getElementById("castStatus").textContent =
-      "Casting requires Chrome browser. Please open admin in Chrome.";
+    document.getElementById("castStatus").textContent = "Casting only works in Chrome browser.";
     return;
   }
+
   try {
-    document.getElementById("castStatus").textContent = "Searching for devices…";
-    const request = new PresentationRequest([DISPLAY_URL]);
-
-    request.getAvailability().then(av => {
-      if (!presentationConnection) {
-        document.getElementById("castStatus").textContent = av.value
-          ? "Devices found nearby — pick one in the dialog"
-          : "No cast devices found. Make sure Chromecast is on the same WiFi.";
-      }
-    }).catch(() => {});
-
+    document.getElementById("castStatus").textContent = "Opening device picker...";
+    const request = new PresentationRequest([displayUrl]);
     presentationConnection = await request.start();
+    document.getElementById("castStatus").innerHTML = '<span style="color:green;">Casting successfully!</span>';
+    document.getElementById("startCastBtn").style.display = "none";
+    document.getElementById("stopCastBtn").style.display  = "block";
 
-    presentationConnection.addEventListener("close", () => {
-      document.getElementById("castStatus").textContent = "Casting stopped";
+    presentationConnection.addEventListener("terminate", () => {
+      document.getElementById("castStatus").textContent = "Casting ended.";
+      document.getElementById("startCastBtn").style.display = "block";
       document.getElementById("stopCastBtn").style.display  = "none";
-      document.getElementById("startCastBtn").style.display = "inline-block";
       presentationConnection = null;
     });
-
-    document.getElementById("castStatus").textContent =
-      "Casting to TV — connection ID: " + (presentationConnection.id || "connected");
-    document.getElementById("stopCastBtn").style.display  = "inline-block";
-    document.getElementById("startCastBtn").style.display = "none";
-
   } catch (e) {
-    document.getElementById("castStatus").textContent =
-      e.name === "NotAllowedError" ? "Casting cancelled." : "Error: " + e.message;
+    document.getElementById("castStatus").textContent = "Error: " + e.message;
     console.error(e);
   }
 };
@@ -1124,7 +1179,7 @@ window.stopCasting = function () {
 const _origShowSection = window.showSection;
 window.showSection = function (id, navEl) {
   _origShowSection(id, navEl);
-  if (id === "castTV")       loadCategoryToggles();
+  if (id === "castTV")       { loadCategoryToggles(); loadCastOutlets(); }
   if (id === "manageOutlets") loadOutletList();
 };
 

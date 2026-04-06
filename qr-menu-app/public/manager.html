@@ -412,6 +412,16 @@
           </div>
           <label class="field-label">Image (optional)</label>
           <input class="field-input" type="file" id="itemImage" accept="image/*">
+          <div style="display:flex;gap:20px;margin-bottom:13px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:var(--espresso);">
+              <input type="checkbox" id="itemPopular" style="width:16px;height:16px;accent-color:var(--caramel);cursor:pointer;">
+              Mark as Popular
+            </label>
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:var(--espresso);">
+              <input type="checkbox" id="itemDailySpecial" style="width:16px;height:16px;accent-color:var(--caramel);cursor:pointer;">
+              Daily Special
+            </label>
+          </div>
           <button class="form-btn btn-espresso" onclick="addItem()">Add Item</button>
           <div class="form-status" id="itemStatus"></div>
         </div>
@@ -622,7 +632,9 @@ window.addItem = async function () {
   const desc     = document.getElementById("itemDesc").value.trim();
   const category = document.getElementById("itemCategory").value.trim();
   const file     = document.getElementById("itemImage").files[0];
-  const veg      = document.querySelector('input[name="vegType"]:checked').value;
+  const veg          = document.querySelector('input[name="vegType"]:checked').value;
+  const popular      = document.getElementById("itemPopular").checked;
+  const dailySpecial = document.getElementById("itemDailySpecial").checked;
 
   if (!name || !price || !category) {
     setStatus("itemStatus", "Name, price and category are required.", false); return;
@@ -636,12 +648,14 @@ window.addItem = async function () {
     imageUrl = await getDownloadURL(storageRef);
   }
 
-  await setDoc(menuDocRef(id), { name, price, description: desc, category, imageUrl, veg });
+  await setDoc(menuDocRef(id), { name, price, description: desc, category, imageUrl, veg, popular, dailySpecial });
   document.getElementById("itemName").value     = "";
   document.getElementById("itemPrice").value    = "";
   document.getElementById("itemDesc").value     = "";
   document.getElementById("itemCategory").value = "";
   document.getElementById("itemImage").value    = "";
+  document.getElementById("itemPopular").checked      = false;
+  document.getElementById("itemDailySpecial").checked = false;
   setStatus("itemStatus", "Item added!");
   loadItems();
 };
