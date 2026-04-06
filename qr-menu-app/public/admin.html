@@ -1109,49 +1109,51 @@ async function loadCastOutlets() {
 
 window.updateCastOutlet = function () {
   const sel = document.getElementById("castOutletSelect");
-  if (sel) {
-    castOutletId = sel.value;
-    const previewLink = document.getElementById("previewDisplayLink");
-    if (previewLink) previewLink.href = "/display.html?outlet=" + castOutletId;
+  if (!sel) return;
+  castOutletId = sel.value;
+  console.log("Cast outlet changed to:", castOutletId);
+
+  const previewLink = document.getElementById("previewDisplayLink");
+  if (previewLink) {
+    previewLink.href = "/display.html?outlet=" + castOutletId;
+    previewLink.textContent = "Preview " + sel.options[sel.selectedIndex].text + " Display";
+  }
+
+  const status = document.getElementById("castStatus");
+  if (status) {
+    status.textContent = "Ready to cast: " + sel.options[sel.selectedIndex].text;
   }
 };
 
 window.startCasting = async function () {
+  // Get fresh value from dropdown
+  const sel = document.getElementById("castOutletSelect");
+  if (sel) castOutletId = sel.value;
+
+  const displayUrl = window.location.origin + "/display.html?outlet=" + castOutletId;
+  console.log("Casting URL:", displayUrl);
+
   if (!window.PresentationRequest) {
-    document.getElementById("castStatus").textContent =
-      "Casting requires Chrome browser. Please open admin in Chrome.";
+    document.getElementById("castStatus").textContent = "Casting only works in Chrome browser.";
     return;
   }
+
   try {
-    const displayUrl = window.location.origin + "/display.html?outlet=" + castOutletId;
-    document.getElementById("castStatus").textContent = "Searching for devices…";
+    document.getElementById("castStatus").textContent = "Opening device picker...";
     const request = new PresentationRequest([displayUrl]);
-
-    request.getAvailability().then(av => {
-      if (!presentationConnection) {
-        document.getElementById("castStatus").textContent = av.value
-          ? "Devices found nearby — pick one in the dialog"
-          : "No cast devices found. Make sure Chromecast is on the same WiFi.";
-      }
-    }).catch(() => {});
-
     presentationConnection = await request.start();
+    document.getElementById("castStatus").innerHTML = '<span style="color:green;">Casting successfully!</span>';
+    document.getElementById("startCastBtn").style.display = "none";
+    document.getElementById("stopCastBtn").style.display  = "block";
 
-    presentationConnection.addEventListener("close", () => {
-      document.getElementById("castStatus").textContent = "Casting stopped";
+    presentationConnection.addEventListener("terminate", () => {
+      document.getElementById("castStatus").textContent = "Casting ended.";
+      document.getElementById("startCastBtn").style.display = "block";
       document.getElementById("stopCastBtn").style.display  = "none";
-      document.getElementById("startCastBtn").style.display = "inline-block";
       presentationConnection = null;
     });
-
-    document.getElementById("castStatus").textContent =
-      "Casting to TV — connection ID: " + (presentationConnection.id || "connected");
-    document.getElementById("stopCastBtn").style.display  = "inline-block";
-    document.getElementById("startCastBtn").style.display = "none";
-
   } catch (e) {
-    document.getElementById("castStatus").textContent =
-      e.name === "NotAllowedError" ? "Casting cancelled." : "Error: " + e.message;
+    document.getElementById("castStatus").textContent = "Error: " + e.message;
     console.error(e);
   }
 };
