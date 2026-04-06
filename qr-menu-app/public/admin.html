@@ -473,6 +473,16 @@
         </label>
       </div>
     </div>
+    <div style="display:flex;gap:20px;margin-bottom:12px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:#333;">
+        <input type="checkbox" id="itemPopular" style="width:16px;height:16px;accent-color:#C8894A;cursor:pointer;">
+        Mark as Popular
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:#333;">
+        <input type="checkbox" id="itemDailySpecial" style="width:16px;height:16px;accent-color:#C8894A;cursor:pointer;">
+        Daily Special
+      </label>
+    </div>
     <button class="btn btn-primary" onclick="addItem()">Add Item</button>
 
     <hr>
@@ -775,8 +785,12 @@ window.addItem = async function () {
     imageUrl = await getDownloadURL(storageRef);
   }
 
-  const veg = document.querySelector('input[name="vegType"]:checked').value;
-  await setDoc(itemRef, { name, price, description: desc, category, imageUrl, veg });
+  const veg          = document.querySelector('input[name="vegType"]:checked').value;
+  const popular      = document.getElementById("itemPopular").checked;
+  const dailySpecial = document.getElementById("itemDailySpecial").checked;
+  await setDoc(itemRef, { name, price, description: desc, category, imageUrl, veg, popular, dailySpecial });
+  document.getElementById("itemPopular").checked = false;
+  document.getElementById("itemDailySpecial").checked = false;
   alert("Item Added");
   loadItems();
 };

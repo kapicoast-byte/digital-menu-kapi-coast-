@@ -229,36 +229,50 @@
     /* QR Grid */
     .qr-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
     }
+
+    /* ── Premium QR card ── */
     .qr-card {
       background: #fff;
-      border: 1.5px solid #E0D5CC;
-      border-radius: 14px;
-      padding: 20px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
+      border: 1px solid #F0E8E0;
+      border-radius: 18px;
+      padding: 18px 16px 14px;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      box-shadow: 0 4px 24px rgba(44,26,14,0.10);
+      position: relative;
     }
-    .qr-card-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #9A7D6B;
+    .qr-card-top {
+      width: 100%; display: flex; justify-content: flex-end; margin-bottom: 2px;
     }
-    .qr-card-num {
-      font-size: 22px;
-      font-weight: 800;
-      color: #2C1A0E;
+    .qr-card-outlet-tag {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #9A7D6B;
     }
-    .qr-card-canvas { border-radius: 8px; overflow: hidden; }
-    .qr-card-dl {
-      width: 100%;
-      text-align: center;
+    .qr-card-logo {
+      font-size: 14px; font-weight: 800; color: #2C1A0E;
+      letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px;
     }
+    .qr-frame {
+      padding: 8px;
+      border: 2.5px solid #C8894A;
+      border-radius: 12px;
+      background: #fff;
+      margin-bottom: 6px;
+    }
+    .qr-card-canvas { border-radius: 4px; overflow: hidden; display: block; }
+    .qr-card-table {
+      font-size: 20px; font-weight: 800; color: #2C1A0E;
+      margin-top: 2px;
+    }
+    .qr-card-scan {
+      font-size: 10px; font-weight: 600; color: #9A7D6B; letter-spacing: 0.02em;
+    }
+    .qr-card-url {
+      font-size: 9px; color: #C4B5A8; letter-spacing: 0.04em; margin-top: 2px;
+    }
+    .qr-card-dl { width: 100%; text-align: center; margin-top: 6px; }
 
     /* ── Print styles ── */
     @media print {
@@ -266,35 +280,36 @@
       header, .card > *:not(#bulkGrid), .gen-controls, #singleResult .qr-meta,
       .bulk-controls, .section-title, .card.single-card { display: none !important; }
 
-      .card.bulk-card {
-        box-shadow: none;
-        padding: 0;
-        margin: 0;
-      }
+      .card.bulk-card { box-shadow: none; padding: 0; margin: 0; }
 
       .qr-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-        padding: 16px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0;
+        padding: 8mm;
       }
 
       .qr-card {
-        border: 1.5px solid #ccc;
-        border-radius: 10px;
-        padding: 16px 12px 12px;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        outline: 0.5px dashed #ccc;
+        padding: 14px 12px;
         page-break-inside: avoid;
         break-inside: avoid;
+        margin: 4mm;
+      }
+
+      /* Crop marks */
+      .qr-card::before, .qr-card::after {
+        content: "";
+        position: absolute;
+        background: #aaa;
       }
 
       .qr-card-dl { display: none !important; }
-
-      .qr-card-label {
-        font-size: 10px;
-      }
-      .qr-card-num {
-        font-size: 18px;
-      }
+      .qr-card-logo { font-size: 12px; }
+      .qr-card-table { font-size: 18px; }
     }
   </style>
 </head>
@@ -331,10 +346,19 @@
 
       <div id="singleResult">
         <div class="qr-preview">
-          <div id="singleQrCanvas"></div>
+          <div class="qr-card" style="width:220px;flex-shrink:0;">
+            <div class="qr-card-top">
+              <span class="qr-card-outlet-tag" id="singleOutletTag"></span>
+            </div>
+            <div class="qr-card-logo">Kapi Coast</div>
+            <div class="qr-frame">
+              <div id="singleQrCanvas" class="qr-card-canvas"></div>
+            </div>
+            <div class="qr-card-table">Table <span id="singleTableNum"></span></div>
+            <div class="qr-card-scan">Scan to view menu</div>
+            <div class="qr-card-url">menu.kapicoast.org</div>
+          </div>
           <div class="qr-meta">
-            <div class="qr-table-label">Table</div>
-            <div class="qr-table-num" id="singleTableNum"></div>
             <div class="qr-url" id="singleUrl"></div>
             <div class="qr-actions">
               <button class="btn btn-caramel btn-sm" onclick="downloadQR()">Download PNG</button>
@@ -418,6 +442,7 @@
 
       document.getElementById("singleTableNum").textContent = n;
       document.getElementById("singleUrl").textContent = url;
+      document.getElementById("singleOutletTag").textContent = outlet.toUpperCase();
       document.getElementById("singleResult").style.display = "block";
     }
 
@@ -449,11 +474,18 @@
         const card = document.createElement("div");
         card.className = "qr-card";
         card.innerHTML = `
-          <div class="qr-card-label">${outletLabel} · Table</div>
-          <div class="qr-card-num">${i}</div>
-          <div class="qr-card-canvas" id="bulk-qr-${i}"></div>
+          <div class="qr-card-top">
+            <span class="qr-card-outlet-tag">${outletLabel}</span>
+          </div>
+          <div class="qr-card-logo">Kapi Coast</div>
+          <div class="qr-frame">
+            <div class="qr-card-canvas" id="bulk-qr-${i}"></div>
+          </div>
+          <div class="qr-card-table">Table ${i}</div>
+          <div class="qr-card-scan">Scan to view menu</div>
+          <div class="qr-card-url">menu.kapicoast.org</div>
           <div class="qr-card-dl">
-            <button class="btn btn-outline btn-sm" onclick="downloadBulk(${i})">Download</button>
+            <button class="btn btn-outline btn-sm" onclick="downloadBulk(${i})">Download PNG</button>
           </div>
         `;
         grid.appendChild(card);
