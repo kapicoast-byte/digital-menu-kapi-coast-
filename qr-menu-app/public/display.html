@@ -321,7 +321,7 @@
 
 <!-- ── Top bar ── -->
 <div class="top-bar">
-  <div class="top-logo">Kapi Coast</div>
+  <div class="top-logo" id="displayLogo">Kapi Coast</div>
   <div class="top-category" id="topCategory"></div>
   <div class="top-clock" id="clock"></div>
 </div>
@@ -366,8 +366,8 @@ console.log("Display outlet:", outlet);
 
 // ── Fetch and show outlet name in header ──
 getDoc(doc(db, "outlets", outlet)).then(snap => {
-  const name = snap.exists() ? (snap.data().name || outlet.toUpperCase()) : outlet.toUpperCase();
-  document.querySelector(".top-logo").textContent = "KAPI COAST — " + name;
+  document.getElementById("displayLogo").textContent =
+    snap.exists() ? (snap.data().name || outlet) : outlet;
 });
 
 // ── Clock ──
