@@ -1100,11 +1100,18 @@ async function loadCastOutlets() {
     const opt = document.createElement("option");
     opt.value       = d.id;
     opt.textContent = d.data().name || d.id;
-    if (d.id === castOutletId) opt.selected = true;
+    if (d.id === selectedOutlet) opt.selected = true;
     sel.appendChild(opt);
   });
-  // Sync preview link to current selection
-  updateCastOutlet();
+
+  // Set castOutletId to currently selected value
+  castOutletId = sel.value;
+
+  // Update preview link immediately after loading
+  const previewLink = document.getElementById("previewDisplayLink");
+  if (previewLink) {
+    previewLink.href = "/display.html?outlet=" + castOutletId;
+  }
 }
 
 window.updateCastOutlet = function () {
