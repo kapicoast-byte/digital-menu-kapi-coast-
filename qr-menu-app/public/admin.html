@@ -507,11 +507,17 @@
     <div class="cast-panel">
       <h3>📺 Cast Display Screen</h3>
       <p>Opens the Kapi Coast menu display on a nearby Chromecast or smart TV on the same WiFi network.</p>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:600;color:#9A7D6B;display:block;margin-bottom:6px;">Select Outlet to Cast</label>
+        <select id="castOutletSelect" onchange="updateCastOutlet()"
+          style="width:100%;padding:11px;border:1.5px solid #E0D5C8;border-radius:10px;font-family:Manrope,sans-serif;font-size:14px;">
+        </select>
+      </div>
       <div id="castStatus">Not casting</div>
       <div class="cast-actions">
         <button id="startCastBtn" class="btn btn-primary" onclick="startCasting()">Start Casting</button>
         <button id="stopCastBtn"  class="btn btn-danger"  onclick="stopCasting()" style="display:none;">Stop Casting</button>
-        <a href="/display.html" target="_blank" class="btn btn-success">Preview Display</a>
+        <a id="previewDisplayLink" href="/display.html" target="_blank" class="btn btn-success">Preview Display</a>
       </div>
       <div style="margin-top:16px; font-size:12px; color:#9A7D6B; line-height:1.6;">
         Works with: Chromecast, smart TVs with Chrome, any screen on the same WiFi.<br>
@@ -1082,8 +1088,33 @@ window.saveCategoryToggle = async function (cat, show) {
 };
 
 // ── Cast to TV ──
-const DISPLAY_URL = window.location.origin + "/display.html";
+let castOutletId = selectedOutlet;
 let presentationConnection = null;
+
+async function loadCastOutlets() {
+  const snap = await getDocs(collection(db, "outlets"));
+  const sel  = document.getElementById("castOutletSelect");
+  if (!sel) return;
+  sel.innerHTML = "";
+  snap.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value       = d.id;
+    opt.textContent = d.data().name || d.id;
+    if (d.id === castOutletId) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  // Sync preview link to current selection
+  updateCastOutlet();
+}
+
+window.updateCastOutlet = function () {
+  const sel = document.getElementById("castOutletSelect");
+  if (sel) {
+    castOutletId = sel.value;
+    const previewLink = document.getElementById("previewDisplayLink");
+    if (previewLink) previewLink.href = "/display.html?outlet=" + castOutletId;
+  }
+};
 
 window.startCasting = async function () {
   if (!window.PresentationRequest) {
@@ -1092,8 +1123,9 @@ window.startCasting = async function () {
     return;
   }
   try {
+    const displayUrl = window.location.origin + "/display.html?outlet=" + castOutletId;
     document.getElementById("castStatus").textContent = "Searching for devices…";
-    const request = new PresentationRequest([DISPLAY_URL]);
+    const request = new PresentationRequest([displayUrl]);
 
     request.getAvailability().then(av => {
       if (!presentationConnection) {
@@ -1138,7 +1170,7 @@ window.stopCasting = function () {
 const _origShowSection = window.showSection;
 window.showSection = function (id, navEl) {
   _origShowSection(id, navEl);
-  if (id === "castTV")       loadCategoryToggles();
+  if (id === "castTV")       { loadCategoryToggles(); loadCastOutlets(); }
   if (id === "manageOutlets") loadOutletList();
 };
 
