@@ -344,7 +344,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, onSnapshot, query, where
+  getFirestore, collection, doc, getDoc, onSnapshot, query, where
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -358,6 +358,17 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
+
+// ── Outlet from URL — must be first ──
+const urlParams = new URLSearchParams(window.location.search);
+const outlet    = urlParams.get("outlet") || "ecr";
+console.log("Display outlet:", outlet);
+
+// ── Fetch and show outlet name in header ──
+getDoc(doc(db, "outlets", outlet)).then(snap => {
+  const name = snap.exists() ? (snap.data().name || outlet.toUpperCase()) : outlet.toUpperCase();
+  document.querySelector(".top-logo").textContent = "KAPI COAST — " + name;
+});
 
 // ── Clock ──
 function updateClock() {
@@ -391,9 +402,6 @@ function boldGradient(cat) {
   for (let i = 0; i < cat.length; i++) h = cat.charCodeAt(i) + ((h << 5) - h);
   return BOLD_GRADS[Math.abs(h) % BOLD_GRADS.length];
 }
-
-// ── Outlet from URL ──
-const outlet = new URLSearchParams(location.search).get("outlet") || "ecr";
 
 // ── State ──
 let menuItems   = [];
