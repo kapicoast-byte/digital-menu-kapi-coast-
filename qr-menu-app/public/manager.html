@@ -191,6 +191,127 @@
     .mobile-nav-item.active { color: #fff; border-top-color: var(--caramel); }
     .mobile-nav-icon { font-size: 18px; line-height: 1; }
 
+    /* ── Form inputs ── */
+    .form-panel {
+      background: #fff; border-radius: 14px;
+      padding: 22px 24px; max-width: 520px;
+      box-shadow: 0 2px 12px rgba(44,26,14,0.08);
+      margin-bottom: 24px;
+    }
+    .form-panel h3 { font-size: 16px; font-weight: 800; color: var(--espresso); margin-bottom: 16px; }
+    .field-label {
+      display: block; font-size: 11px; font-weight: 700;
+      color: var(--muted); letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 5px;
+    }
+    .field-input {
+      width: 100%; padding: 10px 13px;
+      border: 1.5px solid #E0D5CC; border-radius: 10px;
+      font-family: 'Manrope', sans-serif; font-size: 14px;
+      color: var(--espresso); background: var(--cream);
+      outline: none; margin-bottom: 13px;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus { border-color: var(--caramel); background: #fff; }
+    .field-input::placeholder { color: #C4B5A8; }
+    textarea.field-input { resize: vertical; min-height: 72px; }
+    input[type="color"].field-input { padding: 3px 6px; height: 40px; width: 70px; cursor: pointer; }
+    input[type="file"].field-input { padding: 8px 10px; }
+
+    .veg-row { display: flex; gap: 18px; margin-bottom: 13px; }
+    .veg-label {
+      display: flex; align-items: center; gap: 7px;
+      cursor: pointer; font-size: 14px; font-weight: 600; color: var(--espresso);
+    }
+    .veg-dot-veg    { width: 13px; height: 13px; background: #2e7d32; border-radius: 2px; flex-shrink: 0; }
+    .veg-dot-nonveg { width: 13px; height: 13px; background: #e53935; border-radius: 2px; flex-shrink: 0; }
+
+    .form-btn {
+      padding: 10px 22px; border: none; border-radius: 10px;
+      font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .form-btn:active { opacity: 0.8; }
+    .form-btn + .form-btn { margin-left: 8px; }
+    .btn-espresso { background: var(--espresso); color: #fff; }
+    .btn-caramel  { background: var(--caramel);  color: #fff; }
+    .btn-danger   { background: #c62828;          color: #fff; }
+    .btn-success  { background: #2e7d32;          color: #fff; }
+    .btn-sm { padding: 5px 13px; font-size: 12px; }
+    .form-status { font-size: 13px; font-weight: 600; margin-top: 10px; min-height: 16px; }
+
+    /* ── Item cards ── */
+    .items-list { margin-top: 6px; }
+    .cat-header {
+      font-size: 13px; font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin: 20px 0 8px;
+    }
+    .item-card {
+      display: flex; gap: 12px; background: #fff;
+      padding: 12px; margin-bottom: 10px;
+      border-radius: 12px; align-items: center;
+      box-shadow: 0 1px 6px rgba(44,26,14,0.07);
+    }
+    .item-card img {
+      width: 58px; height: 58px; border-radius: 8px;
+      object-fit: cover; background: #eee; flex-shrink: 0;
+    }
+    .item-card-info { flex: 1; }
+    .item-card-name {
+      font-size: 15px; font-weight: 700; color: var(--espresso);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .item-card-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .item-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* ── Ad cards ── */
+    .ad-card {
+      background: #fff; border-radius: 12px;
+      padding: 14px 16px; margin-bottom: 12px;
+      border-left: 4px solid #ddd;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+      box-shadow: 0 1px 6px rgba(44,26,14,0.07);
+    }
+    .ad-card.active { border-left-color: #2e7d32; }
+    .ad-card-body { flex: 1; }
+    .ad-card-title { font-weight: 700; font-size: 15px; color: var(--espresso); margin-bottom: 3px; }
+    .ad-card-text  { font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+    .ad-swatch {
+      display: inline-block; width: 14px; height: 14px;
+      border-radius: 3px; border: 1px solid #ccc;
+      vertical-align: middle; margin-right: 4px;
+    }
+    .ad-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px; text-transform: uppercase;
+    }
+    .ad-badge.on  { background: #e8f5e9; color: #2e7d32; }
+    .ad-badge.off { background: #f5f5f5; color: #999; }
+    .ad-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
+
+    /* ── Cast panel ── */
+    .cast-panel {
+      background: #fff; border-radius: 14px;
+      padding: 24px; max-width: 480px; margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(44,26,14,0.08);
+    }
+    .cast-panel h3 { font-size: 17px; font-weight: 800; color: var(--espresso); margin-bottom: 8px; }
+    .cast-panel p  { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    #castStatus {
+      font-size: 13px; font-weight: 600; color: var(--espresso);
+      background: var(--cream); border-radius: 8px;
+      padding: 10px 14px; margin: 12px 0;
+    }
+    .cast-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .slider-row { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+    .slider-row input[type="range"] {
+      flex: 1; max-width: 180px; accent-color: var(--caramel);
+    }
+    .slider-val { font-size: 14px; font-weight: 700; color: var(--caramel); min-width: 40px; }
+
+    hr.section-hr { border: none; border-top: 1px solid #EDE5DB; margin: 22px 0; }
+
     @media (max-width: 768px) {
       .sidebar   { display: none; }
       .header    { padding: 12px 16px; }
@@ -199,6 +320,7 @@
       .mobile-nav { display: flex; }
       .main { padding: 16px; margin-bottom: 68px; }
       h2 { font-size: 18px; }
+      .form-panel { padding: 16px; }
     }
     @media (min-width: 769px) {
       .mobile-nav { display: none; }
@@ -264,21 +386,95 @@
 
     <!-- Main content -->
     <div class="main">
+      <!-- ── Section 1: Menu Items ── -->
       <div id="menuItems" class="section active">
         <h2>Menu Items</h2>
-        <p style="color:var(--muted);font-size:14px;">Coming soon.</p>
+        <div class="form-panel">
+          <h3>Add Item</h3>
+          <label class="field-label">Item Name</label>
+          <input class="field-input" type="text" id="itemName" placeholder="e.g. Cappuccino">
+          <label class="field-label">Price (₹)</label>
+          <input class="field-input" type="text" id="itemPrice" placeholder="e.g. 120">
+          <label class="field-label">Description</label>
+          <input class="field-input" type="text" id="itemDesc" placeholder="Optional">
+          <label class="field-label">Category</label>
+          <input class="field-input" type="text" id="itemCategory" placeholder="e.g. Coffee, Snacks">
+          <label class="field-label">Type</label>
+          <div class="veg-row">
+            <label class="veg-label">
+              <input type="radio" name="vegType" value="veg" checked>
+              <span class="veg-dot-veg"></span> Veg
+            </label>
+            <label class="veg-label">
+              <input type="radio" name="vegType" value="nonveg">
+              <span class="veg-dot-nonveg"></span> Non-Veg
+            </label>
+          </div>
+          <label class="field-label">Image (optional)</label>
+          <input class="field-input" type="file" id="itemImage" accept="image/*">
+          <button class="form-btn btn-espresso" onclick="addItem()">Add Item</button>
+          <div class="form-status" id="itemStatus"></div>
+        </div>
+        <hr class="section-hr">
+        <div class="items-list" id="menuList">Loading…</div>
       </div>
+
+      <!-- ── Section 2: Offer Banner ── -->
       <div id="offerBanner" class="section">
         <h2>Offer Banner</h2>
-        <p style="color:var(--muted);font-size:14px;">Coming soon.</p>
+        <div class="form-panel">
+          <h3>Active Offer</h3>
+          <label class="field-label">Offer Message</label>
+          <textarea class="field-input" id="offerInput" placeholder="e.g. 20% off on all cold brews today!"></textarea>
+          <button class="form-btn btn-espresso" onclick="saveOffer()">Save Offer</button>
+          <button class="form-btn" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="clearOffer()">Clear</button>
+          <div class="form-status" id="offerStatus"></div>
+        </div>
       </div>
+
+      <!-- ── Section 3: Ads & Banners ── -->
       <div id="adsBanners" class="section">
         <h2>Ads &amp; Banners</h2>
-        <p style="color:var(--muted);font-size:14px;">Coming soon.</p>
+        <div class="form-panel">
+          <h3>Create New Ad</h3>
+          <label class="field-label">Title</label>
+          <input class="field-input" type="text" id="adTitle" placeholder="Ad Title">
+          <label class="field-label">Body Text</label>
+          <textarea class="field-input" id="adBody" placeholder="Ad body text"></textarea>
+          <label class="field-label">Background Color</label>
+          <input class="field-input" type="color" id="adColor" value="#fff3cd">
+          <button class="form-btn btn-espresso" onclick="saveAd()">Save Ad</button>
+          <div class="form-status" id="adStatus"></div>
+        </div>
+        <hr class="section-hr">
+        <div id="adList">Loading…</div>
       </div>
+
+      <!-- ── Section 4: Cast TV ── -->
       <div id="castTV" class="section">
         <h2>Cast TV</h2>
-        <p style="color:var(--muted);font-size:14px;">Coming soon.</p>
+        <div class="cast-panel">
+          <h3>📺 Cast Display Screen</h3>
+          <p>Opens the Kapi Coast menu display on a Chromecast or smart TV on the same WiFi.</p>
+          <div id="castStatus">Not casting</div>
+          <div class="cast-actions">
+            <button id="startCastBtn" class="form-btn btn-espresso" onclick="startCasting()">Start Casting</button>
+            <button id="stopCastBtn"  class="form-btn btn-danger"   onclick="stopCasting()" style="display:none;">Stop Casting</button>
+            <a id="previewDisplayLink" href="#" target="_blank" class="form-btn btn-success" style="text-decoration:none;display:inline-flex;align-items:center;">Preview Display</a>
+          </div>
+          <p style="margin-top:14px;font-size:12px;line-height:1.7;">Works with Chromecast, smart TVs with Chrome, any screen on the same WiFi.<br>Requires Chrome browser.</p>
+        </div>
+        <div class="form-panel">
+          <h3>Slide Duration</h3>
+          <p>Seconds per category slide on the TV display.</p>
+          <div class="slider-row">
+            <input type="range" id="intervalSlider" min="3" max="15" step="1" value="8"
+                   oninput="document.getElementById('intervalVal').textContent = this.value + 's'">
+            <span class="slider-val" id="intervalVal">8s</span>
+            <button class="form-btn btn-espresso btn-sm" onclick="saveDisplaySettings()">Save</button>
+          </div>
+          <div class="form-status" id="displayStatus"></div>
+        </div>
       </div>
     </div>
 
@@ -309,8 +505,12 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getFirestore, doc, getDoc
+  getFirestore, collection, getDocs, doc, getDoc, setDoc,
+  deleteDoc, updateDoc, addDoc, onSnapshot, query, where, writeBatch, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB_gtI05K2B7GUEslsMjU_pN4B7rV8kkbM",
@@ -321,78 +521,331 @@ const firebaseConfig = {
   appId: "1:426256600838:web:e8f5b8f4be326d482c5887"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const app     = initializeApp(firebaseConfig);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+
+const outletId = sessionStorage.getItem("mgrOutletId") || "";
+
+// ── Helpers ──
+const menuCol    = () => collection(db, "outlets", outletId, "menu");
+const adsCol     = () => collection(db, "outlets", outletId, "ads");
+const menuDocRef = id => doc(db, "outlets", outletId, "menu", id);
+const adsDocRef  = id => doc(db, "outlets", outletId, "ads",  id);
+const offerRef   = () => doc(db, "outlets", outletId, "settings", "offer");
+const displayRef = () => doc(db, "outlets", outletId, "settings", "display");
+
+function escapeHtml(v) {
+  return String(v ?? "").replace(/[&<>"']/g,
+    c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function setStatus(id, msg, ok = true) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = ok ? "#2e7d32" : "#c62828";
+  if (msg) setTimeout(() => { el.textContent = ""; }, 3000);
+}
 
 // ── Section navigation ──
-window.showSection = function (id, navEl) {
+window.showSection = function (sectionId) {
   document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-
-  // Sync both sidebar and mobile nav active states
   document.querySelectorAll(".nav-item, .mobile-nav-item").forEach(n => n.classList.remove("active"));
-  const sidebar = document.getElementById("sidebarNav-" + id);
-  const mobile  = document.getElementById("mobileNav-" + id);
+  const sidebar = document.getElementById("sidebarNav-" + sectionId);
+  const mobile  = document.getElementById("mobileNav-" + sectionId);
   if (sidebar) sidebar.classList.add("active");
   if (mobile)  mobile.classList.add("active");
-
-  document.getElementById(id).classList.add("active");
+  document.getElementById(sectionId).classList.add("active");
+  if (sectionId === "menuItems")   loadItems();
+  if (sectionId === "offerBanner") loadOffer();
+  if (sectionId === "adsBanners")  loadAds();
+  if (sectionId === "castTV")      loadDisplaySettings();
 };
 
 // ── Show panel after login ──
-function showPanel(outletId, outletName) {
+function showPanel(oId, oName) {
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("appShell").classList.add("visible");
-  document.getElementById("headerOutletName").textContent = outletName;
-  document.getElementById("sidebarOutletName").textContent = outletName;
+  document.getElementById("headerOutletName").textContent  = oName;
+  document.getElementById("sidebarOutletName").textContent = oName;
+  const castUrl = "https://menu.kapicoast.org/display.html?outlet=" + encodeURIComponent(oId);
+  document.getElementById("previewDisplayLink").href = castUrl;
+  loadItems();
 }
 
-// ── Submit login ──
+// ──────────────────────────────────────────────────
+// SECTION 1 — Menu Items
+// ──────────────────────────────────────────────────
+async function loadItems() {
+  const div  = document.getElementById("menuList");
+  div.innerHTML = "Loading…";
+  const snap = await getDocs(menuCol());
+  if (snap.empty) { div.innerHTML = `<p style="color:var(--muted);font-size:14px;">No items yet.</p>`; return; }
+
+  const cats = {};
+  snap.forEach(d => {
+    const item = d.data();
+    const cat  = (item.category || "Others").trim();
+    if (!cats[cat]) cats[cat] = [];
+    cats[cat].push({ ...item, id: d.id });
+  });
+
+  let html = "";
+  Object.keys(cats).sort().forEach(cat => {
+    html += `<div class="cat-header">${escapeHtml(cat)}</div>`;
+    cats[cat].forEach(item => {
+      const dot = item.veg === "nonveg"
+        ? `<span class="veg-dot-nonveg" style="width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`
+        : `<span class="veg-dot-veg"    style="width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`;
+      html += `
+        <div class="item-card">
+          <img src="${escapeHtml(item.imageUrl || "")}" alt="${escapeHtml(item.name)}"
+               onerror="this.style.background='#eee';this.removeAttribute('src')">
+          <div class="item-card-info">
+            <div class="item-card-name">${dot}${escapeHtml(item.name)}</div>
+            <div class="item-card-meta">₹${escapeHtml(item.price)} &nbsp;·&nbsp; ${escapeHtml(item.category || "")}</div>
+            <div class="item-card-meta">${escapeHtml(item.description || "")}</div>
+          </div>
+          <div class="item-card-actions">
+            <button class="form-btn btn-espresso btn-sm" onclick="editItem('${escapeHtml(item.id)}')">Edit</button>
+            <button class="form-btn btn-danger btn-sm"   onclick="deleteItem('${escapeHtml(item.id)}')">Delete</button>
+          </div>
+        </div>`;
+    });
+  });
+  div.innerHTML = html;
+}
+
+window.addItem = async function () {
+  const name     = document.getElementById("itemName").value.trim();
+  const price    = document.getElementById("itemPrice").value.trim();
+  const desc     = document.getElementById("itemDesc").value.trim();
+  const category = document.getElementById("itemCategory").value.trim();
+  const file     = document.getElementById("itemImage").files[0];
+  const veg      = document.querySelector('input[name="vegType"]:checked').value;
+
+  if (!name || !price || !category) {
+    setStatus("itemStatus", "Name, price and category are required.", false); return;
+  }
+
+  const id  = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + Date.now();
+  let imageUrl = "";
+  if (file) {
+    const storageRef = ref(storage, `menu/${outletId}/${Date.now()}-${file.name}`);
+    await uploadBytes(storageRef, file);
+    imageUrl = await getDownloadURL(storageRef);
+  }
+
+  await setDoc(menuDocRef(id), { name, price, description: desc, category, imageUrl, veg });
+  document.getElementById("itemName").value     = "";
+  document.getElementById("itemPrice").value    = "";
+  document.getElementById("itemDesc").value     = "";
+  document.getElementById("itemCategory").value = "";
+  document.getElementById("itemImage").value    = "";
+  setStatus("itemStatus", "Item added!");
+  loadItems();
+};
+
+window.deleteItem = async function (id) {
+  if (!confirm("Delete this item?")) return;
+  await deleteDoc(menuDocRef(id));
+  loadItems();
+};
+
+window.editItem = async function (id) {
+  const snap = await getDoc(menuDocRef(id));
+  if (!snap.exists()) { alert("Item not found"); return; }
+  const item = snap.data();
+  const newName     = prompt("Name",        item.name        || ""); if (!newName) return;
+  const newPrice    = prompt("Price",       item.price       || "");
+  const newDesc     = prompt("Description", item.description || "");
+  const newCategory = prompt("Category",    item.category    || "Others");
+  const newVegRaw   = prompt("Type (veg / nonveg)", item.veg || "veg");
+  const newVeg      = (newVegRaw || "veg").trim().toLowerCase() === "nonveg" ? "nonveg" : "veg";
+  await setDoc(menuDocRef(id), {
+    name: newName.trim(),
+    price: (newPrice || "").trim(),
+    description: (newDesc || "").trim(),
+    category: (newCategory || "Others").trim(),
+    imageUrl: item.imageUrl || "",
+    veg: newVeg
+  });
+  loadItems();
+};
+
+// ──────────────────────────────────────────────────
+// SECTION 2 — Offer Banner
+// ──────────────────────────────────────────────────
+async function loadOffer() {
+  const snap = await getDoc(offerRef());
+  document.getElementById("offerInput").value = snap.exists() ? (snap.data().message || "") : "";
+}
+
+window.saveOffer = async function () {
+  const msg = document.getElementById("offerInput").value.trim();
+  await setDoc(offerRef(), { message: msg });
+  setStatus("offerStatus", msg ? "Offer saved!" : "Offer cleared.");
+};
+
+window.clearOffer = async function () {
+  document.getElementById("offerInput").value = "";
+  await setDoc(offerRef(), { message: "" });
+  setStatus("offerStatus", "Offer cleared.");
+};
+
+// ──────────────────────────────────────────────────
+// SECTION 3 — Ads & Banners
+// ──────────────────────────────────────────────────
+window.saveAd = async function () {
+  const title = document.getElementById("adTitle").value.trim();
+  const body  = document.getElementById("adBody").value.trim();
+  const color = document.getElementById("adColor").value;
+  if (!title || !body) { setStatus("adStatus", "Title and body are required.", false); return; }
+  await addDoc(adsCol(), { title, body, color, active: false, createdAt: serverTimestamp() });
+  document.getElementById("adTitle").value = "";
+  document.getElementById("adBody").value  = "";
+  document.getElementById("adColor").value = "#fff3cd";
+  setStatus("adStatus", "Ad saved!");
+  loadAds();
+};
+
+window.toggleAd = async function (id, makeActive) {
+  if (makeActive) {
+    const snap  = await getDocs(query(adsCol(), where("active", "==", true)));
+    const batch = writeBatch(db);
+    snap.forEach(d => { if (d.id !== id) batch.update(d.ref, { active: false }); });
+    batch.update(adsDocRef(id), { active: true });
+    await batch.commit();
+  } else {
+    await updateDoc(adsDocRef(id), { active: false });
+  }
+  loadAds();
+};
+
+window.deleteAd = async function (id) {
+  if (!confirm("Delete this ad?")) return;
+  await deleteDoc(adsDocRef(id));
+  loadAds();
+};
+
+async function loadAds() {
+  const div  = document.getElementById("adList");
+  const snap = await getDocs(adsCol());
+  if (snap.empty) { div.innerHTML = `<p style="color:var(--muted);font-size:14px;">No ads yet.</p>`; return; }
+
+  const ads = [];
+  snap.forEach(d => ads.push({ id: d.id, ...d.data() }));
+  ads.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+  div.innerHTML = ads.map(ad => `
+    <div class="ad-card ${ad.active ? "active" : ""}">
+      <div class="ad-card-body">
+        <div class="ad-card-title">${escapeHtml(ad.title)}</div>
+        <div class="ad-card-text">${escapeHtml(ad.body)}</div>
+        <span class="ad-swatch" style="background:${escapeHtml(ad.color)};"></span>
+        <span class="ad-badge ${ad.active ? "on" : "off"}">${ad.active ? "Active" : "Inactive"}</span>
+      </div>
+      <div class="ad-actions">
+        <button class="form-btn btn-sm ${ad.active ? "btn-danger" : "btn-success"}"
+          onclick="toggleAd('${escapeHtml(ad.id)}', ${!ad.active})">
+          ${ad.active ? "Deactivate" : "Activate"}
+        </button>
+        <button class="form-btn btn-sm btn-danger" onclick="deleteAd('${escapeHtml(ad.id)}')">Delete</button>
+      </div>
+    </div>`).join("");
+}
+
+// ──────────────────────────────────────────────────
+// SECTION 4 — Cast TV
+// ──────────────────────────────────────────────────
+let presentationConnection = null;
+
+async function loadDisplaySettings() {
+  const snap = await getDoc(displayRef());
+  if (!snap.exists()) return;
+  const secs = snap.data().intervalSeconds || 8;
+  document.getElementById("intervalSlider").value = secs;
+  document.getElementById("intervalVal").textContent = secs + "s";
+}
+
+window.saveDisplaySettings = async function () {
+  const secs = parseInt(document.getElementById("intervalSlider").value, 10);
+  await setDoc(displayRef(), { intervalSeconds: secs }, { merge: true });
+  setStatus("displayStatus", "Saved!");
+};
+
+window.startCasting = async function () {
+  if (!window.PresentationRequest) {
+    document.getElementById("castStatus").textContent =
+      "Casting requires Chrome browser."; return;
+  }
+  try {
+    const castUrl = "https://menu.kapicoast.org/display.html?outlet=" + encodeURIComponent(outletId);
+    document.getElementById("castStatus").textContent = "Searching for devices…";
+    const request = new PresentationRequest([castUrl]);
+    request.getAvailability().then(av => {
+      if (!presentationConnection) {
+        document.getElementById("castStatus").textContent = av.value
+          ? "Devices found — pick one in the dialog."
+          : "No cast devices found. Check WiFi.";
+      }
+    }).catch(() => {});
+    presentationConnection = await request.start();
+    presentationConnection.addEventListener("close", () => {
+      document.getElementById("castStatus").textContent = "Casting stopped.";
+      document.getElementById("stopCastBtn").style.display  = "none";
+      document.getElementById("startCastBtn").style.display = "inline-block";
+      presentationConnection = null;
+    });
+    document.getElementById("castStatus").textContent = "Casting to TV — connected.";
+    document.getElementById("stopCastBtn").style.display  = "inline-block";
+    document.getElementById("startCastBtn").style.display = "none";
+  } catch (e) {
+    document.getElementById("castStatus").textContent =
+      e.name === "NotAllowedError" ? "Casting cancelled." : "Error: " + e.message;
+    console.error(e);
+  }
+};
+
+window.stopCasting = function () {
+  if (presentationConnection) { presentationConnection.close(); presentationConnection = null; }
+  document.getElementById("castStatus").textContent     = "Not casting.";
+  document.getElementById("stopCastBtn").style.display  = "none";
+  document.getElementById("startCastBtn").style.display = "inline-block";
+};
+
+// ──────────────────────────────────────────────────
+// Login / auth
+// ──────────────────────────────────────────────────
 window.submitLogin = async function () {
   const code  = document.getElementById("codeInput").value.trim().toUpperCase();
   const errEl = document.getElementById("loginError");
   errEl.textContent = "";
   if (!code) return;
-
   try {
     const snap = await getDoc(doc(db, "managers", code));
-
-    if (!snap.exists()) {
-      errEl.textContent = "Invalid code.";
-      return;
-    }
-
+    if (!snap.exists()) { errEl.textContent = "Invalid code."; return; }
     const data = snap.data();
-
-    if (data.active === false) {
-      errEl.textContent = "Access deactivated. Contact admin.";
-      return;
-    }
-
+    if (data.active === false) { errEl.textContent = "Access deactivated. Contact admin."; return; }
     sessionStorage.setItem("mgrCode",       code);
     sessionStorage.setItem("mgrOutletId",   data.outletId   || "");
     sessionStorage.setItem("mgrOutletName", data.outletName || data.outletId || "");
-
     showPanel(data.outletId, data.outletName || data.outletId);
-
   } catch (e) {
     errEl.textContent = "Error. Please try again.";
     console.error(e);
   }
 };
 
-// ── Sign out ──
 window.signOut = function () {
-  sessionStorage.removeItem("mgrCode");
-  sessionStorage.removeItem("mgrOutletId");
-  sessionStorage.removeItem("mgrOutletName");
+  ["mgrCode","mgrOutletId","mgrOutletName"].forEach(k => sessionStorage.removeItem(k));
   location.reload();
 };
 
-// ── Boot: check existing session ──
+// ── Boot ──
 const savedCode       = sessionStorage.getItem("mgrCode");
 const savedOutletId   = sessionStorage.getItem("mgrOutletId");
 const savedOutletName = sessionStorage.getItem("mgrOutletName");
-
 if (savedCode && savedOutletId) {
   showPanel(savedOutletId, savedOutletName || savedOutletId);
 }
