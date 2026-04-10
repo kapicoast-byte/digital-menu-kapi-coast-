@@ -260,7 +260,7 @@
       .sidebar-logo { display: none; }
       .sidebar-footer { display: none; }
       #navQR { display: none; }
-      #superAdminLink { display: none !important; }
+      #managerPortalLink { display: none !important; }
       .nav-item {
         flex-direction: column;
         padding: 6px 4px;
@@ -457,9 +457,9 @@
   <div class="nav-item" onclick="showSection('feedback', this)">
     <span class="nav-icon">⭐</span><span>Feedback</span>
   </div>
-  <a href="/superadmin.html" id="superAdminLink"
-     style="display:none;text-align:center;padding:10px;background:rgba(200,137,74,0.15);color:#C8894A;border-radius:8px;font-size:13px;text-decoration:none;margin:8px 12px 4px;font-weight:600;">
-    Super Admin
+  <a href="/manager.html" target="_blank" id="managerPortalLink"
+     style="display:none;text-align:center;padding:10px;background:rgba(200,137,74,0.1);color:#9A7D6B;border-radius:8px;font-size:12px;text-decoration:none;margin:8px 12px 4px;display:block;">
+    Open Manager Portal
   </a>
 </nav>
 
@@ -963,9 +963,9 @@ async function initApp() {
 function applyMode(mode, mgr) {
   document.getElementById("loginScreen").classList.remove("visible");
   if (mode === "super") {
-    document.getElementById("superAdminLink").style.display = "block";
+    document.getElementById("managerPortalLink").style.display = "block";
   } else if (mode === "manager" && mgr) {
-    document.getElementById("superAdminLink").style.display = "none";
+    document.getElementById("managerPortalLink").style.display = "none";
     selectedOutlet = mgr.outletId;
     sessionStorage.setItem("adminOutlet", mgr.outletId);
     sessionStorage.setItem("adminOutletName", mgr.outletName || mgr.outletId);
@@ -1358,27 +1358,75 @@ async function createOutlet() {
 window.createOutlet = createOutlet;
 
 async function loadOutletList() {
-  const div  = document.getElementById("outletList");
-  const snap = await getDocs(collection(db, "outlets"));
-  if (snap.empty) { div.innerHTML = "<p style='color:#999;font-size:14px;'>No outlets yet.</p>"; return; }
+  const div = document.getElementById("outletList");
+  div.innerHTML = "Loading…";
+
+  // Fetch outlets and managers in parallel
+  const [outletSnap, mgrSnap] = await Promise.all([
+    getDocs(collection(db, "outlets")),
+    getDocs(collection(db, "managers"))
+  ]);
+
+  if (outletSnap.empty) {
+    div.innerHTML = "<p style='color:#999;font-size:14px;'>No outlets yet.</p>";
+    return;
+  }
+
+  // Build map: outletId → manager code (only active managers)
+  const mgrByOutlet = {};
+  mgrSnap.forEach(d => {
+    const m = d.data();
+    if (m.outletId && m.active !== false) mgrByOutlet[m.outletId] = d.id;
+  });
 
   const outlets = [];
-  snap.forEach(d => outlets.push({ id: d.id, ...d.data() }));
+  outletSnap.forEach(d => outlets.push({ id: d.id, ...d.data() }));
 
-  div.innerHTML = outlets.map(o => `
-    <div class="outlet-card">
-      <div class="outlet-card-info">
-        <div class="outlet-card-name">${escapeHtml(o.name || o.id)}</div>
-        <div class="outlet-card-meta">${escapeHtml(o.location || "")}${o.city ? " · " + escapeHtml(o.city) : ""}${o.phone ? " · " + escapeHtml(o.phone) : ""}</div>
-        <div class="outlet-card-id">${escapeHtml(o.id)}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
-        <button class="btn btn-sm btn-primary" onclick="switchToOutlet('${escapeHtml(o.id)}')">Switch</button>
-        <button class="btn btn-sm btn-danger"  onclick="deleteOutlet('${escapeHtml(o.id)}')">Delete</button>
-      </div>
-    </div>`).join("");
+  // Fetch item counts for all outlets in parallel
+  const itemCounts = await Promise.all(
+    outlets.map(o => getDocs(collection(db, "outlets", o.id, "menu")).then(s => s.size))
+  );
+
+  div.innerHTML = outlets.map((o, i) => {
+    const mgrCode    = mgrByOutlet[o.id];
+    const itemCount  = itemCounts[i];
+    const mgrSection = mgrCode
+      ? `<div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:6px;">
+           Manager Code: <span style="font-family:'Courier New',monospace;letter-spacing:0.06em;background:#e8f5e9;padding:2px 6px;border-radius:4px;">${escapeHtml(mgrCode)}</span>
+         </div>`
+      : `<div style="font-size:12px;color:#9A7D6B;margin-top:6px;display:flex;align-items:center;gap:8px;">
+           No manager assigned
+           <button class="btn btn-sm btn-success" onclick="createManagerForOutlet('${escapeHtml(o.id)}','${escapeHtml(o.name || o.id)}')">Create Code</button>
+         </div>`;
+    return `
+      <div class="outlet-card">
+        <div class="outlet-card-info">
+          <div class="outlet-card-name">${escapeHtml(o.name || o.id)}</div>
+          <div class="outlet-card-meta">${escapeHtml(o.location || "")}${o.city ? " · " + escapeHtml(o.city) : ""}</div>
+          <div class="outlet-card-id">${escapeHtml(o.id)} · ${itemCount} item${itemCount !== 1 ? "s" : ""}</div>
+          ${mgrSection}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:stretch;min-width:120px;">
+          <button class="btn btn-sm btn-primary" onclick="switchToOutlet('${escapeHtml(o.id)}')">Manage</button>
+          ${mgrCode
+            ? `<a href="/manager.html" target="_blank" class="btn btn-sm btn-success" style="text-decoration:none;text-align:center;">Manager Portal</a>`
+            : ""}
+          <button class="btn btn-sm btn-danger" onclick="deleteOutlet('${escapeHtml(o.id)}')">Delete</button>
+        </div>
+      </div>`;
+  }).join("");
 }
 const loadOutlets = loadOutletList;
+
+window.createManagerForOutlet = async function (outletId, outletName) {
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  const code   = (outletId.slice(0, 4) + suffix).toUpperCase();
+  await setDoc(doc(db, "managers", code), {
+    code, outletId, outletName, active: true, createdAt: serverTimestamp()
+  });
+  alert("Manager code created: " + code + "\nShare this with the outlet manager.");
+  loadOutletList();
+};
 
 window.switchToOutlet = async function (id) {
   selectedOutlet = id;
