@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kapi Coast — Manager</title>
+  <title>Digital Menu</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -248,18 +248,162 @@
       margin: 20px 0 8px;
     }
     .item-card {
-      display: flex; gap: 12px; background: #fff;
-      padding: 12px; margin-bottom: 10px;
+      display: flex; height: 80px; background: #fff;
+      padding: 0 4px 0 0; margin-bottom: 8px;
       border-radius: 12px; align-items: center;
       box-shadow: 0 1px 6px rgba(44,26,14,0.07);
+      overflow: hidden; position: relative;
     }
-    .item-card img, .item-card .item-illus {
-      width: 58px; height: 58px; border-radius: 8px;
-      object-fit: cover; background: #EDE5DB; flex-shrink: 0;
-    }
-    .item-card .item-illus {
+    .ic-img {
+      width: 72px; height: 72px; flex-shrink: 0;
+      border-radius: 8px; margin: 0 10px 0 4px;
+      overflow: hidden; background: #EDE5DB;
       display: flex; align-items: center; justify-content: center;
     }
+    .ic-img img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; }
+    .ic-body { flex: 1; min-width: 0; padding: 6px 0; }
+    .ic-name {
+      font-size: 14px; font-weight: 700; color: var(--espresso);
+      display: flex; align-items: center; gap: 5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ic-meta {
+      font-size: 12px; color: var(--muted); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ic-desc {
+      font-size: 12px; color: var(--muted); margin-top: 1px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ic-tags { display: flex; gap: 4px; flex-wrap: nowrap; margin-top: 3px; overflow: hidden; }
+    .ic-tag {
+      font-size: 10px; font-weight: 700; border-radius: 4px;
+      padding: 2px 6px; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0;
+    }
+    .ic-tag.popular { background: #FFF0D0; color: #B85C00; }
+    .ic-tag.daily-special { background: #E8F5E9; color: #2E7D32; }
+    .ic-tag.archived { background: #e0e0e0; color: #777; text-transform: uppercase; }
+    .ic-tag.time-avail { background: #FFF3CD; color: #856404; border: 1px solid #FFECB5; }
+    .ic-tag.time-unavail { background: #f5f5f5; color: #888; }
+    .ic-actions { flex-shrink: 0; display: flex; align-items: center; }
+    .ic-menu-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 22px; font-weight: 700;
+      padding: 8px 10px; border-radius: 8px; line-height: 1;
+      transition: background 0.15s;
+    }
+    .ic-menu-btn:hover { background: #F5EDE4; color: var(--espresso); }
+
+    /* ── Global dropdown ── */
+    #globalDropdown {
+      position: fixed; z-index: 2000;
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(44,26,14,0.18);
+      min-width: 200px; padding: 6px 0; display: none;
+    }
+    #globalDropdown.open { display: block; }
+    .dd-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; font-size: 13px; font-weight: 600;
+      color: var(--espresso); cursor: pointer; border: none;
+      background: none; width: 100%; text-align: left;
+      transition: background 0.1s; white-space: nowrap;
+    }
+    .dd-item:hover { background: #FAF6F0; }
+    .dd-item.danger { color: #c62828; }
+    .dd-sep { height: 1px; background: #F0EAE3; margin: 4px 0; }
+
+    /* ── Item profile drawer ── */
+    .drawer-backdrop {
+      position: fixed; inset: 0; z-index: 1500;
+      background: rgba(0,0,0,0.35);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .item-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 380px; max-width: 100%;
+      background: #fff; z-index: 1600;
+      box-shadow: -4px 0 32px rgba(44,26,14,0.15);
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto; display: flex; flex-direction: column;
+    }
+    .item-drawer.open { transform: translateX(0); }
+    .drawer-header {
+      display: flex; justify-content: flex-end; padding: 12px 14px 0;
+      position: sticky; top: 0; background: #fff; z-index: 10;
+    }
+    .drawer-close-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 22px; color: var(--muted); padding: 4px 8px;
+      border-radius: 8px; transition: background 0.15s;
+    }
+    .drawer-close-btn:hover { background: #F5EDE4; }
+    .drawer-img { width: 100%; height: 200px; background: #EDE5DB;
+      display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .drawer-img img { width: 100%; height: 200px; object-fit: cover; }
+    .drawer-body { padding: 18px 20px 32px; }
+    .drawer-name { font-size: 22px; font-weight: 800; color: var(--espresso); margin-bottom: 10px; }
+    .drawer-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .drawer-pill { font-size: 12px; font-weight: 700; border-radius: 20px; padding: 4px 10px; }
+    .drawer-pill.veg { background: #E8F5E9; color: #2E7D32; }
+    .drawer-pill.nonveg { background: #FFEBEE; color: #c62828; }
+    .drawer-pill.cat { background: #F5EDE4; color: var(--espresso); }
+    .drawer-price { font-size: 20px; font-weight: 800; color: var(--caramel); margin-bottom: 10px; }
+    .drawer-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+    .drawer-divider { height: 1px; background: #F0EAE3; margin: 14px 0; }
+    .drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .drawer-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; background: #FAF6F0; border-radius: 10px;
+    }
+    .drawer-toggle-label { font-size: 13px; font-weight: 600; color: var(--espresso); }
+    .toggle-switch { position: relative; width: 40px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ccc; border-radius: 22px; transition: 0.2s;
+    }
+    .toggle-slider:before {
+      position: absolute; content: "";
+      height: 16px; width: 16px; left: 3px; bottom: 3px;
+      background: white; border-radius: 50%; transition: 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--caramel); }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+    .drawer-time-row { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .drawer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .drawer-action-btn {
+      padding: 10px 0; border-radius: 10px; font-size: 13px; font-weight: 700;
+      border: 1.5px solid #E0D5CC; background: #fff; cursor: pointer;
+      color: var(--espresso); transition: background 0.15s; text-align: center;
+    }
+    .drawer-action-btn:hover { background: #FAF6F0; }
+    .drawer-action-btn.danger { color: #c62828; border-color: #ffc1c1; }
+    .drawer-action-btn.danger:hover { background: #fff5f5; }
+    @media (max-width: 480px) { .item-drawer { width: 100%; } }
+
+    /* ── AI Refine popup ── */
+    .ai-popup {
+      position: fixed; inset: 0; z-index: 3000;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .ai-popup.hidden { display: none; }
+    .ai-popup-box {
+      background: #fff; border-radius: 18px; padding: 28px 24px 24px;
+      width: 100%; max-width: 460px;
+      box-shadow: 0 8px 40px rgba(44,26,14,0.2);
+    }
+    .ai-popup-box h3 { font-size: 16px; font-weight: 800; color: var(--espresso); margin-bottom: 14px; }
+    .ai-desc-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .ai-desc-old { background: #F5F5F5; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.5; }
+    .ai-desc-new { background: #FFF8EE; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--caramel); margin-bottom: 14px; line-height: 1.5; font-weight: 600; border: 1px solid #FFDFA0; min-height: 48px; }
+    .ai-popup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ai-status { font-size: 12px; color: var(--muted); margin-bottom: 10px; min-height: 16px; }
 
     /* ── Archived item cards ── */
     .item-card.archived-card {
@@ -318,10 +462,27 @@
       font-size: 13px; color: var(--muted);
       margin-top: 8px; min-height: 18px;
     }
-    .mgr-toolbar {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      align-items: center; margin-bottom: 14px;
+    /* ── Tools panel ── */
+    .tools-panel { margin-bottom: 14px; }
+    .tools-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
+    .tools-toggle-btn {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      background: none; border: 1.5px solid #E0D5CC;
+      border-radius: 8px; padding: 5px 12px; cursor: pointer;
+      transition: background 0.15s;
     }
+    .tools-toggle-btn:hover { background: #F5EDE4; }
+    .tools-body { display: none; margin-top: 10px; }
+    .tools-body.open { display: block; }
+    .tools-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+    .tool-btn {
+      font-size: 12px; font-weight: 600; color: var(--espresso);
+      background: #fff; border: 1.5px solid #E0D5CC;
+      border-radius: 8px; padding: 5px 12px; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s; white-space: nowrap;
+    }
+    .tool-btn:hover { background: #F5EDE4; border-color: var(--caramel); }
+    .tool-btn.active { background: var(--caramel); color: #fff; border-color: var(--caramel); }
 
     /* ── Drag reorder ── */
     .drag-handle {
@@ -416,13 +577,7 @@
         align-content: start;
       }
     }
-    .item-card-info { flex: 1; }
-    .item-card-name {
-      font-size: 15px; font-weight: 700; color: var(--espresso);
-      display: flex; align-items: center; gap: 6px;
-    }
-    .item-card-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .item-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    /* item-card-info legacy rules removed — using .ic-* instead */
 
     /* ── Ad cards ── */
     .ad-card {
@@ -491,7 +646,7 @@
 <!-- ── Login screen ── -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-brand">KAPI COAST</div>
+    <div class="login-brand">DIGITAL MENU</div>
     <div class="login-sub">Manager Access</div>
     <input class="login-input" type="text" id="codeInput"
            placeholder="Enter Access Code"
@@ -509,7 +664,7 @@
   <!-- Header -->
   <header class="header">
     <div class="header-brand">
-      <span class="header-logo">Kapi Coast</span>
+      <span class="header-logo">Digital Menu</span>
       <span class="header-outlet">Manager Panel</span>
     </div>
     <div class="header-right">
@@ -599,17 +754,27 @@
           <div class="form-status" id="itemStatus"></div>
         </div>
         <hr class="section-hr">
-        <div class="mgr-toolbar">
-          <button class="form-btn btn-espresso btn-sm" onclick="openBulkEdit()">Bulk Edit Prices</button>
-          <button class="form-btn btn-espresso btn-sm" onclick="openBulkUpload()">Bulk Upload</button>
-          <button class="form-btn btn-espresso btn-sm" onclick="openCopyMenu()">Copy Menu to Outlet</button>
-          <button class="form-btn btn-espresso btn-sm" onclick="openPhotoImport()">Import from Photo</button>
-          <button class="form-btn btn-espresso btn-sm" id="reorderToggleBtn" onclick="toggleReorder()">Reorder</button>
-          <button class="form-btn btn-espresso btn-sm" id="saveOrderBtn" style="display:none;" onclick="saveOrder()">Save Order</button>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;margin-left:auto;">
-            <input type="checkbox" id="showArchivedToggle" style="accent-color:var(--caramel);" onchange="toggleArchivedView()">
-            Show Archived
-          </label>
+        <div class="tools-panel">
+          <div class="tools-header">
+            <button class="tools-toggle-btn" id="toolsToggleBtn" onclick="toggleTools()">Tools ▼</button>
+          </div>
+          <div class="tools-body" id="toolsBody">
+            <div class="tools-row">
+              <button class="tool-btn" onclick="openBulkUpload()">↑ Bulk Upload CSV</button>
+              <button class="tool-btn" onclick="downloadCSVTemplate()">↓ Download Template</button>
+              <button class="tool-btn" id="reorderToggleBtn" onclick="toggleReorder()">⇅ Reorder Mode</button>
+              <button class="tool-btn" id="saveOrderBtn" style="display:none;" onclick="saveOrder()">✓ Save Order</button>
+            </div>
+            <div class="tools-row">
+              <button class="tool-btn" onclick="openBulkEdit()">✏ Bulk Edit Prices</button>
+              <button class="tool-btn" onclick="openCopyMenu()">⎘ Copy to Outlet</button>
+              <button class="tool-btn" onclick="openPhotoImport()">📷 Import from Photo</button>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;">
+                <input type="checkbox" id="showArchivedToggle" style="accent-color:var(--caramel);" onchange="toggleArchivedView()">
+                Show Archived
+              </label>
+            </div>
+          </div>
         </div>
         <div class="items-list" id="menuList">Loading…</div>
       </div>
@@ -940,20 +1105,22 @@ async function loadItems() {
   console.log("loadItems — outletId:", getOutletId());
   const div  = document.getElementById("menuList");
   div.innerHTML = "Loading…";
+  window._itemsCache = {};
   const snap = await getDocs(menuCol());
   if (snap.empty) { div.innerHTML = `<p style="color:var(--muted);font-size:14px;">No items yet.</p>`; return; }
 
   const activeCats   = {};
   const archivedCats = {};
   snap.forEach(d => {
-    const item = d.data();
+    const item = { ...d.data(), id: d.id };
+    window._itemsCache[d.id] = item;
     const cat  = (item.category || "Others").trim();
     if (item.archived === true) {
       if (!archivedCats[cat]) archivedCats[cat] = [];
-      archivedCats[cat].push({ ...item, id: d.id });
+      archivedCats[cat].push(item);
     } else {
       if (!activeCats[cat]) activeCats[cat] = [];
-      activeCats[cat].push({ ...item, id: d.id });
+      activeCats[cat].push(item);
     }
   });
   // Sort by sortOrder if present
@@ -962,30 +1129,36 @@ async function loadItems() {
 
   function itemCardHtml(item, isArchived) {
     const dot = item.veg === "nonveg"
-      ? `<span class="veg-dot-nonveg" style="width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`
-      : `<span class="veg-dot-veg"    style="width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`;
-    const imgBlock = item.imageUrl
-      ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" onerror="this.replaceWith((function(){const d=document.createElement('div');d.className='item-illus';d.innerHTML='${getFoodIllustration(item.category, item.name).replace(/'/g, "\\'")}';return d;})())">`
-      : `<div class="item-illus">${getFoodIllustration(item.category, item.name)}</div>`;
-    const archivedBadge = isArchived ? `<span class="archived-label">Archived</span>` : "";
-    const timeBadge = isArchived ? "" : timeAvailBadge(item);
-    const handle = `<span class="drag-handle">≡</span>`;
+      ? `<span class="veg-dot-nonveg" style="width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`
+      : `<span class="veg-dot-veg" style="width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`;
+    const illus = getFoodIllustration(item.category, item.name);
+    const imgHtml = item.imageUrl
+      ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div style=\\'display:flex;align-items:center;justify-content:center;\\'>${illus.replace(/'/g,"\\'")}</div>')">`
+      : illus;
+    const tags = [];
+    if (item.popular)      tags.push(`<span class="ic-tag popular">Popular</span>`);
+    if (item.dailySpecial) tags.push(`<span class="ic-tag daily-special">Daily Special</span>`);
+    if (isArchived)        tags.push(`<span class="ic-tag archived">Archived</span>`);
+    if (!isArchived && item.availableFrom && item.availableTo) {
+      const tb = timeAvailBadge(item);
+      if (tb.includes("time-avail-badge")) tags.push(`<span class="ic-tag time-avail">${item.availableFrom}–${item.availableTo}</span>`);
+      else tags.push(`<span class="ic-tag time-unavail">Avail. ${item.availableFrom}–${item.availableTo}</span>`);
+    }
+    const handle = `<span class="drag-handle" style="font-size:20px;color:var(--muted);cursor:grab;padding:0 10px 0 8px;flex-shrink:0;user-select:none;display:none;align-items:center;">≡</span>`;
     const draggable = (!isArchived && mgrReorderMode) ? `draggable="true"` : "";
-    const actions = isArchived
-      ? `<button class="form-btn btn-espresso btn-sm" onclick="restoreItem('${escapeHtml(item.id)}')">Restore</button>
-         <button class="form-btn btn-danger btn-sm"   onclick="deleteForever('${escapeHtml(item.id)}')">Delete Forever</button>`
-      : `<button class="form-btn btn-espresso btn-sm" onclick="editItem('${escapeHtml(item.id)}')">Edit</button>
-         <button class="form-btn btn-espresso btn-sm" onclick="duplicateItem('${escapeHtml(item.id)}')">Duplicate</button>
-         <button class="form-btn btn-danger btn-sm"   onclick="archiveItem('${escapeHtml(item.id)}')">Archive</button>`;
     return `
       <div class="item-card${isArchived ? " archived-card" : ""}" ${draggable} data-id="${escapeHtml(item.id)}" data-cat="${escapeHtml(item.category || "Others")}">
-        ${handle}${imgBlock}
-        <div class="item-card-info">
-          <div class="item-card-name">${dot}${escapeHtml(item.name)}${archivedBadge}${timeBadge}</div>
-          <div class="item-card-meta">₹${escapeHtml(item.price)} &nbsp;·&nbsp; ${escapeHtml(item.category || "")}</div>
-          <div class="item-card-meta">${escapeHtml(item.description || "")}</div>
+        ${handle}
+        <div class="ic-img">${imgHtml}</div>
+        <div class="ic-body">
+          <div class="ic-name">${dot} ${escapeHtml(item.name)}</div>
+          <div class="ic-meta">${escapeHtml(item.category || "")} &nbsp;·&nbsp; ₹${escapeHtml(String(item.price))}</div>
+          ${item.description ? `<div class="ic-desc">${escapeHtml(item.description)}</div>` : ""}
+          ${tags.length ? `<div class="ic-tags">${tags.join("")}</div>` : ""}
         </div>
-        <div class="item-card-actions">${actions}</div>
+        <div class="ic-actions">
+          <button class="ic-menu-btn" onclick="openItemMenu(this,'${escapeHtml(item.id)}')" title="Actions">⋮</button>
+        </div>
       </div>`;
   }
 
@@ -1076,6 +1249,169 @@ window.duplicateItem = async function (id) {
 window.toggleArchivedView = function () {
   mgrShowArchived = document.getElementById("showArchivedToggle").checked;
   loadItems();
+};
+
+// ── Tools panel toggle ──
+window.toggleTools = function () {
+  const body = document.getElementById("toolsBody");
+  const btn  = document.getElementById("toolsToggleBtn");
+  const isOpen = body.classList.toggle("open");
+  btn.textContent = isOpen ? "Tools ▲" : "Tools ▼";
+};
+
+// ── Global item dropdown ──
+window._itemsCache = window._itemsCache || {};
+window.openItemMenu = function (btn, itemId) {
+  const item = window._itemsCache[itemId];
+  if (!item) return;
+  const dd = document.getElementById("globalDropdown");
+  const isArchived = item.archived === true;
+  dd.innerHTML = `
+    <button class="dd-item" onclick="openDrawer('${escapeHtml(itemId)}');closeDropdown()">👁 View Profile</button>
+    <button class="dd-item" onclick="editItem('${escapeHtml(itemId)}');closeDropdown()">✏️ Edit</button>
+    <button class="dd-item" onclick="duplicateItem('${escapeHtml(itemId)}');closeDropdown()">⎘ Duplicate</button>
+    <button class="dd-item" onclick="aiRefineDescription('${escapeHtml(itemId)}')">✨ AI Refine Description</button>
+    <div class="dd-sep"></div>
+    ${isArchived
+      ? `<button class="dd-item" onclick="restoreItem('${escapeHtml(itemId)}');closeDropdown()">↩ Restore</button>
+         <button class="dd-item danger" onclick="deleteForever('${escapeHtml(itemId)}');closeDropdown()">🗑 Delete Forever</button>`
+      : `<button class="dd-item" onclick="archiveItem('${escapeHtml(itemId)}');closeDropdown()">📦 Archive</button>`}
+  `;
+  const rect = btn.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 6) + "px";
+  dd.style.right = (window.innerWidth - rect.right) + "px";
+  dd.style.left = "auto";
+  dd.classList.add("open");
+  setTimeout(() => document.addEventListener("click", _ddOutsideHandler, { once: true }), 0);
+};
+function _ddOutsideHandler(e) {
+  const dd = document.getElementById("globalDropdown");
+  if (dd && !dd.contains(e.target)) closeDropdown();
+}
+window.closeDropdown = function () {
+  const dd = document.getElementById("globalDropdown");
+  if (dd) dd.classList.remove("open");
+};
+
+// ── Item profile drawer ──
+window.openDrawer = function (itemId) {
+  const item = window._itemsCache[itemId];
+  if (!item) return;
+  _renderDrawer(item);
+  document.getElementById("drawerBackdrop").classList.add("open");
+  document.getElementById("itemDrawer").classList.add("open");
+};
+window.closeDrawer = function () {
+  document.getElementById("drawerBackdrop").classList.remove("open");
+  document.getElementById("itemDrawer").classList.remove("open");
+};
+function _renderDrawer(item) {
+  const isVeg = item.veg !== "nonveg";
+  const illus = getFoodIllustration(item.category, item.name);
+  const imgHtml = item.imageUrl
+    ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}">`
+    : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:200px;background:#EDE5DB;">${illus}</div>`;
+  document.getElementById("drawerImgWrap").innerHTML = imgHtml;
+  document.getElementById("drawerName").textContent = item.name || "";
+  document.getElementById("drawerPills").innerHTML =
+    `<span class="drawer-pill ${isVeg ? "veg" : "nonveg"}">${isVeg ? "Veg" : "Non-Veg"}</span>` +
+    (item.category ? `<span class="drawer-pill cat">${escapeHtml(item.category)}</span>` : "");
+  document.getElementById("drawerPrice").textContent = "₹" + (item.price || "");
+  document.getElementById("drawerDesc").textContent = item.description || "";
+  const timeRow = (item.availableFrom && item.availableTo)
+    ? `🕐 Available ${escapeHtml(item.availableFrom)} – ${escapeHtml(item.availableTo)}`
+    : "";
+  document.getElementById("drawerTimeRow").textContent = timeRow;
+
+  const toggleDefs = [
+    { key: "Popular",     field: "popular"      },
+    { key: "DailySpecial",field: "dailySpecial" },
+    { key: "Available",   field: "available"    },
+    { key: "Visible",     field: "visible"      }
+  ];
+  toggleDefs.forEach(({ key, field }) => {
+    const el = document.getElementById("drawerToggle" + key);
+    if (!el) return;
+    let val = !!item[field];
+    if (field === "available" && item[field] === undefined) val = true;
+    if (field === "visible"   && item[field] === undefined) val = true;
+    el.checked = val;
+    el.onchange = () => _saveDrawerToggle(item.id, field, el.checked);
+  });
+
+  document.getElementById("drawerBtnRefine").onclick    = () => aiRefineDescription(item.id);
+  document.getElementById("drawerBtnEdit").onclick      = () => { closeDrawer(); editItem(item.id); };
+  document.getElementById("drawerBtnDuplicate").onclick = () => { closeDrawer(); duplicateItem(item.id); };
+  document.getElementById("drawerBtnArchive").onclick   = () => { closeDrawer(); archiveItem(item.id); };
+}
+async function _saveDrawerToggle(itemId, field, value) {
+  try {
+    await updateDoc(menuDocRef(itemId), { [field]: value });
+    if (window._itemsCache[itemId]) window._itemsCache[itemId][field] = value;
+  } catch (e) { console.error("Toggle save failed:", e); }
+}
+
+// ── AI Refine Description (Gemini) ──
+async function _getGeminiKey() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "config"));
+    return snap.exists() ? (snap.data().geminiKey || "") : "";
+  } catch { return ""; }
+}
+window.aiRefineDescription = function (itemId) {
+  closeDropdown();
+  closeDrawer();
+  const item = window._itemsCache[itemId];
+  if (!item) return;
+  const popup = document.getElementById("aiRefinePop");
+  popup.dataset.itemId = itemId;
+  document.getElementById("aiOldDesc").textContent = item.description || "(no description)";
+  document.getElementById("aiNewDesc").textContent = "";
+  document.getElementById("aiRefineStatus").textContent = "Generating…";
+  popup.classList.remove("hidden");
+  _doGeminiRefine(item);
+};
+async function _doGeminiRefine(item) {
+  try {
+    const key = await _getGeminiKey();
+    if (!key) {
+      document.getElementById("aiRefineStatus").textContent = "No Gemini API key set. Add it in Manage Outlets → AI Settings.";
+      return;
+    }
+    const prompt = `Write a short, appetizing 1–2 sentence menu description for a cafe item called "${item.name}" (category: "${item.category || "Food"}"). Current description: "${item.description || "none"}". Be concise and mouth-watering.`;
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    const newDesc = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    if (!newDesc) throw new Error("Empty response from Gemini");
+    document.getElementById("aiNewDesc").textContent = newDesc;
+    document.getElementById("aiRefineStatus").textContent = "";
+  } catch (e) {
+    document.getElementById("aiRefineStatus").textContent = "Error: " + e.message;
+  }
+}
+window.aiUseDescription = async function () {
+  const popup   = document.getElementById("aiRefinePop");
+  const itemId  = popup.dataset.itemId;
+  const newDesc = document.getElementById("aiNewDesc").textContent.trim();
+  if (!newDesc || !itemId) return;
+  await updateDoc(menuDocRef(itemId), { description: newDesc });
+  if (window._itemsCache[itemId]) window._itemsCache[itemId].description = newDesc;
+  popup.classList.add("hidden");
+  loadItems();
+};
+window.aiTryAgain = function () {
+  const popup  = document.getElementById("aiRefinePop");
+  const itemId = popup.dataset.itemId;
+  if (!itemId) return;
+  document.getElementById("aiNewDesc").textContent = "";
+  document.getElementById("aiRefineStatus").textContent = "Generating…";
+  _doGeminiRefine(window._itemsCache[itemId]);
+};
+window.cancelAiRefine = function () {
+  document.getElementById("aiRefinePop").classList.add("hidden");
 };
 
 window.editItem = async function (id) {
@@ -1766,6 +2102,80 @@ if (savedCode && savedOutletId) {
   console.log("Boot: no session found, showing login screen");
 }
 </script>
+
+<!-- ── Global dropdown ── -->
+<div id="globalDropdown"></div>
+
+<!-- ── Drawer backdrop + drawer ── -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<div class="item-drawer" id="itemDrawer">
+  <div class="drawer-header">
+    <button class="drawer-close-btn" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-img" id="drawerImgWrap"></div>
+  <div class="drawer-body">
+    <div class="drawer-name" id="drawerName"></div>
+    <div class="drawer-pills" id="drawerPills"></div>
+    <div class="drawer-price" id="drawerPrice"></div>
+    <div class="drawer-desc" id="drawerDesc"></div>
+    <div class="drawer-time-row" id="drawerTimeRow"></div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-grid">
+      <div class="drawer-toggle-row">
+        <span class="drawer-toggle-label">Popular</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drawerTogglePopular">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="drawer-toggle-row">
+        <span class="drawer-toggle-label">Daily Special</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drawerToggleDailySpecial">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="drawer-toggle-row">
+        <span class="drawer-toggle-label">Available</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drawerToggleAvailable">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="drawer-toggle-row">
+        <span class="drawer-toggle-label">Visible</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drawerToggleVisible">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-actions">
+      <button class="drawer-action-btn" id="drawerBtnRefine">✨ AI Refine Desc</button>
+      <button class="drawer-action-btn" id="drawerBtnEdit">✏️ Edit Item</button>
+      <button class="drawer-action-btn" id="drawerBtnDuplicate">⎘ Duplicate</button>
+      <button class="drawer-action-btn danger" id="drawerBtnArchive">📦 Archive</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI Refine popup ── -->
+<div class="ai-popup hidden" id="aiRefinePop">
+  <div class="ai-popup-box">
+    <h3>✨ AI Refine Description</h3>
+    <div class="ai-desc-label">Current Description</div>
+    <div class="ai-desc-old" id="aiOldDesc"></div>
+    <div class="ai-desc-label">New Suggestion</div>
+    <div class="ai-desc-new" id="aiNewDesc"></div>
+    <div class="ai-status" id="aiRefineStatus"></div>
+    <div class="ai-popup-actions">
+      <button class="form-btn btn-espresso btn-sm" onclick="aiUseDescription()">Use This</button>
+      <button class="form-btn btn-espresso btn-sm" onclick="aiTryAgain()">Try Again</button>
+      <button class="form-btn btn-sm" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="cancelAiRefine()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
