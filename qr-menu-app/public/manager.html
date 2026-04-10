@@ -535,15 +535,18 @@ const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
 
-const outletId = sessionStorage.getItem("mgrOutletId") || "";
+// ── Outlet ID — read at call time so login can set it after page load ──
+function getOutletId() {
+  return window.mgrOutletId || sessionStorage.getItem("mgrOutletId") || "";
+}
 
-// ── Helpers ──
-const menuCol    = () => collection(db, "outlets", outletId, "menu");
-const adsCol     = () => collection(db, "outlets", outletId, "ads");
-const menuDocRef = id => doc(db, "outlets", outletId, "menu", id);
-const adsDocRef  = id => doc(db, "outlets", outletId, "ads",  id);
-const offerRef   = () => doc(db, "outlets", outletId, "settings", "offer");
-const displayRef = () => doc(db, "outlets", outletId, "settings", "display");
+// ── Firestore path helpers ──
+const menuCol    = () => collection(db, "outlets", getOutletId(), "menu");
+const adsCol     = () => collection(db, "outlets", getOutletId(), "ads");
+const menuDocRef = id => doc(db, "outlets", getOutletId(), "menu", id);
+const adsDocRef  = id => doc(db, "outlets", getOutletId(), "ads",  id);
+const offerRef   = () => doc(db, "outlets", getOutletId(), "settings", "offer");
+const displayRef = () => doc(db, "outlets", getOutletId(), "settings", "display");
 
 function escapeHtml(v) {
   return String(v ?? "").replace(/[&<>"']/g,
@@ -574,6 +577,8 @@ window.showSection = function (sectionId) {
 
 // ── Show panel after login ──
 function showPanel(oId, oName) {
+  window.mgrOutletId = oId; // set global FIRST so getOutletId() returns correctly
+  console.log("showPanel — outletId:", getOutletId());
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("appShell").classList.add("visible");
   document.getElementById("headerOutletName").textContent  = oName;
@@ -581,12 +586,15 @@ function showPanel(oId, oName) {
   const castUrl = "https://menu.kapicoast.org/display.html?outlet=" + encodeURIComponent(oId);
   document.getElementById("previewDisplayLink").href = castUrl;
   loadItems();
+  loadOffer();
+  loadAds();
 }
 
 // ──────────────────────────────────────────────────
 // SECTION 1 — Menu Items
 // ──────────────────────────────────────────────────
 async function loadItems() {
+  console.log("loadItems — outletId:", getOutletId());
   const div  = document.getElementById("menuList");
   div.innerHTML = "Loading…";
   const snap = await getDocs(menuCol());
@@ -627,6 +635,7 @@ async function loadItems() {
 }
 
 window.addItem = async function () {
+  console.log("addItem — outletId:", getOutletId());
   const name     = document.getElementById("itemName").value.trim();
   const price    = document.getElementById("itemPrice").value.trim();
   const desc     = document.getElementById("itemDesc").value.trim();
@@ -643,7 +652,7 @@ window.addItem = async function () {
   const id  = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + Date.now();
   let imageUrl = "";
   if (file) {
-    const storageRef = ref(storage, `menu/${outletId}/${Date.now()}-${file.name}`);
+    const storageRef = ref(storage, `menu/${getOutletId()}/${Date.now()}-${file.name}`);
     await uploadBytes(storageRef, file);
     imageUrl = await getDownloadURL(storageRef);
   }
@@ -691,6 +700,7 @@ window.editItem = async function (id) {
 // SECTION 2 — Offer Banner
 // ──────────────────────────────────────────────────
 async function loadOffer() {
+  console.log("loadOffer — outletId:", getOutletId());
   const snap = await getDoc(offerRef());
   document.getElementById("offerInput").value = snap.exists() ? (snap.data().message || "") : "";
 }
@@ -711,6 +721,7 @@ window.clearOffer = async function () {
 // SECTION 3 — Ads & Banners
 // ──────────────────────────────────────────────────
 window.saveAd = async function () {
+  console.log("saveAd — outletId:", getOutletId());
   const title = document.getElementById("adTitle").value.trim();
   const body  = document.getElementById("adBody").value.trim();
   const color = document.getElementById("adColor").value;
@@ -743,6 +754,7 @@ window.deleteAd = async function (id) {
 };
 
 async function loadAds() {
+  console.log("loadAds — outletId:", getOutletId());
   const div  = document.getElementById("adList");
   const snap = await getDocs(adsCol());
   if (snap.empty) { div.innerHTML = `<p style="color:var(--muted);font-size:14px;">No ads yet.</p>`; return; }
@@ -775,6 +787,7 @@ async function loadAds() {
 let presentationConnection = null;
 
 async function loadDisplaySettings() {
+  console.log("loadDisplaySettings — outletId:", getOutletId());
   const snap = await getDoc(displayRef());
   if (!snap.exists()) return;
   const secs = snap.data().intervalSeconds || 8;
@@ -794,7 +807,7 @@ window.startCasting = async function () {
       "Casting requires Chrome browser."; return;
   }
   try {
-    const castUrl = "https://menu.kapicoast.org/display.html?outlet=" + encodeURIComponent(outletId);
+    const castUrl = "https://menu.kapicoast.org/display.html?outlet=" + encodeURIComponent(getOutletId());
     document.getElementById("castStatus").textContent = "Searching for devices…";
     const request = new PresentationRequest([castUrl]);
     request.getAvailability().then(av => {
@@ -861,7 +874,10 @@ const savedCode       = sessionStorage.getItem("mgrCode");
 const savedOutletId   = sessionStorage.getItem("mgrOutletId");
 const savedOutletName = sessionStorage.getItem("mgrOutletName");
 if (savedCode && savedOutletId) {
+  console.log("Boot: restoring session for outlet:", savedOutletId);
   showPanel(savedOutletId, savedOutletName || savedOutletId);
+} else {
+  console.log("Boot: no session found, showing login screen");
 }
 </script>
 
