@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Digital Menu</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -124,10 +124,87 @@
 
     /* ── Menu item card ── */
     .item-card {
-      display: flex; gap: 10px; background: white; padding: 10px;
-      margin-bottom: 10px; border-radius: 8px; align-items: center;
+      display: flex; height: 80px; background: white; padding: 0 4px 0 0;
+      margin-bottom: 8px; border-radius: 10px; align-items: center;
+      border: 1px solid #eee; overflow: hidden; position: relative;
     }
-    .item-card img { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; background: #e5e5e5; }
+    .ic-img {
+      width: 72px; height: 72px; flex-shrink: 0;
+      border-radius: 8px; margin: 0 10px 0 4px;
+      overflow: hidden; background: #f0f0f0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ic-img img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; }
+    .ic-body { flex: 1; min-width: 0; padding: 6px 0; }
+    .ic-name { font-size: 14px; font-weight: 700; color: #1a1a1a; display: flex; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ic-meta { font-size: 12px; color: #777; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ic-desc { font-size: 12px; color: #777; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ic-tags { display: flex; gap: 4px; flex-wrap: nowrap; margin-top: 3px; overflow: hidden; }
+    .ic-tag { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 6px; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0; }
+    .ic-tag.popular { background: #FFF0D0; color: #B85C00; }
+    .ic-tag.daily-special { background: #E8F5E9; color: #2E7D32; }
+    .ic-tag.archived { background: #e0e0e0; color: #777; text-transform: uppercase; }
+    .ic-tag.time-avail { background: #FFF3CD; color: #856404; border: 1px solid #FFECB5; }
+    .ic-tag.time-unavail { background: #f5f5f5; color: #888; }
+    .ic-actions { flex-shrink: 0; display: flex; align-items: center; }
+    .ic-menu-btn { background: none; border: none; cursor: pointer; color: #aaa; font-size: 22px; font-weight: 700; padding: 8px 10px; border-radius: 8px; line-height: 1; transition: background 0.15s; }
+    .ic-menu-btn:hover { background: #f5f5f5; color: #333; }
+
+    /* ── Global dropdown ── */
+    #globalDropdown { position: fixed; z-index: 2000; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.16); min-width: 200px; padding: 6px 0; display: none; }
+    #globalDropdown.open { display: block; }
+    .dd-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600; color: #1a1a1a; cursor: pointer; border: none; background: none; width: 100%; text-align: left; transition: background 0.1s; white-space: nowrap; }
+    .dd-item:hover { background: #f5f5f5; }
+    .dd-item.danger { color: #c62828; }
+    .dd-sep { height: 1px; background: #eee; margin: 4px 0; }
+
+    /* ── Item profile drawer ── */
+    .drawer-backdrop { position: fixed; inset: 0; z-index: 1500; background: rgba(0,0,0,0.35); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .item-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 100%; background: #fff; z-index: 1600; box-shadow: -4px 0 32px rgba(0,0,0,0.15); transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; display: flex; flex-direction: column; }
+    .item-drawer.open { transform: translateX(0); }
+    .drawer-header { display: flex; justify-content: flex-end; padding: 12px 14px 0; position: sticky; top: 0; background: #fff; z-index: 10; }
+    .drawer-close-btn { background: none; border: none; cursor: pointer; font-size: 22px; color: #aaa; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+    .drawer-close-btn:hover { background: #f5f5f5; }
+    .drawer-img { width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .drawer-img img { width: 100%; height: 200px; object-fit: cover; }
+    .drawer-body { padding: 18px 20px 32px; }
+    .drawer-name { font-size: 22px; font-weight: 800; color: #1a1a1a; margin-bottom: 10px; }
+    .drawer-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .drawer-pill { font-size: 12px; font-weight: 700; border-radius: 20px; padding: 4px 10px; }
+    .drawer-pill.veg { background: #E8F5E9; color: #2E7D32; }
+    .drawer-pill.nonveg { background: #FFEBEE; color: #c62828; }
+    .drawer-pill.cat { background: #f5f5f5; color: #333; }
+    .drawer-price { font-size: 20px; font-weight: 800; color: #C8894A; margin-bottom: 10px; }
+    .drawer-desc { font-size: 14px; color: #777; line-height: 1.6; margin-bottom: 14px; }
+    .drawer-divider { height: 1px; background: #eee; margin: 14px 0; }
+    .drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .drawer-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f9f9f9; border-radius: 10px; }
+    .drawer-toggle-label { font-size: 13px; font-weight: 600; color: #333; }
+    .toggle-switch { position: relative; width: 40px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 22px; transition: 0.2s; }
+    .toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+    .toggle-switch input:checked + .toggle-slider { background: #C8894A; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+    .drawer-time-row { font-size: 13px; color: #777; margin-bottom: 14px; }
+    .drawer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .drawer-action-btn { padding: 10px 0; border-radius: 10px; font-size: 13px; font-weight: 700; border: 1.5px solid #ddd; background: #fff; cursor: pointer; color: #333; transition: background 0.15s; text-align: center; }
+    .drawer-action-btn:hover { background: #f5f5f5; }
+    .drawer-action-btn.danger { color: #c62828; border-color: #ffc1c1; }
+    .drawer-action-btn.danger:hover { background: #fff5f5; }
+    @media (max-width: 480px) { .item-drawer { width: 100%; } }
+
+    /* ── AI Refine popup ── */
+    .ai-popup { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .ai-popup.hidden { display: none; }
+    .ai-popup-box { background: #fff; border-radius: 16px; padding: 24px 20px 20px; width: 100%; max-width: 460px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+    .ai-popup-box h3 { font-size: 16px; font-weight: 800; margin-bottom: 14px; }
+    .ai-desc-label { font-size: 11px; font-weight: 700; color: #777; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .ai-desc-old { background: #f5f5f5; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.5; }
+    .ai-desc-new { background: #FFF8EE; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #C8894A; margin-bottom: 14px; line-height: 1.5; font-weight: 600; border: 1px solid #FFDFA0; min-height: 48px; }
+    .ai-popup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ai-status { font-size: 12px; color: #777; margin-bottom: 10px; min-height: 16px; }
     .item-card-info { flex: 1; }
 
     /* ── Archived item cards ── */
@@ -165,7 +242,17 @@
     .copy-outlet-select { width: 100%; padding: 9px 11px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin: 8px 0; }
     .copy-warning { background: #FFF8E1; border-left: 4px solid #FFC107; border-radius: 4px; padding: 8px 12px; font-size: 13px; color: #7B4F00; margin: 8px 0; }
     .copy-progress { font-size: 13px; color: #555; margin-top: 8px; min-height: 18px; }
-    .adm-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    /* ── Tools panel ── */
+    .tools-panel { margin-bottom: 14px; }
+    .tools-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
+    .tools-toggle-btn { font-size: 12px; font-weight: 700; color: #777; background: none; border: 1.5px solid #ddd; border-radius: 8px; padding: 5px 12px; cursor: pointer; transition: background 0.15s; }
+    .tools-toggle-btn:hover { background: #f5f5f5; }
+    .tools-body { display: none; margin-top: 10px; }
+    .tools-body.open { display: block; }
+    .tools-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+    .tool-btn { font-size: 12px; font-weight: 600; color: #333; background: #fff; border: 1.5px solid #ddd; border-radius: 8px; padding: 5px 12px; cursor: pointer; transition: background 0.15s, border-color 0.15s; white-space: nowrap; }
+    .tool-btn:hover { background: #f5f5f5; border-color: #C8894A; }
+    .tool-btn.active { background: #C8894A; color: #fff; border-color: #C8894A; }
 
     /* ── Drag reorder ── */
     .drag-handle { font-size: 20px; color: #aaa; cursor: grab; padding: 0 10px 0 2px; flex-shrink: 0; user-select: none; display: none; align-items: center; }
@@ -473,7 +560,7 @@
 <!-- ── Login screen ── -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-brand">KAPI COAST</div>
+    <div class="login-brand">DIGITAL MENU</div>
     <div class="login-sub">Admin Access</div>
     <input class="login-input" type="text" id="codeInput"
            placeholder="Enter Access Code"
@@ -486,7 +573,7 @@
 
 <!-- ── Sidebar nav ── -->
 <nav class="sidebar">
-  <div class="sidebar-title" id="sidebarTitle">Kapi Coast</div>
+  <div class="sidebar-title" id="sidebarTitle">Digital Menu</div>
   <div class="outlet-switcher" id="outletSwitcher">
     <div class="outlet-switcher-label">Outlet</div>
     <select class="outlet-select" id="outletSelect" onchange="changeOutlet(this.value)">
@@ -578,17 +665,27 @@
     <hr>
 
     <h3>All Items</h3>
-    <div class="adm-toolbar">
-      <button class="btn btn-sm btn-primary" onclick="openBulkEdit()">Bulk Edit Prices</button>
-      <button class="btn btn-sm btn-primary" onclick="openBulkUpload()">Bulk Upload</button>
-      <button class="btn btn-sm btn-primary" onclick="openCopyMenu()">Copy Menu to Outlet</button>
-      <button class="btn btn-sm btn-primary" onclick="openPhotoImport()">Import from Photo</button>
-      <button class="btn btn-sm btn-primary" id="reorderToggleBtn" onclick="toggleReorder()">Reorder</button>
-      <button class="btn btn-sm btn-primary" id="saveOrderBtn" style="display:none;" onclick="saveOrder()">Save Order</button>
-      <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#777;cursor:pointer;margin-left:auto;">
-        <input type="checkbox" id="showArchivedToggle" style="accent-color:#C8894A;" onchange="toggleArchivedView()">
-        Show Archived
-      </label>
+    <div class="tools-panel">
+      <div class="tools-header">
+        <button class="tools-toggle-btn" id="toolsToggleBtn" onclick="toggleTools()">Tools ▼</button>
+      </div>
+      <div class="tools-body" id="toolsBody">
+        <div class="tools-row">
+          <button class="tool-btn" onclick="openBulkUpload()">↑ Bulk Upload CSV</button>
+          <button class="tool-btn" onclick="downloadCSVTemplate()">↓ Download Template</button>
+          <button class="tool-btn" id="reorderToggleBtn" onclick="toggleReorder()">⇅ Reorder Mode</button>
+          <button class="tool-btn" id="saveOrderBtn" style="display:none;" onclick="saveOrder()">✓ Save Order</button>
+        </div>
+        <div class="tools-row">
+          <button class="tool-btn" onclick="openBulkEdit()">✏ Bulk Edit Prices</button>
+          <button class="tool-btn" onclick="openCopyMenu()">⎘ Copy to Outlet</button>
+          <button class="tool-btn" onclick="openPhotoImport()">📷 Import from Photo</button>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#777;cursor:pointer;">
+            <input type="checkbox" id="showArchivedToggle" style="accent-color:#C8894A;" onchange="toggleArchivedView()">
+            Show Archived
+          </label>
+        </div>
+      </div>
     </div>
     <div id="menuList">Loading...</div>
   </div>
@@ -860,6 +957,20 @@
 
     <h3>All Outlets</h3>
     <div id="outletList">Loading…</div>
+
+    <hr>
+
+    <h3>AI Settings</h3>
+    <div style="background:#f9f9f9;border-radius:10px;padding:18px 16px;max-width:440px;">
+      <p style="font-size:13px;color:#777;margin-bottom:10px;">Used for AI description refinement on menu items.</p>
+      <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Gemini API Key</label>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <input type="password" id="geminiKeyInput" placeholder="Enter Gemini API Key" style="flex:1;padding:9px 11px;border:1px solid #ccc;border-radius:6px;font-family:monospace;font-size:13px;">
+        <button type="button" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;" onclick="toggleGeminiKeyVisibility()">👁</button>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="saveGeminiKey()">Save</button>
+      <p id="geminiKeyStatus" style="font-size:13px;margin-top:8px;"></p>
+    </div>
   </div>
 
   <!-- Section: Feedback -->
@@ -910,6 +1021,30 @@ function escapeHtml(value) {
   }[char]));
 }
 
+// ── Food illustrations (SVG fallback) ──
+function getFoodIllustration(category, name) {
+  const c = (category || "").toLowerCase();
+  const n = (name || "").toLowerCase();
+  const illustrations = {
+    coffee: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><ellipse cx="40" cy="52" rx="20" ry="14" fill="#C8894A" opacity=".3"/><rect x="22" y="36" width="32" height="24" rx="6" fill="#C8894A"/><rect x="54" y="42" width="10" height="12" rx="5" fill="none" stroke="#C8894A" stroke-width="2.5"/><path d="M30 36 Q32 26 36 24 Q40 22 44 24 Q48 26 50 36" fill="#7B4F2E" opacity=".5"/><ellipse cx="40" cy="36" rx="16" ry="4" fill="#FAF6F0" opacity=".6"/></svg>`,
+    tea: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><rect x="20" y="34" width="32" height="26" rx="6" fill="#9A7D6B"/><rect x="52" y="40" width="10" height="12" rx="5" fill="none" stroke="#9A7D6B" stroke-width="2.5"/><path d="M26 34 Q28 22 36 20 Q44 18 46 34" fill="#7B4F2E" opacity=".4"/><path d="M30 26 Q32 20 34 24" stroke="#C8894A" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`,
+    snack: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><rect x="16" y="38" width="48" height="24" rx="8" fill="#C8894A"/><rect x="20" y="30" width="40" height="14" rx="6" fill="#E8A96A"/><circle cx="28" cy="37" r="3" fill="#FAF6F0" opacity=".5"/><circle cx="40" cy="35" r="3" fill="#FAF6F0" opacity=".5"/><circle cx="52" cy="37" r="3" fill="#FAF6F0" opacity=".5"/></svg>`,
+    food: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><ellipse cx="40" cy="48" rx="26" ry="14" fill="#C8894A" opacity=".3"/><rect x="14" y="38" width="52" height="18" rx="9" fill="#C8894A"/><rect x="18" y="34" width="44" height="10" rx="5" fill="#E8A96A"/></svg>`,
+    dessert: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><ellipse cx="40" cy="54" rx="22" ry="8" fill="#C8894A" opacity=".3"/><rect x="20" y="42" width="40" height="18" rx="9" fill="#C8894A"/><path d="M24 42 Q40 24 56 42" fill="#E8A96A"/><circle cx="40" cy="14" r="4" fill="#C8894A"/></svg>`,
+    juice: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><rect x="26" y="30" width="28" height="34" rx="6" fill="#F0A030" opacity=".8"/><rect x="26" y="26" width="28" height="10" rx="4" fill="#E8A96A"/></svg>`,
+    "cold-drink": `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><rect x="26" y="24" width="28" height="40" rx="8" fill="#9A7D6B" opacity=".7"/><rect x="26" y="24" width="28" height="12" rx="6" fill="#C8894A"/></svg>`,
+    default: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><text x="40" y="50" text-anchor="middle" font-size="32" fill="#C8894A">🍽</text></svg>`
+  };
+  if (c.includes("coffee") || n.includes("coffee") || n.includes("espresso") || n.includes("latte")) return illustrations.coffee;
+  if (c.includes("tea") || n.includes("tea") || n.includes("chai")) return illustrations.tea;
+  if (c.includes("juice") || n.includes("juice")) return illustrations.juice;
+  if (c.includes("cold") || n.includes("cold") || n.includes("soda") || n.includes("cola")) return illustrations["cold-drink"];
+  if (c.includes("dessert") || c.includes("sweet") || n.includes("cake") || n.includes("ice cream")) return illustrations.dessert;
+  if (c.includes("snack") || n.includes("snack") || n.includes("sandwich")) return illustrations.snack;
+  if (c.includes("food") || c.includes("meal") || c.includes("rice")) return illustrations.food;
+  return illustrations.default;
+}
+
 // ── Section nav ──
 window.showSection = function (id, navEl) {
   document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
@@ -956,59 +1091,68 @@ async function loadItems() {
   const activeCats   = {};
   const archivedCats = {};
   allMenuItems = [];
+  window._itemsCache = {};
 
   snapshot.forEach(docSnap => {
-    const item = docSnap.data();
+    const item = { ...docSnap.data(), id: docSnap.id };
+    window._itemsCache[docSnap.id] = item;
     const cat  = (item.category || "Others").trim();
-    allMenuItems.push({ ...item, id: docSnap.id });
+    allMenuItems.push(item);
     if (item.archived === true) {
       if (!archivedCats[cat]) archivedCats[cat] = [];
-      archivedCats[cat].push({ ...item, id: docSnap.id });
+      archivedCats[cat].push(item);
     } else {
       if (!activeCats[cat]) activeCats[cat] = [];
-      activeCats[cat].push({ ...item, id: docSnap.id });
+      activeCats[cat].push(item);
     }
   });
   Object.values(activeCats).forEach(arr =>
     arr.sort((a, b) => (a.sortOrder ?? 9999) - (b.sortOrder ?? 9999)));
 
   function itemCardHtml(item, isArchived) {
-    const vegSquare = item.veg === "nonveg"
-      ? `<span style="display:inline-block;width:12px;height:12px;background:#e53935;border-radius:2px;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>`
-      : item.veg === "veg"
-      ? `<span style="display:inline-block;width:12px;height:12px;background:#2e7d32;border-radius:2px;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>`
-      : "";
-    const archivedBadge = isArchived ? `<span class="archived-label">Archived</span>` : "";
-    const timeBadge = isArchived ? "" : admTimeAvailBadge(item);
-    const handle = `<span class="drag-handle">≡</span>`;
+    const dot = item.veg === "nonveg"
+      ? `<span style="width:10px;height:10px;border-radius:2px;background:#e53935;display:inline-block;flex-shrink:0;"></span>`
+      : `<span style="width:10px;height:10px;border-radius:2px;background:#2e7d32;display:inline-block;flex-shrink:0;"></span>`;
+    const illus = getFoodIllustration(item.category, item.name);
+    const imgHtml = item.imageUrl
+      ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;">`
+      : illus;
+    const tags = [];
+    if (item.popular)      tags.push(`<span class="ic-tag popular">Popular</span>`);
+    if (item.dailySpecial) tags.push(`<span class="ic-tag daily-special">Daily Special</span>`);
+    if (isArchived)        tags.push(`<span class="ic-tag archived">Archived</span>`);
+    if (!isArchived && item.availableFrom && item.availableTo) {
+      const tb = admTimeAvailBadge(item);
+      if (tb.includes("time-avail-badge")) tags.push(`<span class="ic-tag time-avail">${item.availableFrom}–${item.availableTo}</span>`);
+      else tags.push(`<span class="ic-tag time-unavail">Avail. ${item.availableFrom}–${item.availableTo}</span>`);
+    }
+    const handle = `<span class="drag-handle" style="font-size:20px;color:#aaa;cursor:grab;padding:0 10px 0 8px;flex-shrink:0;user-select:none;display:none;align-items:center;">≡</span>`;
     const draggable = (!isArchived && adminReorderMode) ? `draggable="true"` : "";
-    const actions = isArchived
-      ? `<button class="btn btn-sm btn-success" onclick="restoreItem('${item.id}')">Restore</button><br><br>
-         <button class="btn btn-sm btn-danger" onclick="deleteForever('${item.id}')">Delete Forever</button>`
-      : `<button class="btn btn-sm btn-primary" onclick="editItem('${item.id}')">Edit</button><br><br>
-         <button class="btn btn-sm btn-primary" onclick="duplicateItem('${item.id}')">Duplicate</button><br><br>
-         <button class="btn btn-sm btn-danger"  onclick="archiveItem('${item.id}')">Archive</button>`;
     return `
       <div class="item-card${isArchived ? " archived-card" : ""}" ${draggable} data-id="${escapeHtml(item.id)}" data-cat="${escapeHtml(item.category || "Others")}">
-        ${handle}<img src="${item.imageUrl || ""}" alt="${escapeHtml(item.name)}">
-        <div class="item-card-info">
-          <b style="display:flex;align-items:center;flex-wrap:wrap;">${vegSquare}${escapeHtml(item.name)}${archivedBadge}${timeBadge}</b>
-          Rs. ${escapeHtml(item.price)} &nbsp;·&nbsp; <small style="color:#777;">${escapeHtml(item.category || "")}</small><br>
-          <small>${escapeHtml(item.description || "")}</small>
+        ${handle}
+        <div class="ic-img">${imgHtml}</div>
+        <div class="ic-body">
+          <div class="ic-name">${dot} ${escapeHtml(item.name)}</div>
+          <div class="ic-meta">${escapeHtml(item.category || "")} &nbsp;·&nbsp; ₹${escapeHtml(String(item.price))}</div>
+          ${item.description ? `<div class="ic-desc">${escapeHtml(item.description)}</div>` : ""}
+          ${tags.length ? `<div class="ic-tags">${tags.join("")}</div>` : ""}
         </div>
-        <div>${actions}</div>
+        <div class="ic-actions">
+          <button class="ic-menu-btn" onclick="openItemMenu(this,'${escapeHtml(item.id)}')" title="Actions">⋮</button>
+        </div>
       </div>`;
   }
 
   let html = "";
   Object.keys(activeCats).sort().forEach(cat => {
-    html += `<h3 style="margin-top:15px;">${escapeHtml(cat)}</h3>`;
+    html += `<div style="font-size:13px;font-weight:800;color:#9A7D6B;text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 8px;">${escapeHtml(cat)}</div>`;
     activeCats[cat].forEach(item => { html += itemCardHtml(item, false); });
   });
   if (adminShowArchived && Object.keys(archivedCats).length > 0) {
-    html += `<h3 style="margin-top:20px;color:#999;">— Archived Items —</h3>`;
+    html += `<div style="font-size:13px;font-weight:800;color:#999;margin-top:20px;">— Archived Items —</div>`;
     Object.keys(archivedCats).sort().forEach(cat => {
-      html += `<h3 style="margin-top:12px;font-size:13px;">${escapeHtml(cat)}</h3>`;
+      html += `<div style="font-size:12px;font-weight:700;color:#bbb;margin:12px 0 6px;">${escapeHtml(cat)}</div>`;
       archivedCats[cat].forEach(item => { html += itemCardHtml(item, true); });
     });
   }
@@ -1082,6 +1226,185 @@ window.duplicateItem = async function (id) {
 window.toggleArchivedView = function () {
   adminShowArchived = document.getElementById("showArchivedToggle").checked;
   loadItems();
+};
+
+// ── Tools panel toggle ──
+window.toggleTools = function () {
+  const body = document.getElementById("toolsBody");
+  const btn  = document.getElementById("toolsToggleBtn");
+  const isOpen = body.classList.toggle("open");
+  btn.textContent = isOpen ? "Tools ▲" : "Tools ▼";
+};
+
+// ── Global item dropdown ──
+window._itemsCache = window._itemsCache || {};
+window.openItemMenu = function (btn, itemId) {
+  const item = window._itemsCache[itemId];
+  if (!item) return;
+  const dd = document.getElementById("globalDropdown");
+  const isArchived = item.archived === true;
+  dd.innerHTML = `
+    <button class="dd-item" onclick="openDrawer('${escapeHtml(itemId)}');closeDropdown()">👁 View Profile</button>
+    <button class="dd-item" onclick="editItem('${escapeHtml(itemId)}');closeDropdown()">✏️ Edit</button>
+    <button class="dd-item" onclick="duplicateItem('${escapeHtml(itemId)}');closeDropdown()">⎘ Duplicate</button>
+    <button class="dd-item" onclick="aiRefineDescription('${escapeHtml(itemId)}')">✨ AI Refine Description</button>
+    <div class="dd-sep"></div>
+    ${isArchived
+      ? `<button class="dd-item" onclick="restoreItem('${escapeHtml(itemId)}');closeDropdown()">↩ Restore</button>
+         <button class="dd-item danger" onclick="deleteForever('${escapeHtml(itemId)}');closeDropdown()">🗑 Delete Forever</button>`
+      : `<button class="dd-item" onclick="archiveItem('${escapeHtml(itemId)}');closeDropdown()">📦 Archive</button>`}
+  `;
+  const rect = btn.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 6) + "px";
+  dd.style.right = (window.innerWidth - rect.right) + "px";
+  dd.style.left = "auto";
+  dd.classList.add("open");
+  setTimeout(() => document.addEventListener("click", _ddOutsideHandler, { once: true }), 0);
+};
+function _ddOutsideHandler(e) {
+  const dd = document.getElementById("globalDropdown");
+  if (dd && !dd.contains(e.target)) closeDropdown();
+}
+window.closeDropdown = function () {
+  const dd = document.getElementById("globalDropdown");
+  if (dd) dd.classList.remove("open");
+};
+
+// ── Item profile drawer ──
+window.openDrawer = function (itemId) {
+  const item = window._itemsCache[itemId];
+  if (!item) return;
+  _renderDrawer(item);
+  document.getElementById("drawerBackdrop").classList.add("open");
+  document.getElementById("itemDrawer").classList.add("open");
+};
+window.closeDrawer = function () {
+  document.getElementById("drawerBackdrop").classList.remove("open");
+  document.getElementById("itemDrawer").classList.remove("open");
+};
+function _renderDrawer(item) {
+  const isVeg = item.veg !== "nonveg";
+  const illus = getFoodIllustration(item.category, item.name);
+  const imgHtml = item.imageUrl
+    ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}">`
+    : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:200px;background:#f0f0f0;">${illus}</div>`;
+  document.getElementById("drawerImgWrap").innerHTML = imgHtml;
+  document.getElementById("drawerName").textContent = item.name || "";
+  document.getElementById("drawerPills").innerHTML =
+    `<span class="drawer-pill ${isVeg ? "veg" : "nonveg"}">${isVeg ? "Veg" : "Non-Veg"}</span>` +
+    (item.category ? `<span class="drawer-pill cat">${escapeHtml(item.category)}</span>` : "");
+  document.getElementById("drawerPrice").textContent = "₹" + (item.price || "");
+  document.getElementById("drawerDesc").textContent = item.description || "";
+  document.getElementById("drawerTimeRow").textContent = (item.availableFrom && item.availableTo)
+    ? `🕐 Available ${item.availableFrom} – ${item.availableTo}` : "";
+
+  const toggleDefs = [
+    { key: "Popular",     field: "popular"      },
+    { key: "DailySpecial",field: "dailySpecial" },
+    { key: "Available",   field: "available"    },
+    { key: "Visible",     field: "visible"      }
+  ];
+  toggleDefs.forEach(({ key, field }) => {
+    const el = document.getElementById("drawerToggle" + key);
+    if (!el) return;
+    let val = !!item[field];
+    if ((field === "available" || field === "visible") && item[field] === undefined) val = true;
+    el.checked = val;
+    el.onchange = () => _saveDrawerToggle(item.id, field, el.checked);
+  });
+
+  document.getElementById("drawerBtnRefine").onclick    = () => aiRefineDescription(item.id);
+  document.getElementById("drawerBtnEdit").onclick      = () => { closeDrawer(); editItem(item.id); };
+  document.getElementById("drawerBtnDuplicate").onclick = () => { closeDrawer(); duplicateItem(item.id); };
+  document.getElementById("drawerBtnArchive").onclick   = () => { closeDrawer(); archiveItem(item.id); };
+}
+async function _saveDrawerToggle(itemId, field, value) {
+  try {
+    await updateDoc(menuDocRef(itemId), { [field]: value });
+    if (window._itemsCache[itemId]) window._itemsCache[itemId][field] = value;
+  } catch (e) { console.error("Toggle save failed:", e); }
+}
+
+// ── AI Refine Description (Gemini) ──
+async function _getGeminiKey() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "config"));
+    return snap.exists() ? (snap.data().geminiKey || "") : "";
+  } catch { return ""; }
+}
+window.aiRefineDescription = function (itemId) {
+  closeDropdown();
+  closeDrawer();
+  const item = window._itemsCache[itemId];
+  if (!item) return;
+  const popup = document.getElementById("aiRefinePop");
+  popup.dataset.itemId = itemId;
+  document.getElementById("aiOldDesc").textContent = item.description || "(no description)";
+  document.getElementById("aiNewDesc").textContent = "";
+  document.getElementById("aiRefineStatus").textContent = "Generating…";
+  popup.classList.remove("hidden");
+  _doGeminiRefine(item);
+};
+async function _doGeminiRefine(item) {
+  try {
+    const key = await _getGeminiKey();
+    if (!key) {
+      document.getElementById("aiRefineStatus").textContent = "No Gemini API key set. Add it in Manage Outlets → AI Settings.";
+      return;
+    }
+    const prompt = `Write a short, appetizing 1–2 sentence menu description for a cafe item called "${item.name}" (category: "${item.category || "Food"}"). Current description: "${item.description || "none"}". Be concise and mouth-watering.`;
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    const newDesc = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    if (!newDesc) throw new Error("Empty response from Gemini");
+    document.getElementById("aiNewDesc").textContent = newDesc;
+    document.getElementById("aiRefineStatus").textContent = "";
+  } catch (e) {
+    document.getElementById("aiRefineStatus").textContent = "Error: " + e.message;
+  }
+}
+window.aiUseDescription = async function () {
+  const popup   = document.getElementById("aiRefinePop");
+  const itemId  = popup.dataset.itemId;
+  const newDesc = document.getElementById("aiNewDesc").textContent.trim();
+  if (!newDesc || !itemId) return;
+  await updateDoc(menuDocRef(itemId), { description: newDesc });
+  if (window._itemsCache[itemId]) window._itemsCache[itemId].description = newDesc;
+  popup.classList.add("hidden");
+  loadItems();
+};
+window.aiTryAgain = function () {
+  const popup  = document.getElementById("aiRefinePop");
+  const itemId = popup.dataset.itemId;
+  if (!itemId) return;
+  document.getElementById("aiNewDesc").textContent = "";
+  document.getElementById("aiRefineStatus").textContent = "Generating…";
+  _doGeminiRefine(window._itemsCache[itemId]);
+};
+window.cancelAiRefine = function () {
+  document.getElementById("aiRefinePop").classList.add("hidden");
+};
+
+// ── Gemini API key ──
+window.saveGeminiKey = async function () {
+  const key = document.getElementById("geminiKeyInput").value.trim();
+  const statusEl = document.getElementById("geminiKeyStatus");
+  try {
+    await setDoc(doc(db, "settings", "config"), { geminiKey: key }, { merge: true });
+    statusEl.style.color = "green";
+    statusEl.textContent = "Saved!";
+  } catch (e) {
+    statusEl.style.color = "red";
+    statusEl.textContent = "Error: " + e.message;
+  }
+  setTimeout(() => { statusEl.textContent = ""; }, 3000);
+};
+window.toggleGeminiKeyVisibility = function () {
+  const input = document.getElementById("geminiKeyInput");
+  input.type = input.type === "password" ? "text" : "password";
 };
 
 // ── Feature 5: Bulk Upload CSV ──
@@ -2065,6 +2388,80 @@ async function triggerPushNotification(title, body) {
   }
 }
 </script>
+
+<!-- ── Global dropdown ── -->
+<div id="globalDropdown"></div>
+
+<!-- ── Drawer backdrop + drawer ── -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<div class="item-drawer" id="itemDrawer">
+  <div class="drawer-header">
+    <button class="drawer-close-btn" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-img" id="drawerImgWrap"></div>
+  <div class="drawer-body">
+    <div class="drawer-name" id="drawerName"></div>
+    <div class="drawer-pills" id="drawerPills"></div>
+    <div class="drawer-price" id="drawerPrice"></div>
+    <div class="drawer-desc" id="drawerDesc"></div>
+    <div class="drawer-time-row" id="drawerTimeRow"></div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-grid">
+      <div class="drawer-toggle-row">
+        <span class="drawer-toggle-label">Popular</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drawerTogglePopular">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="drawer-toggle-row">
+        <span class="drawer-toggle-label">Daily Special</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drawerToggleDailySpecial">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="drawer-toggle-row">
+        <span class="drawer-toggle-label">Available</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drawerToggleAvailable">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="drawer-toggle-row">
+        <span class="drawer-toggle-label">Visible</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drawerToggleVisible">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-actions">
+      <button class="drawer-action-btn" id="drawerBtnRefine">✨ AI Refine Desc</button>
+      <button class="drawer-action-btn" id="drawerBtnEdit">✏️ Edit Item</button>
+      <button class="drawer-action-btn" id="drawerBtnDuplicate">⎘ Duplicate</button>
+      <button class="drawer-action-btn danger" id="drawerBtnArchive">📦 Archive</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI Refine popup ── -->
+<div class="ai-popup hidden" id="aiRefinePop">
+  <div class="ai-popup-box">
+    <h3>✨ AI Refine Description</h3>
+    <div class="ai-desc-label">Current Description</div>
+    <div class="ai-desc-old" id="aiOldDesc"></div>
+    <div class="ai-desc-label">New Suggestion</div>
+    <div class="ai-desc-new" id="aiNewDesc"></div>
+    <div class="ai-status" id="aiRefineStatus"></div>
+    <div class="ai-popup-actions">
+      <button class="btn btn-success btn-sm" onclick="aiUseDescription()">Use This</button>
+      <button class="btn btn-primary btn-sm" onclick="aiTryAgain()">Try Again</button>
+      <button class="btn btn-sm" style="background:#eee;color:#333;" onclick="cancelAiRefine()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
