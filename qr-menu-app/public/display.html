@@ -689,6 +689,7 @@ onSnapshot(collection(db, "outlets", outlet, "menu"), snap => {
   menuItems = [];
   snap.forEach(d => {
     const item = { ...d.data(), id: d.id };
+    if (item.archived === true) return;
     item.category = (item.category || "Others").trim();
     menuItems.push(item);
   });

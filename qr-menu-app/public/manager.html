@@ -261,6 +261,68 @@
       display: flex; align-items: center; justify-content: center;
     }
 
+    /* ── Archived item cards ── */
+    .item-card.archived-card {
+      background: #f0f0f0; opacity: 0.7;
+    }
+    .archived-label {
+      font-size: 11px; font-weight: 700; color: #999;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      background: #e0e0e0; border-radius: 4px; padding: 2px 6px;
+      margin-left: 6px;
+    }
+
+    /* ── Bulk edit / copy menu overlay ── */
+    .mgr-overlay {
+      position: fixed; inset: 0; z-index: 800;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .mgr-overlay.hidden { display: none; }
+    .mgr-modal {
+      background: #fff;
+      border-radius: 18px;
+      padding: 28px 24px 24px;
+      width: 100%; max-width: 540px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 8px 40px rgba(44,26,14,0.18);
+    }
+    .mgr-modal h3 { font-size: 18px; color: var(--espresso); margin-bottom: 14px; }
+    .mgr-modal-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .mgr-modal-row label { font-size: 13px; font-weight: 600; color: var(--espresso); white-space: nowrap; }
+    .bulk-price-table {
+      width: 100%; border-collapse: collapse; margin: 12px 0;
+      font-size: 13px;
+    }
+    .bulk-price-table th {
+      text-align: left; padding: 6px 8px;
+      background: #FAF6F0; color: var(--muted);
+      font-weight: 700; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .bulk-price-table td { padding: 6px 8px; border-top: 1px solid #F0EAE3; color: var(--espresso); }
+    .bulk-price-table .new-price { color: #2e7d32; font-weight: 700; }
+    .copy-outlet-select {
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid #E0D5CC; border-radius: 10px;
+      font-family: 'Manrope', sans-serif; font-size: 14px;
+      color: var(--espresso); margin: 8px 0;
+    }
+    .copy-warning {
+      background: #FFF8E1; border-left: 4px solid #FFC107;
+      border-radius: 6px; padding: 10px 14px;
+      font-size: 13px; color: #7B4F00; margin: 10px 0;
+    }
+    .copy-progress {
+      font-size: 13px; color: var(--muted);
+      margin-top: 8px; min-height: 18px;
+    }
+    .mgr-toolbar {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      align-items: center; margin-bottom: 14px;
+    }
+
     /* ── QR Section ── */
     .qr-gen-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
     .qr-grid {
@@ -468,7 +530,58 @@
           <div class="form-status" id="itemStatus"></div>
         </div>
         <hr class="section-hr">
+        <div class="mgr-toolbar">
+          <button class="form-btn btn-espresso btn-sm" onclick="openBulkEdit()">Bulk Edit Prices</button>
+          <button class="form-btn btn-espresso btn-sm" onclick="openCopyMenu()">Copy Menu to Outlet</button>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;margin-left:auto;">
+            <input type="checkbox" id="showArchivedToggle" style="accent-color:var(--caramel);" onchange="toggleArchivedView()">
+            Show Archived
+          </label>
+        </div>
         <div class="items-list" id="menuList">Loading…</div>
+      </div>
+
+      <!-- Bulk Edit Prices overlay -->
+      <div class="mgr-overlay hidden" id="bulkEditOverlay">
+        <div class="mgr-modal">
+          <h3>Bulk Edit Prices</h3>
+          <div class="mgr-modal-row">
+            <label>Increase by %</label>
+            <input class="field-input" type="number" id="bulkPct" placeholder="e.g. 10" min="0" max="200" style="width:90px;margin-bottom:0;">
+            <button class="form-btn btn-espresso btn-sm" onclick="previewBulk('pct')">Preview</button>
+          </div>
+          <div class="mgr-modal-row">
+            <label>Add fixed ₹</label>
+            <input class="field-input" type="number" id="bulkFixed" placeholder="e.g. 20" min="0" style="width:90px;margin-bottom:0;">
+            <button class="form-btn btn-espresso btn-sm" onclick="previewBulk('fixed')">Preview</button>
+          </div>
+          <div id="bulkPreviewWrap" style="display:none;">
+            <table class="bulk-price-table">
+              <thead><tr><th>Item</th><th>Current</th><th>New Price</th></tr></thead>
+              <tbody id="bulkPreviewBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="form-btn btn-espresso" id="bulkConfirmBtn" style="display:none;" onclick="confirmBulkEdit()">Confirm &amp; Save</button>
+            <button class="form-btn" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="closeBulkEdit()">Cancel</button>
+          </div>
+          <div class="form-status" id="bulkStatus"></div>
+        </div>
+      </div>
+
+      <!-- Copy Menu overlay -->
+      <div class="mgr-overlay hidden" id="copyMenuOverlay">
+        <div class="mgr-modal">
+          <h3>Copy Menu to Another Outlet</h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">Select the target outlet to copy all current menu items to:</p>
+          <select class="copy-outlet-select" id="copyTargetSelect"></select>
+          <div class="copy-warning" id="copyWarning">Select an outlet above to see a warning.</div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="form-btn btn-espresso" onclick="confirmCopyMenu()">Copy Menu</button>
+            <button class="form-btn" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="closeCopyMenu()">Cancel</button>
+          </div>
+          <div class="copy-progress" id="copyProgress"></div>
+        </div>
       </div>
 
       <!-- ── Section 2: Offer Banner ── -->
@@ -680,6 +793,8 @@ function showPanel(oId, oName) {
 // ──────────────────────────────────────────────────
 // SECTION 1 — Menu Items
 // ──────────────────────────────────────────────────
+let mgrShowArchived = false;
+
 async function loadItems() {
   console.log("loadItems — outletId:", getOutletId());
   const div  = document.getElementById("menuList");
@@ -687,40 +802,60 @@ async function loadItems() {
   const snap = await getDocs(menuCol());
   if (snap.empty) { div.innerHTML = `<p style="color:var(--muted);font-size:14px;">No items yet.</p>`; return; }
 
-  const cats = {};
+  const activeCats   = {};
+  const archivedCats = {};
   snap.forEach(d => {
     const item = d.data();
     const cat  = (item.category || "Others").trim();
-    if (!cats[cat]) cats[cat] = [];
-    cats[cat].push({ ...item, id: d.id });
+    if (item.archived === true) {
+      if (!archivedCats[cat]) archivedCats[cat] = [];
+      archivedCats[cat].push({ ...item, id: d.id });
+    } else {
+      if (!activeCats[cat]) activeCats[cat] = [];
+      activeCats[cat].push({ ...item, id: d.id });
+    }
   });
 
+  function itemCardHtml(item, isArchived) {
+    const dot = item.veg === "nonveg"
+      ? `<span class="veg-dot-nonveg" style="width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`
+      : `<span class="veg-dot-veg"    style="width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`;
+    const imgBlock = item.imageUrl
+      ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" onerror="this.replaceWith((function(){const d=document.createElement('div');d.className='item-illus';d.innerHTML='${getFoodIllustration(item.category, item.name).replace(/'/g, "\\'")}';return d;})())">`
+      : `<div class="item-illus">${getFoodIllustration(item.category, item.name)}</div>`;
+    const archivedBadge = isArchived ? `<span class="archived-label">Archived</span>` : "";
+    const actions = isArchived
+      ? `<button class="form-btn btn-espresso btn-sm" onclick="restoreItem('${escapeHtml(item.id)}')">Restore</button>
+         <button class="form-btn btn-danger btn-sm"   onclick="deleteForever('${escapeHtml(item.id)}')">Delete Forever</button>`
+      : `<button class="form-btn btn-espresso btn-sm" onclick="editItem('${escapeHtml(item.id)}')">Edit</button>
+         <button class="form-btn btn-espresso btn-sm" onclick="duplicateItem('${escapeHtml(item.id)}')">Duplicate</button>
+         <button class="form-btn btn-danger btn-sm"   onclick="archiveItem('${escapeHtml(item.id)}')">Archive</button>`;
+    return `
+      <div class="item-card${isArchived ? " archived-card" : ""}">
+        ${imgBlock}
+        <div class="item-card-info">
+          <div class="item-card-name">${dot}${escapeHtml(item.name)}${archivedBadge}</div>
+          <div class="item-card-meta">₹${escapeHtml(item.price)} &nbsp;·&nbsp; ${escapeHtml(item.category || "")}</div>
+          <div class="item-card-meta">${escapeHtml(item.description || "")}</div>
+        </div>
+        <div class="item-card-actions">${actions}</div>
+      </div>`;
+  }
+
   let html = "";
-  Object.keys(cats).sort().forEach(cat => {
+  Object.keys(activeCats).sort().forEach(cat => {
     html += `<div class="cat-header">${escapeHtml(cat)}</div>`;
-    cats[cat].forEach(item => {
-      const dot = item.veg === "nonveg"
-        ? `<span class="veg-dot-nonveg" style="width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`
-        : `<span class="veg-dot-veg"    style="width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;"></span>`;
-      const imgBlock = item.imageUrl
-        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" onerror="this.replaceWith((function(){const d=document.createElement('div');d.className='item-illus';d.innerHTML='${getFoodIllustration(item.category, item.name).replace(/'/g, "\\'")}';return d;})())">`
-        : `<div class="item-illus">${getFoodIllustration(item.category, item.name)}</div>`;
-      html += `
-        <div class="item-card">
-          ${imgBlock}
-          <div class="item-card-info">
-            <div class="item-card-name">${dot}${escapeHtml(item.name)}</div>
-            <div class="item-card-meta">₹${escapeHtml(item.price)} &nbsp;·&nbsp; ${escapeHtml(item.category || "")}</div>
-            <div class="item-card-meta">${escapeHtml(item.description || "")}</div>
-          </div>
-          <div class="item-card-actions">
-            <button class="form-btn btn-espresso btn-sm" onclick="editItem('${escapeHtml(item.id)}')">Edit</button>
-            <button class="form-btn btn-danger btn-sm"   onclick="deleteItem('${escapeHtml(item.id)}')">Delete</button>
-          </div>
-        </div>`;
-    });
+    activeCats[cat].forEach(item => { html += itemCardHtml(item, false); });
   });
-  div.innerHTML = html;
+
+  if (mgrShowArchived && Object.keys(archivedCats).length > 0) {
+    html += `<div class="cat-header" style="color:var(--muted);margin-top:20px;">— Archived Items —</div>`;
+    Object.keys(archivedCats).sort().forEach(cat => {
+      html += `<div class="cat-header" style="font-size:12px;">${escapeHtml(cat)}</div>`;
+      archivedCats[cat].forEach(item => { html += itemCardHtml(item, true); });
+    });
+  }
+  div.innerHTML = html || `<p style="color:var(--muted);font-size:14px;">No active items.</p>`;
 }
 
 window.addItem = async function () {
@@ -758,9 +893,35 @@ window.addItem = async function () {
   loadItems();
 };
 
-window.deleteItem = async function (id) {
-  if (!confirm("Delete this item?")) return;
+window.archiveItem = async function (id) {
+  if (!confirm("Archive this item? It will be hidden from customers.")) return;
+  await updateDoc(menuDocRef(id), { archived: true });
+  loadItems();
+};
+
+window.restoreItem = async function (id) {
+  await updateDoc(menuDocRef(id), { archived: false });
+  loadItems();
+};
+
+window.deleteForever = async function (id) {
+  if (!confirm("Permanently delete this item? This cannot be undone.")) return;
   await deleteDoc(menuDocRef(id));
+  loadItems();
+};
+
+window.duplicateItem = async function (id) {
+  const snap = await getDoc(menuDocRef(id));
+  if (!snap.exists()) return;
+  const item = snap.data();
+  const newId = id + "-copy-" + Date.now();
+  await setDoc(menuDocRef(newId), { ...item, name: "Copy of " + item.name, archived: false });
+  setStatus("itemStatus", "Item duplicated!");
+  loadItems();
+};
+
+window.toggleArchivedView = function () {
+  mgrShowArchived = document.getElementById("showArchivedToggle").checked;
   loadItems();
 };
 
@@ -928,6 +1089,129 @@ window.stopCasting = function () {
   document.getElementById("castStatus").textContent     = "Not casting.";
   document.getElementById("stopCastBtn").style.display  = "none";
   document.getElementById("startCastBtn").style.display = "inline-block";
+};
+
+// ──────────────────────────────────────────────────
+// Bulk Edit Prices
+// ──────────────────────────────────────────────────
+let bulkPendingPrices = [];
+
+window.openBulkEdit = function () {
+  document.getElementById("bulkPct").value          = "";
+  document.getElementById("bulkFixed").value        = "";
+  document.getElementById("bulkPreviewWrap").style.display = "none";
+  document.getElementById("bulkConfirmBtn").style.display  = "none";
+  document.getElementById("bulkStatus").textContent = "";
+  document.getElementById("bulkEditOverlay").classList.remove("hidden");
+};
+
+window.closeBulkEdit = function () {
+  document.getElementById("bulkEditOverlay").classList.add("hidden");
+  bulkPendingPrices = [];
+};
+
+window.previewBulk = async function (mode) {
+  const snap  = await getDocs(menuCol());
+  const pct   = parseFloat(document.getElementById("bulkPct").value)   || 0;
+  const fixed = parseFloat(document.getElementById("bulkFixed").value) || 0;
+  const delta = mode === "pct" ? pct : 0;
+  const flat  = mode === "fixed" ? fixed : 0;
+
+  if (delta === 0 && flat === 0) {
+    document.getElementById("bulkStatus").textContent = "Enter a value first.";
+    return;
+  }
+  bulkPendingPrices = [];
+  let rows = "";
+  snap.forEach(d => {
+    const item    = d.data();
+    if (item.archived === true) return;
+    const current = parseFloat(item.price) || 0;
+    const updated = Math.round(mode === "pct" ? current * (1 + delta / 100) : current + flat);
+    bulkPendingPrices.push({ id: d.id, newPrice: String(updated) });
+    rows += `<tr><td>${escapeHtml(item.name)}</td><td>₹${current}</td><td class="new-price">₹${updated}</td></tr>`;
+  });
+  document.getElementById("bulkPreviewBody").innerHTML = rows;
+  document.getElementById("bulkPreviewWrap").style.display = "block";
+  document.getElementById("bulkConfirmBtn").style.display  = "inline-block";
+};
+
+window.confirmBulkEdit = async function () {
+  if (!bulkPendingPrices.length) return;
+  const btn = document.getElementById("bulkConfirmBtn");
+  btn.disabled = true; btn.textContent = "Saving…";
+  const batch = writeBatch(db);
+  bulkPendingPrices.forEach(({ id, newPrice }) => {
+    batch.update(menuDocRef(id), { price: newPrice });
+  });
+  await batch.commit();
+  btn.disabled = false; btn.textContent = "Confirm & Save";
+  document.getElementById("bulkStatus").textContent = `Updated ${bulkPendingPrices.length} items.`;
+  bulkPendingPrices = [];
+  setTimeout(() => closeBulkEdit(), 1200);
+  loadItems();
+};
+
+// ──────────────────────────────────────────────────
+// Copy Menu to Another Outlet
+// ──────────────────────────────────────────────────
+window.openCopyMenu = async function () {
+  document.getElementById("copyProgress").textContent = "";
+  document.getElementById("copyWarning").textContent  = "Loading outlets…";
+  document.getElementById("copyMenuOverlay").classList.remove("hidden");
+
+  const snap = await getDocs(collection(db, "outlets"));
+  const sel  = document.getElementById("copyTargetSelect");
+  sel.innerHTML = "";
+  snap.forEach(d => {
+    if (d.id === getOutletId()) return;
+    const opt = document.createElement("option");
+    opt.value = d.id;
+    opt.textContent = (d.data().name || d.id) + " (" + d.id + ")";
+    sel.appendChild(opt);
+  });
+  if (!sel.options.length) {
+    sel.innerHTML = "<option disabled>No other outlets found</option>";
+    document.getElementById("copyWarning").textContent = "No other outlets available.";
+    return;
+  }
+  updateCopyWarning();
+  sel.onchange = updateCopyWarning;
+};
+
+function updateCopyWarning() {
+  const sel  = document.getElementById("copyTargetSelect");
+  const name = sel.options[sel.selectedIndex]?.text || sel.value;
+  document.getElementById("copyWarning").textContent =
+    `This will ADD all items to "${name}". Existing items in that outlet won't be deleted.`;
+}
+
+window.closeCopyMenu = function () {
+  document.getElementById("copyMenuOverlay").classList.add("hidden");
+};
+
+window.confirmCopyMenu = async function () {
+  const targetId = document.getElementById("copyTargetSelect").value;
+  if (!targetId) return;
+  const prog = document.getElementById("copyProgress");
+  prog.textContent = "Loading items…";
+
+  const snap = await getDocs(menuCol());
+  const items = [];
+  snap.forEach(d => {
+    if (d.data().archived !== true) items.push({ id: d.id, data: d.data() });
+  });
+  if (!items.length) { prog.textContent = "No active items to copy."; return; }
+
+  let done = 0;
+  for (const { id, data } of items) {
+    const newId = id + "-" + Date.now();
+    await setDoc(doc(db, "outlets", targetId, "menu", newId), { ...data, archived: false });
+    done++;
+    prog.textContent = `Copied ${done} / ${items.length}…`;
+  }
+  prog.textContent = `Done! ${done} items copied to outlet "${targetId}".`;
+  setTimeout(() => closeCopyMenu(), 2000);
 };
 
 // ──────────────────────────────────────────────────

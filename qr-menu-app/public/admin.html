@@ -130,6 +130,43 @@
     .item-card img { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; background: #e5e5e5; }
     .item-card-info { flex: 1; }
 
+    /* ── Archived item cards ── */
+    .item-card.archived-card { background: #f0f0f0; opacity: 0.7; }
+    .archived-label {
+      font-size: 11px; font-weight: 700; color: #999;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      background: #e0e0e0; border-radius: 4px;
+      padding: 2px 6px; margin-left: 6px;
+    }
+
+    /* ── Bulk / copy overlay ── */
+    .adm-overlay {
+      position: fixed; inset: 0; z-index: 900;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .adm-overlay.hidden { display: none; }
+    .adm-modal {
+      background: #fff; border-radius: 14px;
+      padding: 24px 20px 20px;
+      width: 100%; max-width: 540px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+    .adm-modal h3 { font-size: 17px; color: #1a1a1a; margin-bottom: 14px; }
+    .adm-modal-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    .adm-modal-row label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+    .adm-modal-row input { max-width: 90px; margin-bottom: 0; }
+    .bulk-price-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+    .bulk-price-table th { text-align: left; padding: 5px 7px; background: #f5f5f5; font-weight: 700; font-size: 11px; }
+    .bulk-price-table td { padding: 5px 7px; border-top: 1px solid #eee; }
+    .bulk-price-table .new-price { color: #2e7d32; font-weight: 700; }
+    .copy-outlet-select { width: 100%; padding: 9px 11px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin: 8px 0; }
+    .copy-warning { background: #FFF8E1; border-left: 4px solid #FFC107; border-radius: 4px; padding: 8px 12px; font-size: 13px; color: #7B4F00; margin: 8px 0; }
+    .copy-progress { font-size: 13px; color: #555; margin-top: 8px; min-height: 18px; }
+    .adm-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+
     /* ── Ad list ── */
     .ad-card {
       background: white; border-radius: 8px; padding: 14px 16px;
@@ -509,7 +546,58 @@
     <hr>
 
     <h3>All Items</h3>
+    <div class="adm-toolbar">
+      <button class="btn btn-sm btn-primary" onclick="openBulkEdit()">Bulk Edit Prices</button>
+      <button class="btn btn-sm btn-primary" onclick="openCopyMenu()">Copy Menu to Outlet</button>
+      <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#777;cursor:pointer;margin-left:auto;">
+        <input type="checkbox" id="showArchivedToggle" style="accent-color:#C8894A;" onchange="toggleArchivedView()">
+        Show Archived
+      </label>
+    </div>
     <div id="menuList">Loading...</div>
+  </div>
+
+  <!-- Bulk Edit Prices overlay -->
+  <div class="adm-overlay hidden" id="bulkEditOverlay">
+    <div class="adm-modal">
+      <h3>Bulk Edit Prices</h3>
+      <div class="adm-modal-row">
+        <label>Increase by %</label>
+        <input type="number" id="bulkPct" placeholder="e.g. 10" min="0" max="200">
+        <button class="btn btn-sm btn-primary" onclick="previewBulk('pct')">Preview</button>
+      </div>
+      <div class="adm-modal-row">
+        <label>Add fixed Rs</label>
+        <input type="number" id="bulkFixed" placeholder="e.g. 20" min="0">
+        <button class="btn btn-sm btn-primary" onclick="previewBulk('fixed')">Preview</button>
+      </div>
+      <div id="bulkPreviewWrap" style="display:none;">
+        <table class="bulk-price-table">
+          <thead><tr><th>Item</th><th>Current</th><th>New Price</th></tr></thead>
+          <tbody id="bulkPreviewBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-success" id="bulkConfirmBtn" style="display:none;" onclick="confirmBulkEdit()">Confirm &amp; Save</button>
+        <button class="btn btn-sm" style="background:#eee;color:#333;" onclick="closeBulkEdit()">Cancel</button>
+      </div>
+      <p id="bulkStatus" style="font-size:13px;margin-top:8px;"></p>
+    </div>
+  </div>
+
+  <!-- Copy Menu overlay -->
+  <div class="adm-overlay hidden" id="copyMenuOverlay">
+    <div class="adm-modal">
+      <h3>Copy Menu to Another Outlet</h3>
+      <p style="font-size:13px;color:#777;margin-bottom:8px;">Select the target outlet:</p>
+      <select class="copy-outlet-select" id="copyTargetSelect"></select>
+      <div class="copy-warning" id="copyWarning">Select an outlet above.</div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-primary" onclick="confirmCopyMenu()">Copy Menu</button>
+        <button class="btn btn-sm" style="background:#eee;color:#333;" onclick="closeCopyMenu()">Cancel</button>
+      </div>
+      <div class="copy-progress" id="copyProgress"></div>
+    </div>
   </div>
 
   <!-- Section: Offer Banner -->
@@ -757,46 +845,67 @@ window.saveOffer = async function () {
 };
 
 // ── Menu Items ──
+let adminShowArchived = false;
+
 async function loadItems() {
   const div      = document.getElementById("menuList");
   const snapshot = await getDocs(menuCol());
-  const categories = {};
-  let html = "";
+  const activeCats   = {};
+  const archivedCats = {};
   allMenuItems = [];
 
   snapshot.forEach(docSnap => {
     const item = docSnap.data();
     const cat  = (item.category || "Others").trim();
-    if (!categories[cat]) categories[cat] = [];
-    categories[cat].push({ ...item, id: docSnap.id });
     allMenuItems.push({ ...item, id: docSnap.id });
+    if (item.archived === true) {
+      if (!archivedCats[cat]) archivedCats[cat] = [];
+      archivedCats[cat].push({ ...item, id: docSnap.id });
+    } else {
+      if (!activeCats[cat]) activeCats[cat] = [];
+      activeCats[cat].push({ ...item, id: docSnap.id });
+    }
   });
 
-  Object.keys(categories).forEach(cat => {
+  function itemCardHtml(item, isArchived) {
+    const vegSquare = item.veg === "nonveg"
+      ? `<span style="display:inline-block;width:12px;height:12px;background:#e53935;border-radius:2px;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>`
+      : item.veg === "veg"
+      ? `<span style="display:inline-block;width:12px;height:12px;background:#2e7d32;border-radius:2px;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>`
+      : "";
+    const archivedBadge = isArchived ? `<span class="archived-label">Archived</span>` : "";
+    const actions = isArchived
+      ? `<button class="btn btn-sm btn-success" onclick="restoreItem('${item.id}')">Restore</button><br><br>
+         <button class="btn btn-sm btn-danger" onclick="deleteForever('${item.id}')">Delete Forever</button>`
+      : `<button class="btn btn-sm btn-primary" onclick="editItem('${item.id}')">Edit</button><br><br>
+         <button class="btn btn-sm btn-primary" onclick="duplicateItem('${item.id}')">Duplicate</button><br><br>
+         <button class="btn btn-sm btn-danger"  onclick="archiveItem('${item.id}')">Archive</button>`;
+    return `
+      <div class="item-card${isArchived ? " archived-card" : ""}">
+        <img src="${item.imageUrl || ""}" alt="${escapeHtml(item.name)}">
+        <div class="item-card-info">
+          <b style="display:flex;align-items:center;">${vegSquare}${escapeHtml(item.name)}${archivedBadge}</b>
+          Rs. ${escapeHtml(item.price)} &nbsp;·&nbsp; <small style="color:#777;">${escapeHtml(item.category || "")}</small><br>
+          <small>${escapeHtml(item.description || "")}</small>
+        </div>
+        <div>${actions}</div>
+      </div>`;
+  }
+
+  let html = "";
+  Object.keys(activeCats).sort().forEach(cat => {
     html += `<h3 style="margin-top:15px;">${escapeHtml(cat)}</h3>`;
-    categories[cat].forEach(item => {
-      const vegSquare = item.veg === "nonveg"
-        ? `<span style="display:inline-block;width:12px;height:12px;background:#e53935;border-radius:2px;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>`
-        : item.veg === "veg"
-        ? `<span style="display:inline-block;width:12px;height:12px;background:#2e7d32;border-radius:2px;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>`
-        : "";
-      html += `
-        <div class="item-card">
-          <img src="${item.imageUrl || ""}" alt="${escapeHtml(item.name)}">
-          <div class="item-card-info">
-            <b style="display:flex;align-items:center;">${vegSquare}${escapeHtml(item.name)}</b>
-            Rs. ${escapeHtml(item.price)} &nbsp;·&nbsp; <small style="color:#777;">${escapeHtml(item.category || "")}</small><br>
-            <small>${escapeHtml(item.description || "")}</small>
-          </div>
-          <div>
-            <button class="btn btn-sm btn-primary" onclick="editItem('${item.id}')">Edit</button><br><br>
-            <button class="btn btn-sm btn-danger"  onclick="deleteItem('${item.id}')">Delete</button>
-          </div>
-        </div>`;
-    });
+    activeCats[cat].forEach(item => { html += itemCardHtml(item, false); });
   });
 
-  div.innerHTML = html || "No items found";
+  if (adminShowArchived && Object.keys(archivedCats).length > 0) {
+    html += `<h3 style="margin-top:20px;color:#999;">— Archived Items —</h3>`;
+    Object.keys(archivedCats).sort().forEach(cat => {
+      html += `<h3 style="margin-top:12px;font-size:13px;">${escapeHtml(cat)}</h3>`;
+      archivedCats[cat].forEach(item => { html += itemCardHtml(item, true); });
+    });
+  }
+  div.innerHTML = html || "No active items found";
 }
 
 window.addItem = async function () {
@@ -829,10 +938,147 @@ window.addItem = async function () {
   loadItems();
 };
 
-window.deleteItem = async function (id) {
-  if (!confirm("Delete this item?")) return;
+window.archiveItem = async function (id) {
+  if (!confirm("Archive this item? It will be hidden from customers.")) return;
+  await updateDoc(menuDocRef(id), { archived: true });
+  loadItems();
+};
+
+window.restoreItem = async function (id) {
+  await updateDoc(menuDocRef(id), { archived: false });
+  loadItems();
+};
+
+window.deleteForever = async function (id) {
+  if (!confirm("Permanently delete this item? This cannot be undone.")) return;
   await deleteDoc(menuDocRef(id));
   loadItems();
+};
+
+window.duplicateItem = async function (id) {
+  const snap = await getDoc(menuDocRef(id));
+  if (!snap.exists()) return;
+  const item  = snap.data();
+  const newId = id + "-copy-" + Date.now();
+  await setDoc(menuDocRef(newId), { ...item, name: "Copy of " + item.name, archived: false });
+  alert("Item duplicated!");
+  loadItems();
+};
+
+window.toggleArchivedView = function () {
+  adminShowArchived = document.getElementById("showArchivedToggle").checked;
+  loadItems();
+};
+
+// ── Bulk Edit Prices ──
+let bulkPendingPrices = [];
+
+window.openBulkEdit = function () {
+  document.getElementById("bulkPct").value   = "";
+  document.getElementById("bulkFixed").value = "";
+  document.getElementById("bulkPreviewWrap").style.display = "none";
+  document.getElementById("bulkConfirmBtn").style.display  = "none";
+  document.getElementById("bulkStatus").textContent        = "";
+  document.getElementById("bulkEditOverlay").classList.remove("hidden");
+};
+
+window.closeBulkEdit = function () {
+  document.getElementById("bulkEditOverlay").classList.add("hidden");
+  bulkPendingPrices = [];
+};
+
+window.previewBulk = async function (mode) {
+  const snap  = await getDocs(menuCol());
+  const pct   = parseFloat(document.getElementById("bulkPct").value)   || 0;
+  const fixed = parseFloat(document.getElementById("bulkFixed").value) || 0;
+  if (pct === 0 && fixed === 0) {
+    document.getElementById("bulkStatus").textContent = "Enter a value first.";
+    return;
+  }
+  bulkPendingPrices = [];
+  let rows = "";
+  snap.forEach(d => {
+    const item    = d.data();
+    if (item.archived === true) return;
+    const current = parseFloat(item.price) || 0;
+    const updated = Math.round(mode === "pct" ? current * (1 + pct / 100) : current + fixed);
+    bulkPendingPrices.push({ id: d.id, newPrice: String(updated) });
+    rows += `<tr><td>${escapeHtml(item.name)}</td><td>Rs. ${current}</td><td class="new-price">Rs. ${updated}</td></tr>`;
+  });
+  document.getElementById("bulkPreviewBody").innerHTML = rows;
+  document.getElementById("bulkPreviewWrap").style.display = "block";
+  document.getElementById("bulkConfirmBtn").style.display  = "inline-block";
+};
+
+window.confirmBulkEdit = async function () {
+  if (!bulkPendingPrices.length) return;
+  const btn = document.getElementById("bulkConfirmBtn");
+  btn.disabled = true; btn.textContent = "Saving…";
+  const batch = writeBatch(db);
+  bulkPendingPrices.forEach(({ id, newPrice }) => {
+    batch.update(menuDocRef(id), { price: newPrice });
+  });
+  await batch.commit();
+  btn.disabled = false; btn.textContent = "Confirm & Save";
+  document.getElementById("bulkStatus").textContent = `Updated ${bulkPendingPrices.length} items.`;
+  bulkPendingPrices = [];
+  setTimeout(() => closeBulkEdit(), 1200);
+  loadItems();
+};
+
+// ── Copy Menu to Another Outlet ──
+window.openCopyMenu = async function () {
+  document.getElementById("copyProgress").textContent = "";
+  document.getElementById("copyWarning").textContent  = "Loading outlets…";
+  document.getElementById("copyMenuOverlay").classList.remove("hidden");
+
+  const snap = await getDocs(collection(db, "outlets"));
+  const sel  = document.getElementById("copyTargetSelect");
+  sel.innerHTML = "";
+  snap.forEach(d => {
+    if (d.id === selectedOutlet) return;
+    const opt = document.createElement("option");
+    opt.value = d.id;
+    opt.textContent = (d.data().name || d.id) + " (" + d.id + ")";
+    sel.appendChild(opt);
+  });
+  if (!sel.options.length) {
+    sel.innerHTML = "<option disabled>No other outlets found</option>";
+    document.getElementById("copyWarning").textContent = "No other outlets available.";
+    return;
+  }
+  updateCopyWarning();
+  sel.onchange = updateCopyWarning;
+};
+
+function updateCopyWarning() {
+  const sel  = document.getElementById("copyTargetSelect");
+  const name = sel.options[sel.selectedIndex]?.text || sel.value;
+  document.getElementById("copyWarning").textContent =
+    `This will ADD all items to "${name}". Existing items in that outlet won't be deleted.`;
+}
+
+window.closeCopyMenu = function () {
+  document.getElementById("copyMenuOverlay").classList.add("hidden");
+};
+
+window.confirmCopyMenu = async function () {
+  const targetId = document.getElementById("copyTargetSelect").value;
+  if (!targetId) return;
+  const prog = document.getElementById("copyProgress");
+  prog.textContent = "Loading items…";
+  const snap = await getDocs(menuCol());
+  const items = [];
+  snap.forEach(d => { if (d.data().archived !== true) items.push({ id: d.id, data: d.data() }); });
+  if (!items.length) { prog.textContent = "No active items to copy."; return; }
+  let done = 0;
+  for (const { id, data } of items) {
+    await setDoc(doc(db, "outlets", targetId, "menu", id + "-" + Date.now()), { ...data, archived: false });
+    done++;
+    prog.textContent = `Copied ${done} / ${items.length}…`;
+  }
+  prog.textContent = `Done! ${done} items copied to "${targetId}".`;
+  setTimeout(() => closeCopyMenu(), 2000);
 };
 
 window.editItem = async function (id) {

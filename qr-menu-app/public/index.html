@@ -740,6 +740,7 @@ onSnapshot(collection(db, "outlets", outlet, "menu"), snap => {
   const catSet = new Set();
   snap.forEach(d => {
     const item = { ...d.data(), id: d.id };
+    if (item.archived === true) return;
     item.category = (item.category || "Others").trim();
     catSet.add(item.category);
     allItems.push(item);
