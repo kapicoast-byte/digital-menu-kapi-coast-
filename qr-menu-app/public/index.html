@@ -141,6 +141,13 @@
       display: none;
     }
     .menu-card.sold-out .sold-out-badge { display: block; }
+    .menu-card.time-unavail { opacity: 0.55; }
+    .time-unavail-badge {
+      display: inline-block;
+      font-size: 10px; background: #f5f5f5; color: #888;
+      border-radius: 4px; padding: 2px 6px; font-weight: 700;
+      margin-left: 4px; vertical-align: middle; white-space: nowrap;
+    }
     .card-body {
       padding: 9px 10px 11px;
       flex: 1; display: flex; flex-direction: column; gap: 3px;
@@ -650,6 +657,15 @@ function buildPills(cats) {
   });
 }
 
+function isItemAvailableNow(item) {
+  if (!item.availableFrom || !item.availableTo) return true;
+  const now  = new Date();
+  const cur  = now.getHours() * 60 + now.getMinutes();
+  const [fh, fm] = item.availableFrom.split(":").map(Number);
+  const [th, tm] = item.availableTo.split(":").map(Number);
+  return cur >= fh * 60 + fm && cur <= th * 60 + tm;
+}
+
 function renderMenu() {
   const container = document.getElementById("menuContainer");
   const search    = document.getElementById("searchInput").value.toLowerCase();
@@ -681,6 +697,7 @@ function renderMenu() {
     html += `<div class="cat-heading">${escapeHtml(cat)}</div><div class="menu-grid">`;
     byCat[cat].forEach(item => {
       const soldOut  = item.available === false;
+      const timeOk   = isItemAvailableNow(item);
       const vegDot   = item.veg === "veg"
         ? `<span class="veg-dot is-veg"></span>`
         : item.veg === "nonveg"
@@ -691,8 +708,10 @@ function renderMenu() {
       const imgContent = imgSrc
         ? `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(item.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${getFoodIllustration(item.category, item.name)}</div>`;
+      const timeTag = (!timeOk && item.availableFrom)
+        ? `<span class="time-unavail-badge">Available ${item.availableFrom}–${item.availableTo}</span>` : "";
       html += `
-        <div class="menu-card${soldOut ? " sold-out" : ""}">
+        <div class="menu-card${soldOut ? " sold-out" : ""}${!timeOk ? " time-unavail" : ""}">
           <div class="card-img-wrap" ${onImgClick} style="${imgSrc ? "cursor:pointer;" : ""}">
             ${imgContent}
             <span class="sold-out-badge">Sold Out</span>
@@ -700,7 +719,7 @@ function renderMenu() {
             ${item.dailySpecial ? '<span class="special-card-ribbon">Special</span>' : ""}
           </div>
           <div class="card-body">
-            <div class="card-name">${vegDot}${escapeHtml(item.name)}</div>
+            <div class="card-name">${vegDot}${escapeHtml(item.name)}${timeTag}</div>
             <div class="card-desc">${escapeHtml(item.description || "")}</div>
             <div class="card-price">Rs. ${escapeHtml(item.price)}</div>
           </div>
@@ -746,7 +765,9 @@ onSnapshot(collection(db, "outlets", outlet, "menu"), snap => {
     allItems.push(item);
   });
   allItems.sort((a, b) =>
-    a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+    a.category.localeCompare(b.category) ||
+    (a.sortOrder ?? 9999) - (b.sortOrder ?? 9999) ||
+    a.name.localeCompare(b.name));
   document.getElementById("skeletonGrid").style.display = "none";
   buildPills([...catSet].sort());
   renderSpecials();
