@@ -323,6 +323,64 @@
       align-items: center; margin-bottom: 14px;
     }
 
+    /* ── Drag reorder ── */
+    .drag-handle {
+      font-size: 20px; color: var(--muted); cursor: grab;
+      padding: 0 10px 0 2px; flex-shrink: 0; user-select: none;
+      display: none; align-items: center;
+    }
+    .reorder-active .drag-handle { display: flex; }
+    .item-card.drag-over { outline: 2px dashed var(--caramel); }
+    .item-card.dragging  { opacity: 0.35; }
+
+    /* ── Time availability ── */
+    .time-avail-badge {
+      display: inline-block;
+      font-size: 11px; background: #FFF3CD; color: #856404;
+      border: 1px solid #FFECB5; border-radius: 4px;
+      padding: 2px 6px; font-weight: 600; margin-left: 6px;
+    }
+    .time-unavail-badge {
+      display: inline-block;
+      font-size: 11px; background: #f5f5f5; color: #888;
+      border-radius: 4px; padding: 2px 6px; font-weight: 600; margin-left: 6px;
+    }
+    .time-inputs-row {
+      display: flex; gap: 8px; align-items: center;
+      flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .time-inputs-row label { font-size: 13px; color: var(--muted); }
+
+    /* ── Import / Bulk upload tables ── */
+    .import-table {
+      width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0;
+    }
+    .import-table th {
+      text-align: left; padding: 5px 8px;
+      background: #FAF6F0; font-size: 11px; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .import-table td { padding: 5px 8px; border-top: 1px solid #F0EAE3; vertical-align: middle; }
+    .import-table input, .import-table select {
+      border: 1px solid #E0D5CC; border-radius: 5px;
+      padding: 3px 6px; font-size: 12px; width: 100%;
+      font-family: 'Manrope', sans-serif;
+    }
+    .import-remove { background: none; border: none; cursor: pointer; color: #c62828; font-size: 16px; padding: 0 4px; }
+    .csv-drop-zone {
+      border: 2px dashed #E0D5CC; border-radius: 10px;
+      padding: 20px; text-align: center; cursor: pointer;
+      color: var(--muted); font-size: 13px; font-weight: 600;
+      transition: border-color 0.15s; margin: 8px 0;
+    }
+    .csv-drop-zone:hover { border-color: var(--caramel); }
+    .api-key-input {
+      width: 100%; padding: 9px 12px;
+      border: 1.5px solid #E0D5CC; border-radius: 8px;
+      font-family: monospace; font-size: 13px; margin: 6px 0 10px;
+      color: var(--espresso);
+    }
+
     /* ── QR Section ── */
     .qr-gen-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
     .qr-grid {
@@ -526,13 +584,28 @@
               Daily Special
             </label>
           </div>
+          <label class="field-label">Availability</label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:var(--espresso);margin-bottom:8px;">
+            <input type="checkbox" id="itemAllDay" style="width:16px;height:16px;accent-color:var(--caramel);" checked onchange="document.getElementById('timeInputsWrap').style.display=this.checked?'none':'flex'">
+            Available all day
+          </label>
+          <div id="timeInputsWrap" class="time-inputs-row" style="display:none;">
+            <label>From</label>
+            <input class="field-input" type="time" id="itemAvailFrom" style="width:120px;margin-bottom:0;">
+            <label>To</label>
+            <input class="field-input" type="time" id="itemAvailTo" style="width:120px;margin-bottom:0;">
+          </div>
           <button class="form-btn btn-espresso" onclick="addItem()">Add Item</button>
           <div class="form-status" id="itemStatus"></div>
         </div>
         <hr class="section-hr">
         <div class="mgr-toolbar">
           <button class="form-btn btn-espresso btn-sm" onclick="openBulkEdit()">Bulk Edit Prices</button>
+          <button class="form-btn btn-espresso btn-sm" onclick="openBulkUpload()">Bulk Upload</button>
           <button class="form-btn btn-espresso btn-sm" onclick="openCopyMenu()">Copy Menu to Outlet</button>
+          <button class="form-btn btn-espresso btn-sm" onclick="openPhotoImport()">Import from Photo</button>
+          <button class="form-btn btn-espresso btn-sm" id="reorderToggleBtn" onclick="toggleReorder()">Reorder</button>
+          <button class="form-btn btn-espresso btn-sm" id="saveOrderBtn" style="display:none;" onclick="saveOrder()">Save Order</button>
           <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;margin-left:auto;">
             <input type="checkbox" id="showArchivedToggle" style="accent-color:var(--caramel);" onchange="toggleArchivedView()">
             Show Archived
@@ -581,6 +654,60 @@
             <button class="form-btn" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="closeCopyMenu()">Cancel</button>
           </div>
           <div class="copy-progress" id="copyProgress"></div>
+        </div>
+      </div>
+
+      <!-- Bulk Upload CSV overlay -->
+      <div class="mgr-overlay hidden" id="bulkUploadOverlay">
+        <div class="mgr-modal">
+          <h3>Bulk Upload via CSV</h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Upload a CSV file with columns: name, price, description, category, veg</p>
+          <button class="form-btn btn-espresso btn-sm" onclick="downloadCSVTemplate()">Download Template</button>
+          <div class="csv-drop-zone" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()">
+            Click to select CSV file (or drag &amp; drop)
+          </div>
+          <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="previewCSV(this)">
+          <div id="csvPreviewWrap" style="display:none;margin-top:10px;max-height:300px;overflow-y:auto;">
+            <table class="bulk-price-table">
+              <thead><tr><th>Name</th><th>Price</th><th>Category</th><th>Veg</th></tr></thead>
+              <tbody id="csvPreviewBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="form-btn btn-espresso" id="csvUploadBtn" style="display:none;" onclick="uploadCSVItems()">Upload All</button>
+            <button class="form-btn" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="closeBulkUpload()">Cancel</button>
+          </div>
+          <div class="form-status" id="csvUploadStatus"></div>
+        </div>
+      </div>
+
+      <!-- Photo Import overlay -->
+      <div class="mgr-overlay hidden" id="photoImportOverlay">
+        <div class="mgr-modal">
+          <h3>Import Menu from Photo</h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">Upload a photo of a printed menu and Claude AI will extract the items.</p>
+          <label class="field-label">Anthropic API Key</label>
+          <input class="api-key-input" type="password" id="anthropicKey" placeholder="sk-ant-..." value="">
+          <div class="csv-drop-zone" id="photoDropZone" onclick="document.getElementById('menuPhotoInput').click()">
+            Click to select menu photo
+          </div>
+          <input type="file" id="menuPhotoInput" accept="image/*" style="display:none;" onchange="previewMenuPhoto(this)">
+          <img id="menuPhotoPreview" style="display:none;max-width:100%;max-height:160px;border-radius:8px;margin:8px 0;object-fit:contain;">
+          <div style="margin-top:8px;">
+            <button class="form-btn btn-espresso" id="extractBtn" style="display:none;" onclick="extractMenuFromPhoto()">Extract Menu Items</button>
+          </div>
+          <div id="extractStatus" style="font-size:13px;color:var(--muted);margin:8px 0;"></div>
+          <div id="extractedPreviewWrap" style="display:none;max-height:280px;overflow-y:auto;">
+            <table class="import-table">
+              <thead><tr><th>Name</th><th>Price</th><th>Category</th><th>Desc</th><th></th></tr></thead>
+              <tbody id="extractedBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="form-btn btn-espresso" id="saveExtractedBtn" style="display:none;" onclick="saveExtractedItems()">Save All to Menu</button>
+            <button class="form-btn" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="closePhotoImport()">Cancel</button>
+          </div>
+          <div class="form-status" id="saveExtractedStatus"></div>
         </div>
       </div>
 
@@ -794,6 +921,20 @@ function showPanel(oId, oName) {
 // SECTION 1 — Menu Items
 // ──────────────────────────────────────────────────
 let mgrShowArchived = false;
+let mgrReorderMode  = false;
+
+function timeAvailBadge(item) {
+  if (!item.availableFrom || !item.availableTo) return "";
+  const now  = new Date();
+  const cur  = now.getHours() * 60 + now.getMinutes();
+  const [fh, fm] = item.availableFrom.split(":").map(Number);
+  const [th, tm] = item.availableTo.split(":").map(Number);
+  const from = fh * 60 + fm, to = th * 60 + tm;
+  const inRange = cur >= from && cur <= to;
+  return inRange
+    ? `<span class="time-avail-badge">${item.availableFrom}–${item.availableTo}</span>`
+    : `<span class="time-unavail-badge">Available ${item.availableFrom}–${item.availableTo}</span>`;
+}
 
 async function loadItems() {
   console.log("loadItems — outletId:", getOutletId());
@@ -815,6 +956,9 @@ async function loadItems() {
       activeCats[cat].push({ ...item, id: d.id });
     }
   });
+  // Sort by sortOrder if present
+  Object.values(activeCats).forEach(arr =>
+    arr.sort((a, b) => (a.sortOrder ?? 9999) - (b.sortOrder ?? 9999)));
 
   function itemCardHtml(item, isArchived) {
     const dot = item.veg === "nonveg"
@@ -824,6 +968,9 @@ async function loadItems() {
       ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" onerror="this.replaceWith((function(){const d=document.createElement('div');d.className='item-illus';d.innerHTML='${getFoodIllustration(item.category, item.name).replace(/'/g, "\\'")}';return d;})())">`
       : `<div class="item-illus">${getFoodIllustration(item.category, item.name)}</div>`;
     const archivedBadge = isArchived ? `<span class="archived-label">Archived</span>` : "";
+    const timeBadge = isArchived ? "" : timeAvailBadge(item);
+    const handle = `<span class="drag-handle">≡</span>`;
+    const draggable = (!isArchived && mgrReorderMode) ? `draggable="true"` : "";
     const actions = isArchived
       ? `<button class="form-btn btn-espresso btn-sm" onclick="restoreItem('${escapeHtml(item.id)}')">Restore</button>
          <button class="form-btn btn-danger btn-sm"   onclick="deleteForever('${escapeHtml(item.id)}')">Delete Forever</button>`
@@ -831,10 +978,10 @@ async function loadItems() {
          <button class="form-btn btn-espresso btn-sm" onclick="duplicateItem('${escapeHtml(item.id)}')">Duplicate</button>
          <button class="form-btn btn-danger btn-sm"   onclick="archiveItem('${escapeHtml(item.id)}')">Archive</button>`;
     return `
-      <div class="item-card${isArchived ? " archived-card" : ""}">
-        ${imgBlock}
+      <div class="item-card${isArchived ? " archived-card" : ""}" ${draggable} data-id="${escapeHtml(item.id)}" data-cat="${escapeHtml(item.category || "Others")}">
+        ${handle}${imgBlock}
         <div class="item-card-info">
-          <div class="item-card-name">${dot}${escapeHtml(item.name)}${archivedBadge}</div>
+          <div class="item-card-name">${dot}${escapeHtml(item.name)}${archivedBadge}${timeBadge}</div>
           <div class="item-card-meta">₹${escapeHtml(item.price)} &nbsp;·&nbsp; ${escapeHtml(item.category || "")}</div>
           <div class="item-card-meta">${escapeHtml(item.description || "")}</div>
         </div>
@@ -847,7 +994,6 @@ async function loadItems() {
     html += `<div class="cat-header">${escapeHtml(cat)}</div>`;
     activeCats[cat].forEach(item => { html += itemCardHtml(item, false); });
   });
-
   if (mgrShowArchived && Object.keys(archivedCats).length > 0) {
     html += `<div class="cat-header" style="color:var(--muted);margin-top:20px;">— Archived Items —</div>`;
     Object.keys(archivedCats).sort().forEach(cat => {
@@ -856,6 +1002,8 @@ async function loadItems() {
     });
   }
   div.innerHTML = html || `<p style="color:var(--muted);font-size:14px;">No active items.</p>`;
+  if (mgrReorderMode) { div.classList.add("reorder-active"); attachDragEvents(div); }
+  else div.classList.remove("reorder-active");
 }
 
 window.addItem = async function () {
@@ -881,7 +1029,10 @@ window.addItem = async function () {
     imageUrl = await getDownloadURL(storageRef);
   }
 
-  await setDoc(menuDocRef(id), { name, price, description: desc, category, imageUrl, veg, popular, dailySpecial });
+  const allDay       = document.getElementById("itemAllDay").checked;
+  const availableFrom = allDay ? "" : (document.getElementById("itemAvailFrom").value || "");
+  const availableTo   = allDay ? "" : (document.getElementById("itemAvailTo").value   || "");
+  await setDoc(menuDocRef(id), { name, price, description: desc, category, imageUrl, veg, popular, dailySpecial, availableFrom, availableTo });
   document.getElementById("itemName").value     = "";
   document.getElementById("itemPrice").value    = "";
   document.getElementById("itemDesc").value     = "";
@@ -889,6 +1040,8 @@ window.addItem = async function () {
   document.getElementById("itemImage").value    = "";
   document.getElementById("itemPopular").checked      = false;
   document.getElementById("itemDailySpecial").checked = false;
+  document.getElementById("itemAllDay").checked = true;
+  document.getElementById("timeInputsWrap").style.display = "none";
   setStatus("itemStatus", "Item added!");
   loadItems();
 };
@@ -1089,6 +1242,277 @@ window.stopCasting = function () {
   document.getElementById("castStatus").textContent     = "Not casting.";
   document.getElementById("stopCastBtn").style.display  = "none";
   document.getElementById("startCastBtn").style.display = "inline-block";
+};
+
+// ──────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
+// FEATURE 5 — Bulk Upload via CSV
+// ──────────────────────────────────────────────────
+let csvParsedItems = [];
+
+window.openBulkUpload = function () {
+  csvParsedItems = [];
+  document.getElementById("csvFileInput").value = "";
+  document.getElementById("csvPreviewWrap").style.display = "none";
+  document.getElementById("csvUploadBtn").style.display   = "none";
+  document.getElementById("csvUploadStatus").textContent  = "";
+  document.getElementById("bulkUploadOverlay").classList.remove("hidden");
+};
+window.closeBulkUpload = function () {
+  document.getElementById("bulkUploadOverlay").classList.add("hidden");
+};
+
+window.downloadCSVTemplate = function () {
+  const csv = "name,price,description,category,veg\nCappuccino,120,Rich espresso with steamed milk,Coffee,veg\nChicken Sandwich,180,Grilled chicken in a toasted bun,Snacks,nonveg";
+  const a = document.createElement("a");
+  a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+  a.download = "menu_template.csv";
+  a.click();
+};
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+  return lines.slice(1).map(line => {
+    // Handle quoted fields
+    const fields = [];
+    let cur = "", inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; }
+      else if (line[i] === "," && !inQ) { fields.push(cur.trim()); cur = ""; }
+      else cur += line[i];
+    }
+    fields.push(cur.trim());
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (fields[i] || "").replace(/^"|"$/g, "").trim(); });
+    return obj;
+  }).filter(r => r.name);
+}
+
+window.previewCSV = function (input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById("csvDropZone").textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    csvParsedItems = parseCSV(e.target.result);
+    const tbody = document.getElementById("csvPreviewBody");
+    tbody.innerHTML = csvParsedItems.map(r =>
+      `<tr><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.price)}</td><td>${escapeHtml(r.category||"")}</td><td>${escapeHtml(r.veg||"veg")}</td></tr>`
+    ).join("");
+    document.getElementById("csvPreviewWrap").style.display = csvParsedItems.length ? "block" : "none";
+    document.getElementById("csvUploadBtn").style.display   = csvParsedItems.length ? "inline-block" : "none";
+    if (!csvParsedItems.length) document.getElementById("csvUploadStatus").textContent = "No valid rows found.";
+  };
+  reader.readAsText(file);
+};
+
+window.uploadCSVItems = async function () {
+  if (!csvParsedItems.length) return;
+  const btn = document.getElementById("csvUploadBtn");
+  btn.disabled = true;
+  for (let i = 0; i < csvParsedItems.length; i++) {
+    const r   = csvParsedItems[i];
+    const id  = (r.name || "item").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + Date.now() + i;
+    const veg = (r.veg || "veg").toLowerCase().includes("non") ? "nonveg" : "veg";
+    await setDoc(menuDocRef(id), {
+      name: r.name, price: r.price, description: r.description || "",
+      category: r.category || "Others", veg, imageUrl: "",
+      popular: false, dailySpecial: false, archived: false,
+      availableFrom: "", availableTo: ""
+    });
+    document.getElementById("csvUploadStatus").textContent = `Uploading ${i + 1} of ${csvParsedItems.length}…`;
+  }
+  document.getElementById("csvUploadStatus").textContent = `Done! ${csvParsedItems.length} items uploaded.`;
+  btn.disabled = false;
+  setTimeout(() => closeBulkUpload(), 1500);
+  loadItems();
+};
+
+// ──────────────────────────────────────────────────
+// FEATURE 6 — Drag-and-Drop Reorder
+// ──────────────────────────────────────────────────
+window.toggleReorder = function () {
+  mgrReorderMode = !mgrReorderMode;
+  const btn = document.getElementById("reorderToggleBtn");
+  const saveBtn = document.getElementById("saveOrderBtn");
+  btn.textContent   = mgrReorderMode ? "Exit Reorder" : "Reorder";
+  btn.style.background = mgrReorderMode ? "var(--caramel)" : "";
+  saveBtn.style.display = mgrReorderMode ? "inline-block" : "none";
+  loadItems();
+};
+
+function attachDragEvents(container) {
+  let dragSrc = null;
+  container.querySelectorAll(".item-card[draggable='true']").forEach(card => {
+    card.addEventListener("dragstart", e => {
+      dragSrc = card;
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      container.querySelectorAll(".item-card").forEach(c => c.classList.remove("drag-over"));
+    });
+    card.addEventListener("dragover", e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (card !== dragSrc) card.classList.add("drag-over");
+    });
+    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+    card.addEventListener("drop", e => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      if (!dragSrc || dragSrc === card) return;
+      if (dragSrc.dataset.cat !== card.dataset.cat) return; // same category only
+      const afterCard = card.compareDocumentPosition(dragSrc) & Node.DOCUMENT_POSITION_FOLLOWING;
+      if (afterCard) card.before(dragSrc);
+      else card.after(dragSrc);
+    });
+  });
+}
+
+window.saveOrder = async function () {
+  const cards  = document.querySelectorAll("#menuList .item-card[data-id]");
+  const batch  = writeBatch(db);
+  cards.forEach((card, idx) => {
+    batch.update(menuDocRef(card.dataset.id), { sortOrder: idx });
+  });
+  await batch.commit();
+  setStatus("itemStatus", "Order saved!");
+  // Exit reorder mode
+  mgrReorderMode = false;
+  document.getElementById("reorderToggleBtn").textContent   = "Reorder";
+  document.getElementById("reorderToggleBtn").style.background = "";
+  document.getElementById("saveOrderBtn").style.display = "none";
+  loadItems();
+};
+
+// ──────────────────────────────────────────────────
+// FEATURE 8 — Import Menu from Photo
+// ──────────────────────────────────────────────────
+let extractedItems = [];
+
+window.openPhotoImport = function () {
+  extractedItems = [];
+  document.getElementById("menuPhotoInput").value       = "";
+  document.getElementById("menuPhotoPreview").style.display = "none";
+  document.getElementById("extractBtn").style.display   = "none";
+  document.getElementById("extractStatus").textContent  = "";
+  document.getElementById("extractedPreviewWrap").style.display = "none";
+  document.getElementById("saveExtractedBtn").style.display     = "none";
+  document.getElementById("saveExtractedStatus").textContent    = "";
+  const savedKey = sessionStorage.getItem("anthropicKey") || "";
+  document.getElementById("anthropicKey").value = savedKey;
+  document.getElementById("photoImportOverlay").classList.remove("hidden");
+};
+window.closePhotoImport = function () {
+  document.getElementById("photoImportOverlay").classList.add("hidden");
+};
+
+window.previewMenuPhoto = function (input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById("photoDropZone").textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById("menuPhotoPreview");
+    img.src = e.target.result;
+    img.style.display = "block";
+    document.getElementById("extractBtn").style.display = "inline-block";
+  };
+  reader.readAsDataURL(file);
+};
+
+window.extractMenuFromPhoto = async function () {
+  const apiKey = document.getElementById("anthropicKey").value.trim();
+  if (!apiKey) { document.getElementById("extractStatus").textContent = "Please enter your Anthropic API key."; return; }
+  sessionStorage.setItem("anthropicKey", apiKey);
+
+  const file = document.getElementById("menuPhotoInput").files[0];
+  if (!file) return;
+
+  document.getElementById("extractStatus").textContent = "Extracting menu items…";
+  document.getElementById("extractBtn").disabled = true;
+
+  // Convert to base64
+  const base64 = await new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result.split(",")[1]);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+  const mediaType = file.type || "image/jpeg";
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1024,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+            { type: "text",  text: 'Extract all menu items from this image. Return ONLY a JSON array with objects containing: name, price (number only, no currency symbol), description, category. No markdown, no explanation, just the JSON array.' }
+          ]
+        }]
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || "API error");
+    const raw = data.content?.[0]?.text || "[]";
+    extractedItems = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    renderExtractedTable();
+  } catch (err) {
+    document.getElementById("extractStatus").textContent = "Error: " + err.message;
+  }
+  document.getElementById("extractBtn").disabled = false;
+};
+
+function renderExtractedTable() {
+  const tbody = document.getElementById("extractedBody");
+  tbody.innerHTML = extractedItems.map((item, i) => `
+    <tr data-idx="${i}">
+      <td><input value="${escapeHtml(item.name || "")}" onchange="extractedItems[${i}].name=this.value"></td>
+      <td><input value="${escapeHtml(String(item.price || ""))}" style="width:60px;" onchange="extractedItems[${i}].price=this.value"></td>
+      <td><input value="${escapeHtml(item.category || "")}" onchange="extractedItems[${i}].category=this.value"></td>
+      <td><input value="${escapeHtml(item.description || "")}" onchange="extractedItems[${i}].description=this.value"></td>
+      <td><button class="import-remove" onclick="extractedItems.splice(${i},1);renderExtractedTable()">✕</button></td>
+    </tr>`).join("");
+  document.getElementById("extractedPreviewWrap").style.display = extractedItems.length ? "block" : "none";
+  document.getElementById("saveExtractedBtn").style.display     = extractedItems.length ? "inline-block" : "none";
+  document.getElementById("extractStatus").textContent = extractedItems.length
+    ? `Found ${extractedItems.length} item${extractedItems.length !== 1 ? "s" : ""}. Edit as needed then save.`
+    : "No items found in image.";
+}
+
+window.saveExtractedItems = async function () {
+  if (!extractedItems.length) return;
+  const btn = document.getElementById("saveExtractedBtn");
+  btn.disabled = true;
+  for (let i = 0; i < extractedItems.length; i++) {
+    const item = extractedItems[i];
+    const id   = (item.name || "item").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + Date.now() + i;
+    await setDoc(menuDocRef(id), {
+      name: item.name || "", price: String(item.price || ""),
+      description: item.description || "", category: item.category || "Others",
+      veg: "veg", imageUrl: "", popular: false, dailySpecial: false,
+      archived: false, availableFrom: "", availableTo: ""
+    });
+    document.getElementById("saveExtractedStatus").textContent = `Saving ${i + 1} of ${extractedItems.length}…`;
+  }
+  document.getElementById("saveExtractedStatus").textContent = `Saved ${extractedItems.length} items!`;
+  btn.disabled = false;
+  setTimeout(() => closePhotoImport(), 1500);
+  loadItems();
 };
 
 // ──────────────────────────────────────────────────
