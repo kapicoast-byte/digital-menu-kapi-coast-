@@ -1352,11 +1352,18 @@ async function _saveDrawerToggle(itemId, field, value) {
 }
 
 // ── AI Refine Description (Gemini) ──
-async function _getGeminiKey() {
+// Key is SET only in admin.html (AI Settings). Managers read it here; never ask managers to configure it.
+async function getGeminiKey() {
   try {
     const snap = await getDoc(doc(db, "settings", "config"));
-    return snap.exists() ? (snap.data().geminiKey || "") : "";
-  } catch { return ""; }
+    if (snap.exists() && snap.data().geminiKey) {
+      return snap.data().geminiKey;
+    }
+    return null;
+  } catch(e) {
+    console.error("Could not read Gemini key:", e);
+    return null;
+  }
 }
 window.aiRefineDescription = function (itemId) {
   closeDropdown();
@@ -1373,7 +1380,7 @@ window.aiRefineDescription = function (itemId) {
 };
 async function _doGeminiRefine(item) {
   try {
-    const key = await _getGeminiKey();
+    const key = await getGeminiKey();
     if (!key) {
       document.getElementById("aiRefineStatus").textContent = "No Gemini API key set. Add it in Manage Outlets → AI Settings.";
       return;
