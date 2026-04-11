@@ -1326,12 +1326,17 @@ async function _saveDrawerToggle(itemId, field, value) {
 }
 
 // ── AI Refine Description (Gemini) ──
-async function _getGeminiKey() {
-  try {
-    const snap = await getDoc(doc(db, "settings", "config"));
-    return snap.exists() ? (snap.data().geminiKey || "") : "";
-  } catch { return ""; }
+async function getGeminiKey() {
+  // Read from Firestore settings/config
+  const snap = await getDoc(doc(db, "settings", "config"));
+  if (snap.exists() && snap.data().geminiKey) {
+    return snap.data().geminiKey;
+  }
+  return null;
 }
+// NOTE: Protect settings/config in Firebase Console → Firestore Rules:
+//   match /settings/config { allow read, write: if true; }
+// Then restrict Gemini key by domain in Google AI Studio → API Keys → Add restriction → menu.kapicoast.org
 window.aiRefineDescription = function (itemId) {
   closeDropdown();
   closeDrawer();
@@ -1347,7 +1352,7 @@ window.aiRefineDescription = function (itemId) {
 };
 async function _doGeminiRefine(item) {
   try {
-    const key = await _getGeminiKey();
+    const key = await getGeminiKey();
     if (!key) {
       document.getElementById("aiRefineStatus").textContent = "No Gemini API key set. Add it in Manage Outlets → AI Settings.";
       return;
