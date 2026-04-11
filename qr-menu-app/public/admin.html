@@ -1357,7 +1357,7 @@ async function _doGeminiRefine(item) {
       document.getElementById("aiRefineStatus").textContent = "No Gemini API key set. Add it in Manage Outlets → AI Settings.";
       return;
     }
-    const prompt = `Write a short, appetizing 1–2 sentence menu description for a cafe item called "${item.name}" (category: "${item.category || "Food"}"). Current description: "${item.description || "none"}". Be concise and mouth-watering.`;
+    const prompt = `You are a cafe menu copywriter. Write ONE short appetizing description (maximum 12 words) for this menu item: "${item.name}" in category "${item.category || "Food"}". Current description: "${item.description || "none"}". Rules: Return ONLY the description text. No options. No numbering. No markdown. No quotes. No explanation. Just the description itself.`;
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
