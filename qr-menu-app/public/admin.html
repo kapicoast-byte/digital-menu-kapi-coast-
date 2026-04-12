@@ -952,6 +952,8 @@
     <input type="text" id="outletCity" placeholder="e.g. Chennai">
     <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Phone</label>
     <input type="text" id="outletPhone" placeholder="e.g. +91 98765 43210">
+    <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Logo URL <span style="color:#9A7D6B;font-size:11px;">(optional)</span></label>
+    <input type="text" id="outletLogoUrl" placeholder="https://... image URL">
     <button class="btn btn-primary" onclick="createOutlet()">Create Outlet</button>
     <p id="outletFormStatus" style="font-size:13px;margin-top:8px;"></p>
 
@@ -2248,6 +2250,7 @@ async function createOutlet() {
   const location = document.getElementById("outletLocation").value.trim();
   const city = document.getElementById("outletCity").value.trim();
   const phone = document.getElementById("outletPhone").value.trim();
+  const logoUrl = document.getElementById("outletLogoUrl").value.trim();
 
   if (!name || !id) {
     alert("Name and ID are required");
@@ -2263,14 +2266,9 @@ async function createOutlet() {
       return;
     }
 
-    await setDoc(outletRef, {
-      name,
-      id,
-      location,
-      city,
-      phone,
-      createdAt: new Date()
-    });
+    const outletData = { name, id, location, city, phone, createdAt: new Date() };
+    if (logoUrl) outletData.logoUrl = logoUrl;
+    await setDoc(outletRef, outletData);
 
     alert("Outlet created successfully!");
 
@@ -2288,6 +2286,7 @@ async function createOutlet() {
     document.getElementById("outletLocation").value = "";
     document.getElementById("outletCity").value = "";
     document.getElementById("outletPhone").value = "";
+    document.getElementById("outletLogoUrl").value = "";
 
   } catch(e) {
     console.error("Error creating outlet:", e);

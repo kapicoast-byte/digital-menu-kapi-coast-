@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digital Menu</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Manrope', Arial, sans-serif;
+      font-family: 'DM Sans', Arial, sans-serif;
       height: 100vh; overflow: hidden;
     }
 
@@ -69,38 +69,58 @@
     }
 
     /* ─────────────────────────────────────────
-       TOP BAR — fixed, always on top
+       TOP BAR — fixed 72px, dark espresso
     ───────────────────────────────────────── */
     .top-bar {
       position: fixed; top: 0; left: 0; right: 0;
-      height: 64px;
-      background: var(--bar-bg);
-      border-bottom: var(--bar-border);
+      height: 72px;
+      background: #1A0E06;
+      border-bottom: 1px solid #C8894A;
       display: flex; align-items: center;
       justify-content: space-between;
       padding: 0 48px;
       z-index: 200;
-      backdrop-filter: blur(8px);
     }
+    /* Left: outlet name + sub */
+    .top-brand { flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; }
     .top-logo {
-      font-size: 18px; font-weight: 800;
-      color: #C8894A;
-      letter-spacing: 3px; text-transform: uppercase;
-      flex-shrink: 0;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px; font-weight: 700;
+      color: #C8894A; line-height: 1.1;
     }
+    .top-brand-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 400;
+      color: #9A7D6B; letter-spacing: 1.5px;
+      margin-top: 2px;
+    }
+    /* Center: category */
     .top-category {
       position: absolute; left: 50%; transform: translateX(-50%);
-      font-size: 13px; font-weight: 700;
-      color: var(--bar-sub);
-      letter-spacing: 2.5px; text-transform: uppercase;
-      max-width: 46%; overflow: hidden;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 3px; text-transform: uppercase;
+      max-width: 40%; overflow: hidden;
       text-overflow: ellipsis; white-space: nowrap;
     }
+    /* Right: time + date + weather */
+    .top-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
     .top-clock {
-      font-size: 20px; font-weight: 700;
-      color: var(--bar-text);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 1px; flex-shrink: 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 24px; font-weight: 600;
+      color: #fff;
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .top-date {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 400;
+      color: #9A7D6B; line-height: 1;
+    }
+    .top-weather {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 400;
+      color: rgba(255,255,255,0.5); line-height: 1;
     }
 
     /* ─────────────────────────────────────────
@@ -108,7 +128,7 @@
     ───────────────────────────────────────── */
     .progress-wrap {
       position: fixed; bottom: 0; left: 0; right: 0;
-      height: 4px; background: var(--prog-bg); z-index: 200;
+      height: 8px; background: var(--prog-bg); z-index: 200;
     }
     .progress-bar { height: 100%; width: 0%; background: var(--prog-fill); }
 
@@ -116,7 +136,7 @@
        SLIDE VIEWPORT — between top bar and progress bar
     ───────────────────────────────────────── */
     .slide-viewport {
-      position: fixed; top: 64px; bottom: 4px;
+      position: fixed; top: 72px; bottom: 8px;
       left: 0; right: 0;
       overflow: hidden;
       background: var(--bg);
@@ -128,9 +148,10 @@
     ───────────────────────────────────────── */
     .slide {
       position: absolute; inset: 0;
-      opacity: 1; transition: opacity 0.7s ease;
+      opacity: 1; transform: scale(1.0);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
     }
-    .slide.hidden { opacity: 0; }
+    .slide.hidden { opacity: 0; transform: scale(1.02); }
 
     /* ─────────────────────────────────────────
        CATEGORY SLIDE
@@ -148,10 +169,10 @@
       justify-content: space-between;
     }
     .cat-name {
-      font-size: 28px; font-weight: 800;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 32px; font-weight: 700;
       color: var(--cat-name-clr);
-      letter-spacing: 0.5px; line-height: 1;
-      text-transform: uppercase;
+      line-height: 1;
     }
     .cat-count {
       font-size: 13px; font-weight: 600;
@@ -182,7 +203,7 @@
        ITEM CARD
     ───────────────────────────────────────── */
     .item-card {
-      background: #1A1A1A;
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
       overflow: hidden;
@@ -191,17 +212,15 @@
     }
     .item-card.sold-out { opacity: 0.45; }
 
-    /* Image — top portion of card, flex ratio set per layout */
     .card-img-wrap {
       position: relative; overflow: hidden;
-      min-height: 0; flex: 6;
+      min-height: 0;
     }
     .card-img-wrap img {
       width: 100%; height: 100%;
       object-fit: cover; display: block;
     }
 
-    /* Veg dot — top-left corner of image */
     .veg-ind {
       position: absolute; top: 8px; left: 8px;
       width: 12px; height: 12px; border-radius: 2px;
@@ -210,146 +229,185 @@
     .veg-green { background: #22C55E; }
     .veg-red   { background: #EF4444; }
 
-    /* Sold-out overlay */
     .sold-overlay {
       position: absolute; inset: 0;
       background: rgba(0,0,0,0.6);
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 800;
+      font-size: 16px; font-weight: 700;
       color: #fff; letter-spacing: 2px; text-transform: uppercase;
     }
 
-    /* Popular gold badge — top-right of image */
     .popular-badge {
       position: absolute; top: 8px; right: 8px;
       background: #C8894A; color: #fff;
-      font-size: 10px; font-weight: 800;
+      font-size: 10px; font-weight: 700;
       padding: 3px 7px; border-radius: 6px;
       letter-spacing: 0.3px;
     }
 
-    /* Text info area — below image */
     .card-info {
-      flex: 4; display: flex; flex-direction: column; justify-content: center;
-      padding: 8px 12px; min-height: 0;
+      display: flex; flex-direction: column; justify-content: center;
+      min-height: 0;
     }
     .card-name {
-      font-weight: 700; line-height: 1.3; margin-bottom: 3px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700; line-height: 1.25;
       color: var(--card-name);
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
     }
-    .card-price { font-weight: 800; color: var(--card-price); }
+    .card-price {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600; color: var(--card-price);
+    }
+    .card-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400; color: var(--bar-sub);
+      display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
+    }
 
-    /* ── Layout-specific image ratio + font sizes ── */
-    /* 2 items: 60% image */
-    .layout-2 .card-img-wrap { flex: 6; }
-    .layout-2 .card-info     { flex: 4; padding: 16px 20px; }
-    .layout-2 .card-name     { font-size: 32px; -webkit-line-clamp: 2; }
-    .layout-2 .card-price    { font-size: 28px; margin-top: 8px; }
+    /* ── 2 items: 2 cols, 55% image ── */
+    .layout-2 .card-img-wrap { flex: 55; }
+    .layout-2 .card-info     { flex: 45; padding: 16px 20px; }
+    .layout-2 .card-name     { font-size: 36px; margin-bottom: 4px; }
+    .layout-2 .card-price    { font-size: 28px; margin-bottom: 6px; }
+    .layout-2 .card-desc     { font-size: 16px; -webkit-line-clamp: 2; display: -webkit-box; }
 
-    /* 3-4 items: 55% image */
-    .layout-34 .card-img-wrap { flex: 55; }
-    .layout-34 .card-info     { flex: 45; padding: 10px 14px; }
-    .layout-34 .card-name     { font-size: 24px; }
-    .layout-34 .card-price    { font-size: 22px; margin-top: 5px; }
+    /* ── 3-4 items: 2×2, 50% image ── */
+    .layout-34 .card-img-wrap { flex: 50; }
+    .layout-34 .card-info     { flex: 50; padding: 10px 14px; }
+    .layout-34 .card-name     { font-size: 24px; margin-bottom: 3px; }
+    .layout-34 .card-price    { font-size: 20px; margin-bottom: 4px; }
+    .layout-34 .card-desc     { font-size: 13px; -webkit-line-clamp: 1; display: -webkit-box; }
 
-    /* 5-6 items: 50% image */
-    .layout-56 .card-img-wrap { flex: 5; }
-    .layout-56 .card-info     { flex: 5; padding: 8px 12px; }
-    .layout-56 .card-name     { font-size: 20px; }
-    .layout-56 .card-price    { font-size: 18px; margin-top: 4px; }
+    /* ── 5-6 items: 2×3, 45% image, no desc ── */
+    .layout-56 .card-img-wrap { flex: 45; }
+    .layout-56 .card-info     { flex: 55; padding: 8px 12px; }
+    .layout-56 .card-name     { font-size: 20px; margin-bottom: 3px; }
+    .layout-56 .card-price    { font-size: 18px; }
+    .layout-56 .card-desc     { display: none; }
 
-    /* 7-9 items: 45% image */
-    .layout-79 .card-img-wrap { flex: 45; }
-    .layout-79 .card-info     { flex: 55; padding: 6px 9px; }
-    .layout-79 .card-name     { font-size: 16px; }
-    .layout-79 .card-price    { font-size: 14px; margin-top: 3px; }
+    /* ── 7-9 items: 3×3, 40% image, no desc ── */
+    .layout-79 .card-img-wrap { flex: 40; }
+    .layout-79 .card-info     { flex: 60; padding: 6px 9px; }
+    .layout-79 .card-name     { font-size: 16px; margin-bottom: 2px; }
+    .layout-79 .card-price    { font-size: 14px; }
+    .layout-79 .card-desc     { display: none; }
 
     /* ─────────────────────────────────────────
-       CINEMATIC SINGLE-ITEM SLIDE
+       CINEMATIC SINGLE-ITEM — horizontal split
     ───────────────────────────────────────── */
-    .cinema-img-wrap {
-      width: 100%; flex: 7;
-      position: relative; overflow: hidden; min-height: 0;
-    }
-    .cinema-img-wrap img {
+    .cinema-slide {
       width: 100%; height: 100%;
-      object-fit: cover; display: block;
+      display: flex; flex-direction: row;
     }
-    .cinema-gradient {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      height: 70%;
-      background: linear-gradient(to top, rgba(0,0,0,0.96) 0%, transparent 100%);
-      pointer-events: none;
+    .cinema-img-half {
+      flex: 1; position: relative; overflow: hidden;
     }
-    .cinema-text {
-      flex: 3; width: 100%; min-height: 0;
+    .cinema-img-half img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .cinema-illus {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      background: #EDE5DB;
+    }
+    .cinema-info-half {
+      flex: 1;
       display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      text-align: center; padding: 28px 80px;
-      background: #0A0A0A;
+      align-items: flex-start; justify-content: center;
+      padding: 60px;
+      background: var(--slide-bg);
     }
     .cinema-cat {
-      font-size: 15px; font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
       color: #C8894A; letter-spacing: 3px;
-      text-transform: uppercase; margin-bottom: 12px;
-    }
-    .cinema-name-row {
-      display: flex; align-items: center; justify-content: center;
-      gap: 18px; margin-bottom: 12px;
-    }
-    .cinema-veg {
-      width: 16px; height: 16px; border-radius: 3px;
-      border: 2px solid rgba(255,255,255,0.5); flex-shrink: 0;
+      text-transform: uppercase; margin-bottom: 20px;
     }
     .cinema-name {
-      font-size: 80px; font-weight: 800;
-      color: #fff; line-height: 1; letter-spacing: -2px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 72px; font-weight: 700;
+      color: var(--card-name); line-height: 1.05;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .cinema-divider {
+      width: 60px; height: 2px;
+      background: #C8894A; margin-bottom: 20px; flex-shrink: 0;
     }
     .cinema-price {
-      font-size: 56px; font-weight: 800;
-      color: #C8894A; line-height: 1; margin-bottom: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 48px; font-weight: 600;
+      color: #C8894A; margin-bottom: 16px;
     }
     .cinema-desc {
-      font-size: 24px; font-weight: 500;
-      color: rgba(255,255,255,0.55); line-height: 1.5;
-      max-width: 700px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 20px; font-weight: 400;
+      color: #9A7D6B; line-height: 1.5; max-width: 500px;
+      display: -webkit-box; -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 20px;
     }
+    .cinema-veg-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 600;
+    }
+    .cinema-veg-pill.veg    { background: rgba(34,197,94,0.1);  color: #22C55E; }
+    .cinema-veg-pill.nonveg { background: rgba(239,68,68,0.1);  color: #EF4444; }
+    .cinema-veg-dot { width: 8px; height: 8px; border-radius: 50%; }
 
     /* ─────────────────────────────────────────
-       OFFER SLIDE — same across all templates
+       OFFER SLIDE
     ───────────────────────────────────────── */
     .offer-slide {
       width: 100%; height: 100%;
-      background: linear-gradient(135deg, #1A0E06 0%, #2C1A0E 60%, #1A0E06 100%);
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #2C1A0E 0%, #6B3F1F 100%);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       text-align: center; padding: 80px 120px;
     }
+    .offer-circle {
+      position: absolute;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: rgba(200,137,74,0.15);
+      top: -100px; right: -100px;
+      pointer-events: none;
+    }
+    .offer-slide > * { position: relative; z-index: 1; }
     .offer-pill {
-      display: inline-block; font-size: 12px; font-weight: 700;
-      letter-spacing: 3px; text-transform: uppercase; color: #C8894A;
-      border: 1px solid rgba(200,137,74,0.4);
-      padding: 7px 28px; border-radius: 32px; margin-bottom: 40px;
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase; color: #C8894A;
+      border: 1px solid #C8894A;
+      padding: 6px 16px; border-radius: 20px;
     }
-    .offer-deco {
-      width: 80px; height: 2px;
-      background: linear-gradient(90deg, transparent, #C8894A, transparent);
-      margin: 0 auto 32px;
-    }
-    .offer-deco.below { margin: 32px auto 40px; }
     .offer-title {
-      font-size: 72px; font-weight: 800; color: #fff;
-      line-height: 1.08; letter-spacing: -1px; max-width: 900px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 72px; font-weight: 700; color: #fff;
+      line-height: 1.1; max-width: 700px;
+      margin-top: 24px;
+    }
+    .offer-line {
+      width: 80px; height: 2px;
+      background: #C8894A;
+      margin: 24px auto;
     }
     .offer-body {
-      font-size: 32px; font-weight: 500;
-      color: #C8894A; line-height: 1.5; max-width: 760px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 28px; font-weight: 400;
+      color: #9A7D6B; line-height: 1.5;
     }
     .offer-footer {
-      margin-top: 48px; font-size: 14px; font-weight: 600;
-      letter-spacing: 2px; color: rgba(255,255,255,0.2); text-transform: uppercase;
+      margin-top: 40px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 400;
+      color: rgba(255,255,255,0.2);
     }
 
     /* ─────────────────────────────────────────
@@ -362,15 +420,38 @@
     }
     .empty-logo { font-size: 64px; font-weight: 800; color: #C8894A; letter-spacing: 2px; }
     .empty-sub  { font-size: 18px; color: var(--empty-sub, rgba(255,255,255,0.25)); font-weight: 500; }
+
+    /* ─────────────────────────────────────────
+       MUSIC VISUALIZER — fixed bottom-left
+    ───────────────────────────────────────── */
+    .viz {
+      display: flex; gap: 3px; align-items: flex-end;
+      height: 20px; opacity: 0.5;
+      position: fixed; bottom: 16px; left: 48px; z-index: 100;
+    }
+    .viz-bar { width: 4px; background: #C8894A; border-radius: 2px; }
+    .viz-bar:nth-child(1) { animation: vizAnim 0.6s ease-in-out infinite alternate; }
+    .viz-bar:nth-child(2) { animation: vizAnim 0.4s ease-in-out infinite alternate; }
+    .viz-bar:nth-child(3) { animation: vizAnim 0.8s ease-in-out infinite alternate; }
+    .viz-bar:nth-child(4) { animation: vizAnim 0.5s ease-in-out infinite alternate; }
+    .viz-bar:nth-child(5) { animation: vizAnim 0.7s ease-in-out infinite alternate; }
+    @keyframes vizAnim { from { height: 4px; } to { height: 20px; } }
   </style>
 </head>
 <body class="tmpl-dark">
 
 <!-- ── Top bar ── -->
 <div class="top-bar">
-  <div class="top-logo" id="displayLogo">Kapi Coast</div>
+  <div class="top-brand">
+    <div class="top-logo" id="displayLogo">Kapi Coast</div>
+    <div class="top-brand-sub" id="displaySub">Est. 2024 · Chennai</div>
+  </div>
   <div class="top-category" id="topCategory"></div>
-  <div class="top-clock" id="clock"></div>
+  <div class="top-right">
+    <div class="top-clock" id="clock"></div>
+    <div class="top-date" id="clockDate"></div>
+    <div id="weatherWidget" style="font-size:13px;color:#9A7D6B;margin-top:2px;"></div>
+  </div>
 </div>
 
 <!-- ── Slide viewport ── -->
@@ -386,6 +467,15 @@
 <!-- ── Progress bar ── -->
 <div class="progress-wrap">
   <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<!-- ── Music visualizer ── -->
+<div class="viz">
+  <div class="viz-bar"></div>
+  <div class="viz-bar"></div>
+  <div class="viz-bar"></div>
+  <div class="viz-bar"></div>
+  <div class="viz-bar"></div>
 </div>
 
 <script type="module">
@@ -411,21 +501,43 @@ const urlParams = new URLSearchParams(window.location.search);
 const outlet    = urlParams.get("outlet") || "ecr";
 console.log("Display outlet:", outlet);
 
-// ── Fetch and show outlet name in header ──
+// ── Fetch and show outlet name/logo in header ──
 getDoc(doc(db, "outlets", outlet)).then(snap => {
-  document.getElementById("displayLogo").textContent =
-    snap.exists() ? (snap.data().name || outlet) : outlet;
+  const d = snap.exists() ? snap.data() : {};
+  const brandEl = document.getElementById("displayLogo");
+  if (d.logoUrl) {
+    brandEl.innerHTML =
+      `<img src="${d.logoUrl.replace(/"/g,"&quot;")}" height="40" style="border-radius:6px;object-fit:contain;display:block;">`;
+  } else {
+    brandEl.textContent = d.name || outlet;
+  }
 });
 
-// ── Clock ──
+// ── Clock + Date ──
 function updateClock() {
+  const now = new Date();
   document.getElementById("clock").textContent =
-    new Date().toLocaleTimeString("en-IN", {
-      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
-    });
+    now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+  document.getElementById("clockDate").textContent =
+    now.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
 }
 updateClock();
 setInterval(updateClock, 1000);
+
+// ── Weather: Open-Meteo (Chennai, no API key needed) ──
+async function fetchWeather() {
+  try {
+    const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=13.0827&longitude=80.2707&current=temperature_2m,weathercode&timezone=Asia/Kolkata");
+    const data = await res.json();
+    const temp = Math.round(data.current.temperature_2m);
+    const code = data.current.weathercode;
+    const emoji = code === 0 ? "☀" : code <= 3 ? "⛅" : code <= 67 ? "🌧" : code <= 77 ? "❄" : "⛈";
+    const el = document.getElementById("weatherWidget");
+    if (el) el.textContent = emoji + " " + temp + "°C";
+  } catch(e) { console.log("Weather unavailable"); }
+}
+fetchWeather();
+setInterval(fetchWeather, 10 * 60 * 1000);
 
 // ── Helpers ──
 function esc(v) {
@@ -535,8 +647,10 @@ function itemCardHTML(item) {
   const out     = item.available === false || item.soldOut === true;
   const popular = item.popular ? `<span class="popular-badge">★ Popular</span>` : "";
   const cardImg = item.imageUrl
-    ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${getFoodIllustration(item.category, item.name)}</div>`;
+    ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy">`
+    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--card-bg);">${getFoodIllustration(item.category, item.name)}</div>`;
+  const desc = item.description
+    ? `<div class="card-desc">${esc(item.description)}</div>` : "";
   return `<div class="item-card${out ? " sold-out" : ""}">
     <div class="card-img-wrap">
       ${cardImg}
@@ -544,37 +658,36 @@ function itemCardHTML(item) {
     </div>
     <div class="card-info">
       <div class="card-name">${esc(item.name)}</div>
-      <div class="card-price">Rs. ${esc(item.price)}</div>
+      <div class="card-price">₹${esc(item.price)}</div>
+      ${desc}
     </div>
   </div>`;
 }
 
-// ── HTML: cinematic single-item slide ──
+// ── HTML: cinematic single-item slide (horizontal split) ──
 function singleItemSlideHTML(slide) {
   const { category, items } = slide;
-  const item   = items[0];
-  const bgAttr = cfg.template === "bold"
+  const item = items[0];
+  const imgHtml = item.imageUrl
+    ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy">`
+    : `<div class="cinema-illus">${getFoodIllustration(item.category, item.name)}</div>`;
+  let vegPill = "";
+  if (item.veg === "veg") {
+    vegPill = `<div class="cinema-veg-pill veg"><span class="cinema-veg-dot" style="background:#22C55E;"></span>Veg</div>`;
+  } else if (item.veg === "nonveg") {
+    vegPill = `<div class="cinema-veg-pill nonveg"><span class="cinema-veg-dot" style="background:#EF4444;"></span>Non-Veg</div>`;
+  }
+  const infoBg = cfg.template === "bold"
     ? ` style="background:${boldGradient(category)};"` : "";
-  const vegDot = item.veg === "veg"
-    ? `<span class="cinema-veg veg-green"></span>`
-    : item.veg === "nonveg"
-    ? `<span class="cinema-veg veg-red"></span>` : "";
-  const cinemaImg = item.imageUrl
-    ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#EDE5DB;">${getFoodIllustration(item.category, item.name)}</div>`;
-  return `<div class="cat-slide"${bgAttr}>
-    <div class="cinema-img-wrap">
-      ${cinemaImg}
-      <div class="cinema-gradient"></div>
-    </div>
-    <div class="cinema-text">
+  return `<div class="cinema-slide">
+    <div class="cinema-img-half">${imgHtml}</div>
+    <div class="cinema-info-half"${infoBg}>
       <div class="cinema-cat">${esc(category)}</div>
-      <div class="cinema-name-row">
-        ${vegDot}
-        <div class="cinema-name">${esc(item.name)}</div>
-      </div>
-      <div class="cinema-price">Rs. ${esc(item.price)}</div>
+      <div class="cinema-name">${esc(item.name)}</div>
+      <div class="cinema-divider"></div>
+      <div class="cinema-price">₹${esc(item.price)}</div>
       ${item.description ? `<div class="cinema-desc">${esc(item.description)}</div>` : ""}
+      ${vegPill}
     </div>
   </div>`;
 }
@@ -604,13 +717,14 @@ function catSlideHTML(slide) {
 
 // ── HTML: offer slide ──
 function offerHTML(d) {
+  const outletName = document.getElementById("displayLogo").textContent || "Kapi Coast";
   return `<div class="offer-slide">
-    <span class="offer-pill">Today's Offer</span>
-    <div class="offer-deco"></div>
+    <div class="offer-circle"></div>
+    <span class="offer-pill">Today's Special</span>
     <div class="offer-title">${esc(d.title)}</div>
-    <div class="offer-deco below"></div>
+    <div class="offer-line"></div>
     <div class="offer-body">${esc(d.body)}</div>
-    <div class="offer-footer">menu.kapicoast.org</div>
+    <div class="offer-footer">${esc(outletName)}</div>
   </div>`;
 }
 
@@ -650,7 +764,7 @@ async function transitionTo(idx) {
 
   const slideEl = document.getElementById("slide");
   slideEl.classList.add("hidden");
-  await sleep(720); // match CSS transition
+  await sleep(820); // match 0.8s CSS transition
 
   const slide = slides[idx];
   slideEl.innerHTML = slides.length
