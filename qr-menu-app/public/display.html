@@ -450,7 +450,7 @@
   <div class="top-right">
     <div class="top-clock" id="clock"></div>
     <div class="top-date" id="clockDate"></div>
-    <div class="top-weather" id="weatherEl" style="display:none;"></div>
+    <div id="weatherWidget" style="font-size:13px;color:#9A7D6B;margin-top:2px;"></div>
   </div>
 </div>
 
@@ -501,10 +501,16 @@ const urlParams = new URLSearchParams(window.location.search);
 const outlet    = urlParams.get("outlet") || "ecr";
 console.log("Display outlet:", outlet);
 
-// ── Fetch and show outlet name in header ──
+// ── Fetch and show outlet name/logo in header ──
 getDoc(doc(db, "outlets", outlet)).then(snap => {
-  document.getElementById("displayLogo").textContent =
-    snap.exists() ? (snap.data().name || outlet) : outlet;
+  const d = snap.exists() ? snap.data() : {};
+  const brandEl = document.getElementById("displayLogo");
+  if (d.logoUrl) {
+    brandEl.innerHTML =
+      `<img src="${d.logoUrl.replace(/"/g,"&quot;")}" height="40" style="border-radius:6px;object-fit:contain;display:block;">`;
+  } else {
+    brandEl.textContent = d.name || outlet;
+  }
 });
 
 // ── Clock + Date ──
@@ -519,26 +525,16 @@ updateClock();
 setInterval(updateClock, 1000);
 
 // ── Weather: Open-Meteo (Chennai, no API key needed) ──
-const WEATHER_ICONS = {
-  0:"☀️", 1:"🌤️", 2:"⛅", 3:"☁️",
-  45:"🌫️", 48:"🌫️",
-  51:"🌦️", 53:"🌦️", 55:"🌧️",
-  61:"🌧️", 63:"🌧️", 65:"🌧️",
-  80:"🌦️", 81:"🌦️", 82:"⛈️",
-  95:"⛈️", 96:"⛈️", 99:"⛈️"
-};
 async function fetchWeather() {
   try {
-    const r = await fetch(
-      "https://api.open-meteo.com/v1/forecast?latitude=13.0827&longitude=80.2707&current=temperature_2m,weathercode&timezone=Asia/Kolkata"
-    );
-    const d = await r.json();
-    const temp = Math.round(d.current.temperature_2m);
-    const icon = WEATHER_ICONS[d.current.weathercode] || "🌡️";
-    const el = document.getElementById("weatherEl");
-    el.textContent = `${icon} ${temp}°C`;
-    el.style.display = "";
-  } catch(e) { /* weather is optional */ }
+    const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=13.0827&longitude=80.2707&current=temperature_2m,weathercode&timezone=Asia/Kolkata");
+    const data = await res.json();
+    const temp = Math.round(data.current.temperature_2m);
+    const code = data.current.weathercode;
+    const emoji = code === 0 ? "☀" : code <= 3 ? "⛅" : code <= 67 ? "🌧" : code <= 77 ? "❄" : "⛈";
+    const el = document.getElementById("weatherWidget");
+    if (el) el.textContent = emoji + " " + temp + "°C";
+  } catch(e) { console.log("Weather unavailable"); }
 }
 fetchWeather();
 setInterval(fetchWeather, 10 * 60 * 1000);
