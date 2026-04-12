@@ -437,6 +437,7 @@
   <div class="top-brand">
     <div class="top-logo" id="displayLogo">Kapi Coast</div>
     <div class="top-brand-sub" id="displaySub">Est. 2024 · Chennai</div>
+    <div id="displayStatus" style="display:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;margin-top:2px;"></div>
   </div>
   <div class="top-category" id="topCategory"></div>
   <div class="top-right">
@@ -511,6 +512,23 @@ const outlet    = urlParams.get("outlet") || "ecr";
 console.log("Display outlet:", outlet);
 
 // ── Fetch and show outlet name/logo in header ──
+function checkOutletStatus(hoursData, closedToday) {
+  if (closedToday) return { open: false, message: "Closed today" };
+  if (!hoursData)  return { open: true,  message: "" };
+  const now  = new Date();
+  const days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+  const todayHours = hoursData[days[now.getDay()]];
+  if (!todayHours || !todayHours.open) return { open: false, message: "Closed today" };
+  const cur   = now.getHours() * 60 + now.getMinutes();
+  const [fh, fm] = todayHours.from.split(":").map(Number);
+  const [th, tm] = todayHours.to.split(":").map(Number);
+  const openT = fh * 60 + fm, closeT = th * 60 + tm;
+  if (cur < openT)  return { open: false, message: "Opens at " + todayHours.from };
+  if (cur > closeT) return { open: false, message: "Closed · Opens tomorrow at " + todayHours.from };
+  if (closeT - cur <= 30) return { open: true, message: "Closing soon at " + todayHours.to, closingSoon: true };
+  return { open: true, message: "Open until " + todayHours.to };
+}
+
 getDoc(doc(db, "outlets", outlet)).then(snap => {
   const d = snap.exists() ? snap.data() : {};
   const brandEl = document.getElementById("displayLogo");
@@ -519,6 +537,15 @@ getDoc(doc(db, "outlets", outlet)).then(snap => {
       `<img src="${d.logoUrl.replace(/"/g,"&quot;")}" height="40" style="border-radius:6px;object-fit:contain;display:block;">`;
   } else {
     brandEl.textContent = d.name || outlet;
+  }
+  // Open/closed status dot
+  const status   = checkOutletStatus(d.hours, d.closedToday);
+  const statusEl = document.getElementById("displayStatus");
+  if (status.message && statusEl) {
+    const color = status.closingSoon ? "#F59E0B" : status.open ? "#22C55E" : "#EF4444";
+    statusEl.innerHTML =
+      `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${color};margin-right:5px;vertical-align:middle;"></span><span style="color:${color};">${status.message}</span>`;
+    statusEl.style.display = "block";
   }
 });
 

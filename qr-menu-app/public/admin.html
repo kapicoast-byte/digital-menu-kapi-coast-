@@ -986,6 +986,35 @@
     <input type="text" id="outletPhone" placeholder="e.g. +91 98765 43210">
     <label style="font-size:12px;color:#777;display:block;margin-bottom:2px;">Logo URL <span style="color:#9A7D6B;font-size:11px;">(optional)</span></label>
     <input type="text" id="outletLogoUrl" placeholder="https://... image URL">
+    <label style="font-size:12px;color:#777;font-weight:600;display:block;margin:12px 0 8px;">Opening Hours <span style="color:#9A7D6B;font-size:11px;">(optional)</span></label>
+    <div style="background:#FAFAFA;border:1px solid #E0D5C8;border-radius:10px;padding:12px;font-size:12px;">
+      <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 10px;align-items:center;">
+        <label><input type="checkbox" id="hr-monday"    checked style="accent-color:#C8894A;"> Mon</label>
+        <input type="time" id="from-monday"    value="08:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <input type="time" id="to-monday"      value="22:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <label><input type="checkbox" id="hr-tuesday"   checked style="accent-color:#C8894A;"> Tue</label>
+        <input type="time" id="from-tuesday"   value="08:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <input type="time" id="to-tuesday"     value="22:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <label><input type="checkbox" id="hr-wednesday" checked style="accent-color:#C8894A;"> Wed</label>
+        <input type="time" id="from-wednesday" value="08:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <input type="time" id="to-wednesday"   value="22:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <label><input type="checkbox" id="hr-thursday"  checked style="accent-color:#C8894A;"> Thu</label>
+        <input type="time" id="from-thursday"  value="08:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <input type="time" id="to-thursday"    value="22:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <label><input type="checkbox" id="hr-friday"    checked style="accent-color:#C8894A;"> Fri</label>
+        <input type="time" id="from-friday"    value="08:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <input type="time" id="to-friday"      value="22:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <label><input type="checkbox" id="hr-saturday"  checked style="accent-color:#C8894A;"> Sat</label>
+        <input type="time" id="from-saturday"  value="09:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <input type="time" id="to-saturday"    value="23:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <label><input type="checkbox" id="hr-sunday"    checked style="accent-color:#C8894A;"> Sun</label>
+        <input type="time" id="from-sunday"    value="09:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <input type="time" id="to-sunday"      value="23:00" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#E53935;margin-top:10px;">
+        <input type="checkbox" id="closedToday" style="accent-color:#E53935;"> Mark as closed today (override)
+      </label>
+    </div>
     <button class="btn btn-primary" onclick="createOutlet()">Create Outlet</button>
     <p id="outletFormStatus" style="font-size:13px;margin-top:8px;"></p>
 
@@ -2334,7 +2363,17 @@ async function createOutlet() {
       return;
     }
 
-    const outletData = { name, id, location, city, phone, createdAt: new Date() };
+    const DAYS = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+    const hours = {};
+    DAYS.forEach(day => {
+      hours[day] = {
+        open: document.getElementById("hr-" + day)?.checked ?? true,
+        from: document.getElementById("from-" + day)?.value || "08:00",
+        to:   document.getElementById("to-" + day)?.value   || "22:00"
+      };
+    });
+    const closedToday = document.getElementById("closedToday")?.checked || false;
+    const outletData = { name, id, location, city, phone, createdAt: new Date(), hours, closedToday };
     if (logoUrl) outletData.logoUrl = logoUrl;
     await setDoc(outletRef, outletData);
 
@@ -2355,6 +2394,16 @@ async function createOutlet() {
     document.getElementById("outletCity").value = "";
     document.getElementById("outletPhone").value = "";
     document.getElementById("outletLogoUrl").value = "";
+    ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"].forEach(day => {
+      const openEl = document.getElementById("hr-" + day);
+      const fromEl = document.getElementById("from-" + day);
+      const toEl   = document.getElementById("to-" + day);
+      if (openEl) openEl.checked = true;
+      if (fromEl) fromEl.value = ["saturday","sunday"].includes(day) ? "09:00" : "08:00";
+      if (toEl)   toEl.value   = ["saturday","sunday"].includes(day) ? "23:00" : "22:00";
+    });
+    const closedEl = document.getElementById("closedToday");
+    if (closedEl) closedEl.checked = false;
 
   } catch(e) {
     console.error("Error creating outlet:", e);

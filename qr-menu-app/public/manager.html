@@ -966,6 +966,40 @@
           </div>
           <div class="form-status" id="musicUrlStatus"></div>
         </div>
+
+        <div class="form-panel">
+          <h3>Opening Hours</h3>
+          <p>Set when this outlet is open. Customers will see open/closed status on the menu.</p>
+          <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:7px 10px;align-items:center;font-size:13px;margin-bottom:12px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-monday"    checked style="accent-color:var(--caramel);width:15px;height:15px;"> Mon</label>
+            <input class="field-input" type="time" id="from-monday"    value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-monday"      value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-tuesday"   checked style="accent-color:var(--caramel);width:15px;height:15px;"> Tue</label>
+            <input class="field-input" type="time" id="from-tuesday"   value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-tuesday"     value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-wednesday" checked style="accent-color:var(--caramel);width:15px;height:15px;"> Wed</label>
+            <input class="field-input" type="time" id="from-wednesday" value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-wednesday"   value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-thursday"  checked style="accent-color:var(--caramel);width:15px;height:15px;"> Thu</label>
+            <input class="field-input" type="time" id="from-thursday"  value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-thursday"    value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-friday"    checked style="accent-color:var(--caramel);width:15px;height:15px;"> Fri</label>
+            <input class="field-input" type="time" id="from-friday"    value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-friday"      value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-saturday"  checked style="accent-color:var(--caramel);width:15px;height:15px;"> Sat</label>
+            <input class="field-input" type="time" id="from-saturday"  value="09:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-saturday"    value="23:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-sunday"    checked style="accent-color:var(--caramel);width:15px;height:15px;"> Sun</label>
+            <input class="field-input" type="time" id="from-sunday"    value="09:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-sunday"      value="23:00" style="margin:0;padding:6px;">
+          </div>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:#E53935;margin-bottom:12px;">
+            <input type="checkbox" id="closedToday" style="width:16px;height:16px;accent-color:#E53935;">
+            Mark as closed today (override)
+          </label>
+          <button class="form-btn btn-espresso btn-sm" onclick="saveOutletHours()">Save Hours</button>
+          <div class="form-status" id="hoursStatus"></div>
+        </div>
       </div>
 
       <!-- ── Section 5: QR Codes ── -->
@@ -1098,7 +1132,7 @@ window.showSection = function (sectionId) {
   if (sectionId === "menuItems")   loadItems();
   if (sectionId === "offerBanner") loadOffer();
   if (sectionId === "adsBanners")  loadAds();
-  if (sectionId === "castTV")      loadDisplaySettings();
+  if (sectionId === "castTV")      { loadDisplaySettings(); loadOutletHours(); }
 };
 
 // ── Show panel after login ──
@@ -1582,6 +1616,41 @@ window.saveDisplaySettings = async function () {
   const secs = parseInt(document.getElementById("intervalSlider").value, 10);
   await setDoc(displayRef(), { intervalSeconds: secs }, { merge: true });
   setStatus("displayStatus", "Saved!");
+};
+
+const OUTLET_DAYS = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+
+async function loadOutletHours() {
+  if (!getOutletId()) return;
+  const snap = await getDoc(doc(db, "outlets", getOutletId()));
+  if (!snap.exists()) return;
+  const d = snap.data();
+  const hours = d.hours || {};
+  OUTLET_DAYS.forEach(day => {
+    const h = hours[day] || {};
+    const openEl = document.getElementById("hr-" + day);
+    const fromEl = document.getElementById("from-" + day);
+    const toEl   = document.getElementById("to-" + day);
+    if (openEl) openEl.checked = h.open !== false;
+    if (fromEl) fromEl.value  = h.from || (["saturday","sunday"].includes(day) ? "09:00" : "08:00");
+    if (toEl)   toEl.value    = h.to   || (["saturday","sunday"].includes(day) ? "23:00" : "22:00");
+  });
+  const closedEl = document.getElementById("closedToday");
+  if (closedEl) closedEl.checked = d.closedToday === true;
+}
+
+window.saveOutletHours = async function () {
+  const hours = {};
+  OUTLET_DAYS.forEach(day => {
+    hours[day] = {
+      open: document.getElementById("hr-" + day)?.checked ?? true,
+      from: document.getElementById("from-" + day)?.value || "08:00",
+      to:   document.getElementById("to-" + day)?.value   || "22:00"
+    };
+  });
+  const closedToday = document.getElementById("closedToday")?.checked || false;
+  await updateDoc(doc(db, "outlets", getOutletId()), { hours, closedToday });
+  setStatus("hoursStatus", "Hours saved!");
 };
 
 window.saveVideoAdUrl = async function () {
