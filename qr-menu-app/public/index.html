@@ -93,13 +93,18 @@
       -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
     .filter-pills::-webkit-scrollbar { display: none; }
-    .pill {
-      flex-shrink: 0; padding: 7px 16px;
-      border-radius: 20px; font-size: 13px; font-weight: 600;
-      border: 1.5px solid #D4C4B4; background: #fff; color: #2C1A0E;
-      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    .cat-pill {
+      flex-shrink: 0; padding: 8px 16px;
+      border-radius: 30px; border: 1.5px solid #E0D5C8;
+      background: white; color: #9A7D6B;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      white-space: nowrap; display: flex; align-items: center; gap: 4px;
     }
-    .pill.active { background: #2C1A0E; color: #fff; border-color: #2C1A0E; }
+    .cat-pill.active { background: #2C1A0E; color: white; border-color: #2C1A0E; }
+    .cat-pill:hover  { border-color: #C8894A; color: #C8894A; }
+    body.dark .cat-pill { background: #1A1A1A; border-color: #333; color: #9A7D6B; }
+    body.dark .cat-pill.active { background: #C8894A; color: white; border-color: #C8894A; }
 
     /* ── Category title ── */
     .cat-title {
@@ -117,6 +122,10 @@
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
     .menu-item-row {
       display: flex;
@@ -437,8 +446,6 @@
     body.dark .cat-title { color: white; }
     body.dark .header { background: #1A1A1A; }
     body.dark .social-bar { background: #1A1A1A; border-color: #333; }
-    body.dark .pill { background: #333; color: #aaa; border-color: #444; }
-    body.dark .pill.active { background: #C8894A; color: white; border-color: #C8894A; }
     body.dark .item-desc { color: #888; }
     body.dark .search-input { background: #1A1A1A; color: white; border-color: #333; }
     body.dark .search-input::placeholder { color: #666; }
@@ -505,10 +512,19 @@
   <button onclick="dismissWelcome()" style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:18px;color:#9A7D6B;cursor:pointer;line-height:1;">×</button>
 </div>
 
+<!-- ── Order info notice ── -->
+<div style="margin:0 16px 12px;background:#FFF8F0;border-radius:12px;padding:12px 16px;border:1px solid #F0E6D3;">
+  <div style="font-size:13px;font-weight:700;color:#2C1A0E;margin-bottom:4px;">How to Order</div>
+  <div style="font-size:12px;color:#9A7D6B;line-height:1.6;">
+    Please place your order at the <b style="color:#C8894A;">front desk</b>.
+    You will receive a token number on your bill — we will call your token when your order is ready.
+  </div>
+</div>
+
 <!-- ── Sticky nav: pills then search ── -->
 <div class="sticky-nav">
   <div class="filter-pills" id="filterPills">
-    <div class="pill active" data-cat="all" onclick="setFilter('all', this)">All</div>
+    <div class="cat-pill active" data-cat="all" onclick="setFilter('all', this)">All</div>
   </div>
   <div class="search-area">
     <div class="search-wrap">
@@ -670,30 +686,40 @@ function getPlaceholderCard(category, name) {
   const cat = (category || "").toLowerCase();
   const nm  = (name || "").toLowerCase();
   let bg, emoji;
-  if (cat.includes("coffee") || nm.includes("coffee") || nm.includes("latte") || nm.includes("cappuccino") || nm.includes("espresso") || nm.includes("mocha") || nm.includes("filter")) {
+  if (nm.includes("bajji") || nm.includes("bonda") || nm.includes("pakoda") || nm.includes("pakora") || nm.includes("vada") || nm.includes("vadai") || nm.includes("baji")) {
+    bg = "#1B5E20"; emoji = "🫓";
+  } else if (nm.includes("panipuri") || nm.includes("pani puri") || nm.includes("golgappa") || nm.includes("chaat") || cat.includes("panipuri") || cat.includes("chaat")) {
+    bg = "#00695C"; emoji = "🫙";
+  } else if (nm.includes("samosa") || nm.includes("kachori")) {
+    bg = "#E65100"; emoji = "🥟";
+  } else if (cat.includes("coffee") || nm.includes("coffee") || nm.includes("latte") || nm.includes("cappuccino") || nm.includes("espresso") || nm.includes("mocha") || nm.includes("filter") || nm.includes("americano")) {
     bg = "#6B3F1F"; emoji = "☕";
-  } else if (cat.includes("tea") || nm.includes("tea") || nm.includes("chai")) {
+  } else if (cat.includes("tea") || nm.includes("tea") || nm.includes("chai") || nm.includes("masala tea")) {
     bg = "#8B6914"; emoji = "🍵";
-  } else if (cat.includes("juice") || cat.includes("cold") || cat.includes("shake") || nm.includes("juice") || nm.includes("smoothie") || nm.includes("frappe") || nm.includes("milkshake")) {
+  } else if (cat.includes("juice") || cat.includes("cold") || cat.includes("shake") || cat.includes("smoothie") || nm.includes("juice") || nm.includes("smoothie") || nm.includes("frappe") || nm.includes("milkshake") || nm.includes("lassi")) {
     bg = "#1565C0"; emoji = "🥤";
-  } else if (cat.includes("cake") || cat.includes("dessert") || cat.includes("cookie") || cat.includes("sweet") || nm.includes("cake") || nm.includes("cookie") || nm.includes("brownie") || nm.includes("muffin")) {
+  } else if (cat.includes("cake") || cat.includes("dessert") || cat.includes("cookie") || cat.includes("sweet") || nm.includes("cake") || nm.includes("cookie") || nm.includes("brownie") || nm.includes("muffin") || nm.includes("pastry")) {
     bg = "#AD1457"; emoji = "🍰";
-  } else if (cat.includes("bun") || cat.includes("bread") || cat.includes("sandwich") || nm.includes("bun") || nm.includes("bread") || nm.includes("sandwich") || nm.includes("toast") || nm.includes("pav")) {
+  } else if (cat.includes("bun") || nm.includes("bun") || nm.includes("bun maska") || nm.includes("pav")) {
+    bg = "#BF360C"; emoji = "🥖";
+  } else if (cat.includes("bread") || cat.includes("sandwich") || cat.includes("toast") || nm.includes("bread") || nm.includes("sandwich") || nm.includes("toast")) {
     bg = "#E65100"; emoji = "🥐";
-  } else if (cat.includes("snack") || cat.includes("street") || nm.includes("bajji") || nm.includes("vada") || nm.includes("bonda") || nm.includes("pakoda") || nm.includes("fritter")) {
-    bg = "#33691E"; emoji = "🍟";
+  } else if (cat.includes("snack") || cat.includes("street") || cat.includes("andhra")) {
+    bg = "#2E7D32"; emoji = "🫓";
   } else if (cat.includes("meal") || cat.includes("rice") || cat.includes("biryani") || nm.includes("meal") || nm.includes("rice") || nm.includes("biryani") || nm.includes("thali")) {
     bg = "#4A148C"; emoji = "🍱";
   } else if (cat.includes("pizza") || nm.includes("pizza")) {
     bg = "#BF360C"; emoji = "🍕";
-  } else if (cat.includes("panipuri") || cat.includes("chaat") || cat.includes("pani") || nm.includes("panipuri") || nm.includes("pani puri") || nm.includes("golgappa")) {
-    bg = "#00695C"; emoji = "🫙";
   } else if (cat.includes("hot drink") || cat.includes("beverage") || nm.includes("hot chocolate") || nm.includes("cocoa")) {
     bg = "#4E342E"; emoji = "🍫";
+  } else if (nm.includes("waffle") || nm.includes("pancake")) {
+    bg = "#F57F17"; emoji = "🧇";
+  } else if (nm.includes("egg") || nm.includes("omelette")) {
+    bg = "#F9A825"; emoji = "🍳";
   } else {
     bg = "#4E342E"; emoji = "🍽";
   }
-  return `<div style="width:100%;height:100%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:32px;border-radius:inherit;">${emoji}</div>`;
+  return `<div style="width:100%;height:100%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:36px;border-radius:inherit;">${emoji}</div>`;
 }
 
 // ── Outlet + table from URL ──
@@ -753,10 +779,10 @@ let activeFilter = "all";
 function buildPills(cats) {
   const container = document.getElementById("filterPills");
   container.innerHTML =
-    `<div class="pill active" data-cat="all" onclick="setFilter('all',this)">All</div>`;
+    `<div class="cat-pill active" data-cat="all" onclick="setFilter('all',this)">All</div>`;
   cats.forEach(cat => {
     const el = document.createElement("div");
-    el.className    = "pill";
+    el.className    = "cat-pill";
     el.dataset.cat  = cat;
     el.textContent  = cat;
     el.onclick      = function () { setFilter(cat, this); };
@@ -906,7 +932,7 @@ window.clearSearch = function () {
 // ── Filter pill handler ──
 window.setFilter = function (cat, el) {
   activeFilter = cat;
-  document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".cat-pill").forEach(p => p.classList.remove("active"));
   el.classList.add("active");
   renderMenu();
 };
@@ -1020,6 +1046,33 @@ window.selectStar = function (n) {
     s.classList.toggle("lit", parseInt(s.dataset.val) <= n);
   });
 };
+// ── Google review nudge ──
+let reviewNudgeShown = false;
+window.addEventListener("scroll", () => {
+  if (reviewNudgeShown) return;
+  const scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  if (scrolled > 0.6) {
+    reviewNudgeShown = true;
+    showReviewNudge();
+  }
+});
+function showReviewNudge() {
+  if (sessionStorage.getItem("reviewNudgeSeen")) return;
+  sessionStorage.setItem("reviewNudgeSeen", "true");
+  const nudge = document.createElement("div");
+  nudge.style.cssText = "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2C1A0E;color:white;padding:12px 20px;border-radius:30px;font-size:13px;font-weight:600;z-index:400;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.3);animation:slideUp 0.4s ease;white-space:nowrap;";
+  nudge.innerHTML = `
+    <span>Enjoying your visit?</span>
+    <a href="https://g.page/r/Ca5EPPEPHT4CEBM/review" target="_blank"
+       style="background:#C8894A;color:white;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:12px;font-weight:700;">
+      Rate us ★
+    </a>
+    <span onclick="this.parentElement.remove()" style="cursor:pointer;color:#9A7D6B;font-size:18px;line-height:1;">×</span>
+  `;
+  document.body.appendChild(nudge);
+  setTimeout(() => { if (nudge.parentElement) nudge.remove(); }, 6000);
+}
+
 window.submitFeedback = async function () {
   if (!feedbackRating) { alert("Please select a star rating."); return; }
   const comment = document.getElementById("feedbackComment").value.trim();
