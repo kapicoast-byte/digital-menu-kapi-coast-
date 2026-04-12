@@ -934,6 +934,38 @@
           </div>
           <div class="form-status" id="displayStatus"></div>
         </div>
+
+        <div class="form-panel">
+          <h3>Video Ad</h3>
+          <p>When set, the TV display will show this video full-screen instead of the menu slides.</p>
+          <label class="field-label">Video Ad URL (Google Drive)</label>
+          <input class="field-input" type="text" id="videoAdUrl" placeholder="https://drive.google.com/file/d/...">
+          <div style="font-size:11px;color:#9A7D6B;margin-bottom:8px;">Share your video on Google Drive, set access to "Anyone with link can view", then paste the link here.</div>
+          <div style="background:#FFF8F0;border-radius:8px;padding:12px;font-size:12px;color:#9A7D6B;margin-bottom:10px;line-height:1.8;">
+            <b style="color:#2C1A0E;">How to get your Google Drive video URL:</b><br>
+            1. Upload your video to Google Drive<br>
+            2. Right click the video → Share<br>
+            3. Set access to "Anyone with the link"<br>
+            4. Copy the link and paste it above
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="form-btn btn-espresso btn-sm" onclick="saveVideoAdUrl()">Save Video URL</button>
+            <button class="form-btn btn-sm" style="background:#f5f5f5;color:#c62828;border:1.5px solid #f5c6c6;" onclick="clearVideoAdUrl()">Clear</button>
+          </div>
+          <div class="form-status" id="videoAdStatus"></div>
+        </div>
+
+        <div class="form-panel">
+          <h3>Background Music</h3>
+          <p>Plays silently in the background on the TV display screen.</p>
+          <label class="field-label">Background Music URL (YouTube playlist or Google Drive audio)</label>
+          <input class="field-input" type="text" id="displayMusicUrl" placeholder="https://youtube.com/playlist?list=... or Google Drive link">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+            <button class="form-btn btn-espresso btn-sm" onclick="saveMusicUrl()">Save Music URL</button>
+            <button class="form-btn btn-sm" style="background:#f5f5f5;color:#c62828;border:1.5px solid #f5c6c6;" onclick="clearMusicUrl()">Clear</button>
+          </div>
+          <div class="form-status" id="musicUrlStatus"></div>
+        </div>
       </div>
 
       <!-- ── Section 5: QR Codes ── -->
@@ -1538,15 +1570,40 @@ async function loadDisplaySettings() {
   console.log("loadDisplaySettings — outletId:", getOutletId());
   const snap = await getDoc(displayRef());
   if (!snap.exists()) return;
-  const secs = snap.data().intervalSeconds || 8;
+  const d = snap.data();
+  const secs = d.intervalSeconds || 8;
   document.getElementById("intervalSlider").value = secs;
   document.getElementById("intervalVal").textContent = secs + "s";
+  document.getElementById("videoAdUrl").value      = d.videoUrl  || "";
+  document.getElementById("displayMusicUrl").value = d.musicUrl  || "";
 }
 
 window.saveDisplaySettings = async function () {
   const secs = parseInt(document.getElementById("intervalSlider").value, 10);
   await setDoc(displayRef(), { intervalSeconds: secs }, { merge: true });
   setStatus("displayStatus", "Saved!");
+};
+
+window.saveVideoAdUrl = async function () {
+  const url = document.getElementById("videoAdUrl").value.trim();
+  await setDoc(displayRef(), { videoUrl: url }, { merge: true });
+  setStatus("videoAdStatus", url ? "Video URL saved!" : "Saved (video cleared).");
+};
+window.clearVideoAdUrl = async function () {
+  document.getElementById("videoAdUrl").value = "";
+  await setDoc(displayRef(), { videoUrl: "" }, { merge: true });
+  setStatus("videoAdStatus", "Video cleared.");
+};
+
+window.saveMusicUrl = async function () {
+  const url = document.getElementById("displayMusicUrl").value.trim();
+  await setDoc(displayRef(), { musicUrl: url }, { merge: true });
+  setStatus("musicUrlStatus", url ? "Music URL saved!" : "Saved (music cleared).");
+};
+window.clearMusicUrl = async function () {
+  document.getElementById("displayMusicUrl").value = "";
+  await setDoc(displayRef(), { musicUrl: "" }, { merge: true });
+  setStatus("musicUrlStatus", "Music cleared.");
 };
 
 window.startCasting = async function () {
