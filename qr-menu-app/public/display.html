@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digital Menu</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Manrope', Arial, sans-serif;
+      font-family: 'DM Sans', Arial, sans-serif;
       height: 100vh; overflow: hidden;
     }
 
@@ -69,38 +69,58 @@
     }
 
     /* ─────────────────────────────────────────
-       TOP BAR — fixed, always on top
+       TOP BAR — fixed 72px, dark espresso
     ───────────────────────────────────────── */
     .top-bar {
       position: fixed; top: 0; left: 0; right: 0;
-      height: 64px;
-      background: var(--bar-bg);
-      border-bottom: var(--bar-border);
+      height: 72px;
+      background: #1A0E06;
+      border-bottom: 1px solid #C8894A;
       display: flex; align-items: center;
       justify-content: space-between;
       padding: 0 48px;
       z-index: 200;
-      backdrop-filter: blur(8px);
     }
+    /* Left: outlet name + sub */
+    .top-brand { flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; }
     .top-logo {
-      font-size: 18px; font-weight: 800;
-      color: #C8894A;
-      letter-spacing: 3px; text-transform: uppercase;
-      flex-shrink: 0;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px; font-weight: 700;
+      color: #C8894A; line-height: 1.1;
     }
+    .top-brand-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 400;
+      color: #9A7D6B; letter-spacing: 1.5px;
+      margin-top: 2px;
+    }
+    /* Center: category */
     .top-category {
       position: absolute; left: 50%; transform: translateX(-50%);
-      font-size: 13px; font-weight: 700;
-      color: var(--bar-sub);
-      letter-spacing: 2.5px; text-transform: uppercase;
-      max-width: 46%; overflow: hidden;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 3px; text-transform: uppercase;
+      max-width: 40%; overflow: hidden;
       text-overflow: ellipsis; white-space: nowrap;
     }
+    /* Right: time + date + weather */
+    .top-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
     .top-clock {
-      font-size: 20px; font-weight: 700;
-      color: var(--bar-text);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 1px; flex-shrink: 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 24px; font-weight: 600;
+      color: #fff;
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .top-date {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 400;
+      color: #9A7D6B; line-height: 1;
+    }
+    .top-weather {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 400;
+      color: rgba(255,255,255,0.5); line-height: 1;
     }
 
     /* ─────────────────────────────────────────
@@ -108,7 +128,7 @@
     ───────────────────────────────────────── */
     .progress-wrap {
       position: fixed; bottom: 0; left: 0; right: 0;
-      height: 4px; background: var(--prog-bg); z-index: 200;
+      height: 8px; background: var(--prog-bg); z-index: 200;
     }
     .progress-bar { height: 100%; width: 0%; background: var(--prog-fill); }
 
@@ -116,7 +136,7 @@
        SLIDE VIEWPORT — between top bar and progress bar
     ───────────────────────────────────────── */
     .slide-viewport {
-      position: fixed; top: 64px; bottom: 4px;
+      position: fixed; top: 72px; bottom: 8px;
       left: 0; right: 0;
       overflow: hidden;
       background: var(--bg);
@@ -128,9 +148,10 @@
     ───────────────────────────────────────── */
     .slide {
       position: absolute; inset: 0;
-      opacity: 1; transition: opacity 0.7s ease;
+      opacity: 1; transform: scale(1.0);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
     }
-    .slide.hidden { opacity: 0; }
+    .slide.hidden { opacity: 0; transform: scale(1.02); }
 
     /* ─────────────────────────────────────────
        CATEGORY SLIDE
@@ -362,15 +383,38 @@
     }
     .empty-logo { font-size: 64px; font-weight: 800; color: #C8894A; letter-spacing: 2px; }
     .empty-sub  { font-size: 18px; color: var(--empty-sub, rgba(255,255,255,0.25)); font-weight: 500; }
+
+    /* ─────────────────────────────────────────
+       MUSIC VISUALIZER — fixed bottom-left
+    ───────────────────────────────────────── */
+    .viz {
+      display: flex; gap: 3px; align-items: flex-end;
+      height: 20px; opacity: 0.5;
+      position: fixed; bottom: 16px; left: 48px; z-index: 100;
+    }
+    .viz-bar { width: 4px; background: #C8894A; border-radius: 2px; }
+    .viz-bar:nth-child(1) { animation: vizAnim 0.6s ease-in-out infinite alternate; }
+    .viz-bar:nth-child(2) { animation: vizAnim 0.4s ease-in-out infinite alternate; }
+    .viz-bar:nth-child(3) { animation: vizAnim 0.8s ease-in-out infinite alternate; }
+    .viz-bar:nth-child(4) { animation: vizAnim 0.5s ease-in-out infinite alternate; }
+    .viz-bar:nth-child(5) { animation: vizAnim 0.7s ease-in-out infinite alternate; }
+    @keyframes vizAnim { from { height: 4px; } to { height: 20px; } }
   </style>
 </head>
 <body class="tmpl-dark">
 
 <!-- ── Top bar ── -->
 <div class="top-bar">
-  <div class="top-logo" id="displayLogo">Kapi Coast</div>
+  <div class="top-brand">
+    <div class="top-logo" id="displayLogo">Kapi Coast</div>
+    <div class="top-brand-sub" id="displaySub">Est. 2024 · Chennai</div>
+  </div>
   <div class="top-category" id="topCategory"></div>
-  <div class="top-clock" id="clock"></div>
+  <div class="top-right">
+    <div class="top-clock" id="clock"></div>
+    <div class="top-date" id="clockDate"></div>
+    <div class="top-weather" id="weatherEl" style="display:none;"></div>
+  </div>
 </div>
 
 <!-- ── Slide viewport ── -->
@@ -386,6 +430,15 @@
 <!-- ── Progress bar ── -->
 <div class="progress-wrap">
   <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<!-- ── Music visualizer ── -->
+<div class="viz">
+  <div class="viz-bar"></div>
+  <div class="viz-bar"></div>
+  <div class="viz-bar"></div>
+  <div class="viz-bar"></div>
+  <div class="viz-bar"></div>
 </div>
 
 <script type="module">
@@ -417,15 +470,41 @@ getDoc(doc(db, "outlets", outlet)).then(snap => {
     snap.exists() ? (snap.data().name || outlet) : outlet;
 });
 
-// ── Clock ──
+// ── Clock + Date ──
 function updateClock() {
+  const now = new Date();
   document.getElementById("clock").textContent =
-    new Date().toLocaleTimeString("en-IN", {
-      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
-    });
+    now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+  document.getElementById("clockDate").textContent =
+    now.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
 }
 updateClock();
 setInterval(updateClock, 1000);
+
+// ── Weather: Open-Meteo (Chennai, no API key needed) ──
+const WEATHER_ICONS = {
+  0:"☀️", 1:"🌤️", 2:"⛅", 3:"☁️",
+  45:"🌫️", 48:"🌫️",
+  51:"🌦️", 53:"🌦️", 55:"🌧️",
+  61:"🌧️", 63:"🌧️", 65:"🌧️",
+  80:"🌦️", 81:"🌦️", 82:"⛈️",
+  95:"⛈️", 96:"⛈️", 99:"⛈️"
+};
+async function fetchWeather() {
+  try {
+    const r = await fetch(
+      "https://api.open-meteo.com/v1/forecast?latitude=13.0827&longitude=80.2707&current=temperature_2m,weathercode&timezone=Asia/Kolkata"
+    );
+    const d = await r.json();
+    const temp = Math.round(d.current.temperature_2m);
+    const icon = WEATHER_ICONS[d.current.weathercode] || "🌡️";
+    const el = document.getElementById("weatherEl");
+    el.textContent = `${icon} ${temp}°C`;
+    el.style.display = "";
+  } catch(e) { /* weather is optional */ }
+}
+fetchWeather();
+setInterval(fetchWeather, 10 * 60 * 1000);
 
 // ── Helpers ──
 function esc(v) {
@@ -650,7 +729,7 @@ async function transitionTo(idx) {
 
   const slideEl = document.getElementById("slide");
   slideEl.classList.add("hidden");
-  await sleep(720); // match CSS transition
+  await sleep(820); // match 0.8s CSS transition
 
   const slide = slides[idx];
   slideEl.innerHTML = slides.length
