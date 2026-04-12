@@ -684,9 +684,6 @@
       <div class="nav-item active" id="sidebarNav-menuItems" onclick="showSection('menuItems')">
         <span class="nav-icon">☰</span><span>Menu Items</span>
       </div>
-      <div class="nav-item" id="sidebarNav-offerBanner" onclick="showSection('offerBanner')">
-        <span class="nav-icon">★</span><span>Offer Banner</span>
-      </div>
       <div class="nav-item" id="sidebarNav-adsBanners" onclick="showSection('adsBanners')">
         <span class="nav-icon">▣</span><span>Ads &amp; Banners</span>
       </div>
@@ -878,19 +875,6 @@
         </div>
       </div>
 
-      <!-- ── Section 2: Offer Banner ── -->
-      <div id="offerBanner" class="section">
-        <h2>Offer Banner</h2>
-        <div class="form-panel">
-          <h3>Active Offer</h3>
-          <label class="field-label">Offer Message</label>
-          <textarea class="field-input" id="offerInput" placeholder="e.g. 20% off on all cold brews today!"></textarea>
-          <button class="form-btn btn-espresso" onclick="saveOffer()">Save Offer</button>
-          <button class="form-btn" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="clearOffer()">Clear</button>
-          <div class="form-status" id="offerStatus"></div>
-        </div>
-      </div>
-
       <!-- ── Section 3: Ads & Banners ── -->
       <div id="adsBanners" class="section">
         <h2>Ads &amp; Banners</h2>
@@ -1027,10 +1011,6 @@
       <span class="mobile-nav-icon">☰</span>
       <span>Menu</span>
     </div>
-    <div class="mobile-nav-item" id="mobileNav-offerBanner" onclick="showSection('offerBanner')">
-      <span class="mobile-nav-icon">★</span>
-      <span>Offer</span>
-    </div>
     <div class="mobile-nav-item" id="mobileNav-adsBanners" onclick="showSection('adsBanners')">
       <span class="mobile-nav-icon">▣</span>
       <span>Ads</span>
@@ -1130,8 +1110,7 @@ window.showSection = function (sectionId) {
   if (mobile)  mobile.classList.add("active");
   document.getElementById(sectionId).classList.add("active");
   if (sectionId === "menuItems")   loadItems();
-  if (sectionId === "offerBanner") loadOffer();
-  if (sectionId === "adsBanners")  loadAds();
+if (sectionId === "adsBanners")  loadAds();
   if (sectionId === "castTV")      { loadDisplaySettings(); loadOutletHours(); }
 };
 
@@ -1146,7 +1125,6 @@ function showPanel(oId, oName) {
   const castUrl = "https://menu.kapicoast.org/display.html?outlet=" + encodeURIComponent(oId);
   document.getElementById("previewDisplayLink").href = castUrl;
   loadItems();
-  loadOffer();
   loadAds();
 }
 
@@ -1508,27 +1486,6 @@ window.editItem = async function (id) {
     veg: newVeg
   });
   loadItems();
-};
-
-// ──────────────────────────────────────────────────
-// SECTION 2 — Offer Banner
-// ──────────────────────────────────────────────────
-async function loadOffer() {
-  console.log("loadOffer — outletId:", getOutletId());
-  const snap = await getDoc(offerRef());
-  document.getElementById("offerInput").value = snap.exists() ? (snap.data().message || "") : "";
-}
-
-window.saveOffer = async function () {
-  const msg = document.getElementById("offerInput").value.trim();
-  await setDoc(offerRef(), { message: msg });
-  setStatus("offerStatus", msg ? "Offer saved!" : "Offer cleared.");
-};
-
-window.clearOffer = async function () {
-  document.getElementById("offerInput").value = "";
-  await setDoc(offerRef(), { message: "" });
-  setStatus("offerStatus", "Offer cleared.");
 };
 
 // ──────────────────────────────────────────────────

@@ -553,6 +553,24 @@
     .outlet-card-name { font-weight: 700; font-size: 15px; color: #2C1A0E; }
     .outlet-card-meta { font-size: 12px; color: #9A7D6B; margin-top: 2px; }
     .outlet-card-id   { font-size: 11px; color: #C8894A; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+
+    /* ── Analytics ── */
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 6px rgba(44,26,14,0.08); text-align: center; }
+    .stat-value { font-size: 28px; font-weight: 800; color: #C8894A; line-height: 1; }
+    .stat-label { font-size: 12px; color: #9A7D6B; margin-top: 4px; }
+    .analytics-panel { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 6px rgba(44,26,14,0.08); margin-bottom: 16px; }
+    .analytics-panel h3 { font-size: 14px; font-weight: 700; color: #2C1A0E; margin-bottom: 12px; }
+    .popular-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F0E6D3; }
+    .popular-row:last-child { border-bottom: none; }
+    .popular-rank { font-size: 13px; font-weight: 800; color: #C8894A; width: 20px; }
+    .popular-name { flex: 1; font-size: 13px; color: #2C1A0E; font-weight: 600; }
+    .popular-views { font-size: 12px; color: #9A7D6B; }
+    .popular-bar-wrap { width: 80px; height: 6px; background: #F0E6D3; border-radius: 3px; overflow: hidden; }
+    .popular-bar { height: 100%; background: #C8894A; border-radius: 3px; }
+    .rating-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #F0E6D3; font-size: 13px; }
+    .rating-row:last-child { border-bottom: none; }
+    .rating-stars { color: #C8894A; letter-spacing: 1px; }
   </style>
 </head>
 <body>
@@ -583,9 +601,6 @@
   <div class="nav-item active" onclick="showSection('menuItems', this)">
     <span class="nav-icon">🍽️</span><span>Menu Items</span>
   </div>
-  <div class="nav-item" onclick="showSection('offerBanner', this)">
-    <span class="nav-icon">🏷️</span><span>Offers</span>
-  </div>
   <div class="nav-item" onclick="showSection('adsBanners', this)">
     <span class="nav-icon">📢</span><span>Ads</span>
   </div>
@@ -600,6 +615,9 @@
   </div>
   <div class="nav-item" onclick="showSection('feedback', this)">
     <span class="nav-icon">⭐</span><span>Feedback</span>
+  </div>
+  <div class="nav-item" onclick="showSection('analytics', this)">
+    <span class="nav-icon">📊</span><span>Analytics</span>
   </div>
   <a href="/manager.html" target="_blank" id="managerPortalLink"
      style="display:none;text-align:center;padding:10px;background:rgba(200,137,74,0.1);color:#9A7D6B;border-radius:8px;font-size:12px;text-decoration:none;margin:8px 12px 4px;display:block;">
@@ -787,14 +805,6 @@
       </div>
       <p id="saveExtractedStatus" style="font-size:13px;margin-top:8px;"></p>
     </div>
-  </div>
-
-  <!-- Section: Offer Banner -->
-  <div id="offerBanner" class="section">
-    <h2>Offer Banner</h2>
-    <input type="text" id="offerInput" placeholder="Enter offer message (leave empty to disable)">
-    <button class="btn btn-primary" onclick="saveOffer()">Save Offer</button>
-    <p id="status"></p>
   </div>
 
   <!-- Section: Cast to TV -->
@@ -1045,6 +1055,29 @@
     <div id="feedbackList">Loading…</div>
   </div>
 
+  <!-- Section: Analytics -->
+  <div id="analytics" class="section">
+    <h2>Analytics</h2>
+    <div class="analytics-grid">
+      <div class="stat-card"><div class="stat-value" id="statTotalViews">—</div><div class="stat-label">Total Item Views</div></div>
+      <div class="stat-card"><div class="stat-value" id="statUniqueItems">—</div><div class="stat-label">Items Viewed</div></div>
+      <div class="stat-card"><div class="stat-value" id="statAvgRating">—</div><div class="stat-label">Avg Rating</div></div>
+      <div class="stat-card"><div class="stat-value" id="statFeedbackCount">—</div><div class="stat-label">Reviews</div></div>
+    </div>
+    <div class="analytics-panel">
+      <h3>Most Viewed Items</h3>
+      <div id="popularItemsList">Loading…</div>
+    </div>
+    <div class="analytics-panel">
+      <h3>Item Ratings</h3>
+      <div id="itemRatingsList">Loading…</div>
+    </div>
+    <div class="analytics-panel">
+      <h3>Recent Feedback</h3>
+      <div id="analyticsFeedbackList">Loading…</div>
+    </div>
+  </div>
+
 </div>
 
 <script type="module">
@@ -1116,22 +1149,6 @@ window.showSection = function (id, navEl) {
   document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   navEl.classList.add("active");
-};
-
-// ── Offer Banner ──
-async function loadOffer() {
-  const offerDoc = await getDoc(offerDocRef());
-  if (offerDoc.exists()) {
-    document.getElementById("offerInput").value = offerDoc.data().message || "";
-  } else {
-    document.getElementById("offerInput").value = "";
-  }
-}
-
-window.saveOffer = async function () {
-  const offer = document.getElementById("offerInput").value.trim();
-  await setDoc(offerDocRef(), { message: offer });
-  document.getElementById("status").innerText = "Offer saved!";
 };
 
 // ── Menu Items ──
@@ -1956,7 +1973,6 @@ let currentHiddenCategories = [];
 // ── Auth & login ──
 async function initApp() {
   await loadOutletSwitcher();
-  await loadOffer();
   await loadItems();
   await loadAds();
   await loadDisplaySettings();
@@ -2288,6 +2304,70 @@ async function loadFeedback() {
   }).join("");
 }
 
+// ── Analytics ──
+async function loadAnalytics() {
+  const outletId = selectedOutlet;
+  if (!outletId) return;
+
+  // Fetch item views
+  const viewsSnap = await getDocs(collection(db, "outlets", outletId, "itemViews"));
+  const viewDocs  = viewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const totalViews   = viewDocs.reduce((s, d) => s + (d.views || 0), 0);
+  document.getElementById("statTotalViews").textContent  = totalViews;
+  document.getElementById("statUniqueItems").textContent = viewDocs.length;
+
+  // Popular items
+  const sorted = [...viewDocs].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 10);
+  const maxViews = sorted[0]?.views || 1;
+  const menuSnap = await getDocs(collection(db, "outlets", outletId, "menu"));
+  const nameMap  = {};
+  menuSnap.forEach(d => { nameMap[d.id] = d.data().name || d.id; });
+  document.getElementById("popularItemsList").innerHTML = sorted.length
+    ? sorted.map((d, i) => `
+        <div class="popular-row">
+          <span class="popular-rank">${i + 1}</span>
+          <span class="popular-name">${escapeHtml(nameMap[d.id] || d.id)}</span>
+          <div class="popular-bar-wrap"><div class="popular-bar" style="width:${Math.round((d.views / maxViews) * 100)}%"></div></div>
+          <span class="popular-views">${d.views} views</span>
+        </div>`).join("")
+    : "<p style='color:#9A7D6B;font-size:13px;'>No views tracked yet.</p>";
+
+  // Item ratings
+  const ratingsSnap = await getDocs(collection(db, "outlets", outletId, "itemRatings"));
+  const ratingDocs  = ratingsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const totalRating = ratingDocs.reduce((s, d) => s + (d.rating || 0), 0);
+  const avgRating   = ratingDocs.length ? (totalRating / ratingDocs.length).toFixed(1) : "—";
+  document.getElementById("statAvgRating").textContent = avgRating;
+  const sortedRatings = [...ratingDocs].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  document.getElementById("itemRatingsList").innerHTML = sortedRatings.length
+    ? sortedRatings.map(d => `
+        <div class="rating-row">
+          <span style="flex:1;font-size:13px;color:#2C1A0E;">${escapeHtml(nameMap[d.id] || d.id)}</span>
+          <span class="rating-stars">${"★".repeat(d.rating || 0)}${"☆".repeat(5 - (d.rating || 0))}</span>
+        </div>`).join("")
+    : "<p style='color:#9A7D6B;font-size:13px;'>No ratings yet.</p>";
+
+  // Recent feedback
+  const fbSnap = await getDocs(query(collection(db, "outlets", outletId, "feedback")));
+  const fbDocs = fbSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 5);
+  document.getElementById("statFeedbackCount").textContent = fbSnap.size;
+  document.getElementById("analyticsFeedbackList").innerHTML = fbDocs.length
+    ? fbDocs.map(item => {
+        const filled = "★".repeat(item.rating || 0);
+        const empty  = "☆".repeat(5 - (item.rating || 0));
+        const date   = item.createdAt?.toDate
+          ? item.createdAt.toDate().toLocaleDateString("en-IN", { day: "numeric", month: "short" })
+          : "—";
+        return `<div class="feedback-card">
+          <div class="fb-stars">${filled}${empty}</div>
+          ${item.comment ? `<div class="fb-comment">${escapeHtml(item.comment)}</div>` : ""}
+          <div class="fb-meta">${item.table ? "Table " + escapeHtml(String(item.table)) + " · " : ""}${date}</div>
+        </div>`;
+      }).join("")
+    : "<p style='color:#9A7D6B;font-size:13px;'>No feedback yet.</p>";
+}
+
 // ── Section nav (extended to trigger lazy loading) ──
 const _origShowSection = window.showSection;
 window.showSection = function (id, navEl) {
@@ -2295,6 +2375,7 @@ window.showSection = function (id, navEl) {
   if (id === "castTV")        { loadCategoryToggles(); loadCastOutlets(); }
   if (id === "manageOutlets") loadOutletList();
   if (id === "feedback")      loadFeedback();
+  if (id === "analytics")     loadAnalytics();
 };
 
 // ── Outlet switcher ──
@@ -2326,7 +2407,6 @@ window.changeOutlet = async function (val) {
   selectedOutlet = val;
   sessionStorage.setItem("adminOutlet", val);
   updateOutletBadge();
-  await loadOffer();
   await loadItems();
   await loadAds();
 };
@@ -2487,7 +2567,6 @@ window.switchToOutlet = async function (id) {
   selectedOutlet = id;
   sessionStorage.setItem("adminOutlet", id);
   await loadOutletSwitcher();
-  await loadOffer();
   await loadItems();
   await loadAds();
   // Navigate to Menu Items
