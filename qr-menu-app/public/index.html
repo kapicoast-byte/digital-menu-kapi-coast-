@@ -685,41 +685,24 @@ function escapeHtml(v) {
 function getPlaceholderCard(category, name) {
   const cat = (category || "").toLowerCase();
   const nm  = (name || "").toLowerCase();
-  let bg, emoji;
-  if (nm.includes("bajji") || nm.includes("bonda") || nm.includes("pakoda") || nm.includes("pakora") || nm.includes("vada") || nm.includes("vadai") || nm.includes("baji")) {
-    bg = "#1B5E20"; emoji = "🫓";
-  } else if (nm.includes("panipuri") || nm.includes("pani puri") || nm.includes("golgappa") || nm.includes("chaat") || cat.includes("panipuri") || cat.includes("chaat")) {
-    bg = "#00695C"; emoji = "🫙";
-  } else if (nm.includes("samosa") || nm.includes("kachori")) {
-    bg = "#E65100"; emoji = "🥟";
-  } else if (cat.includes("coffee") || nm.includes("coffee") || nm.includes("latte") || nm.includes("cappuccino") || nm.includes("espresso") || nm.includes("mocha") || nm.includes("filter") || nm.includes("americano")) {
-    bg = "#6B3F1F"; emoji = "☕";
-  } else if (cat.includes("tea") || nm.includes("tea") || nm.includes("chai") || nm.includes("masala tea")) {
-    bg = "#8B6914"; emoji = "🍵";
-  } else if (cat.includes("juice") || cat.includes("cold") || cat.includes("shake") || cat.includes("smoothie") || nm.includes("juice") || nm.includes("smoothie") || nm.includes("frappe") || nm.includes("milkshake") || nm.includes("lassi")) {
-    bg = "#1565C0"; emoji = "🥤";
-  } else if (cat.includes("cake") || cat.includes("dessert") || cat.includes("cookie") || cat.includes("sweet") || nm.includes("cake") || nm.includes("cookie") || nm.includes("brownie") || nm.includes("muffin") || nm.includes("pastry")) {
-    bg = "#AD1457"; emoji = "🍰";
-  } else if (cat.includes("bun") || nm.includes("bun") || nm.includes("bun maska") || nm.includes("pav")) {
-    bg = "#BF360C"; emoji = "🥖";
-  } else if (cat.includes("bread") || cat.includes("sandwich") || cat.includes("toast") || nm.includes("bread") || nm.includes("sandwich") || nm.includes("toast")) {
-    bg = "#E65100"; emoji = "🥐";
-  } else if (cat.includes("snack") || cat.includes("street") || cat.includes("andhra")) {
-    bg = "#2E7D32"; emoji = "🫓";
-  } else if (cat.includes("meal") || cat.includes("rice") || cat.includes("biryani") || nm.includes("meal") || nm.includes("rice") || nm.includes("biryani") || nm.includes("thali")) {
-    bg = "#4A148C"; emoji = "🍱";
-  } else if (cat.includes("pizza") || nm.includes("pizza")) {
-    bg = "#BF360C"; emoji = "🍕";
-  } else if (cat.includes("hot drink") || cat.includes("beverage") || nm.includes("hot chocolate") || nm.includes("cocoa")) {
-    bg = "#4E342E"; emoji = "🍫";
-  } else if (nm.includes("waffle") || nm.includes("pancake")) {
-    bg = "#F57F17"; emoji = "🧇";
-  } else if (nm.includes("egg") || nm.includes("omelette")) {
-    bg = "#F9A825"; emoji = "🍳";
-  } else {
-    bg = "#4E342E"; emoji = "🍽";
-  }
-  return `<div style="width:100%;height:100%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:36px;border-radius:inherit;">${emoji}</div>`;
+  let bg = "#F0E6D3";
+  if (cat.includes("coffee") || nm.includes("coffee") || nm.includes("latte") || nm.includes("cappuccino") || nm.includes("espresso") || nm.includes("filter")) bg = "#EDE0D4";
+  else if (cat.includes("tea") || nm.includes("tea") || nm.includes("chai")) bg = "#E8DDD0";
+  else if (cat.includes("juice") || cat.includes("cold") || cat.includes("shake") || nm.includes("juice") || nm.includes("smoothie") || nm.includes("lassi")) bg = "#E0EAF0";
+  else if (cat.includes("cake") || cat.includes("dessert") || cat.includes("sweet") || nm.includes("cake") || nm.includes("brownie") || nm.includes("cookie")) bg = "#F0E0EA";
+  else if (cat.includes("snack") || cat.includes("street") || nm.includes("bajji") || nm.includes("vada") || nm.includes("bonda") || nm.includes("samosa")) bg = "#E0EAE0";
+  return `<div style="width:100%;height:100%;background:${bg};display:flex;align-items:center;justify-content:center;">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="18" fill="${bg}"/>
+      <circle cx="18" cy="19" r="11" stroke="#C4B5A5" stroke-width="1.5" fill="none"/>
+      <circle cx="18" cy="19" r="7" stroke="#C4B5A5" stroke-width="1" fill="none"/>
+      <line x1="10" y1="6" x2="10" y2="14" stroke="#C4B5A5" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="6" x2="8" y2="11" stroke="#C4B5A5" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="12" y1="6" x2="12" y2="11" stroke="#C4B5A5" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="10" y1="14" x2="10" y2="30" stroke="#C4B5A5" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M26 6 C28 8 28 12 26 14 L26 30" stroke="#C4B5A5" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>`;
 }
 
 // ── Outlet + table from URL ──
