@@ -915,6 +915,38 @@
       </div>
     </div>
 
+    <!-- Video Ad URL -->
+    <div class="dsetting-panel">
+      <h3>Video Ad</h3>
+      <p>When set, the TV display will show this video full-screen instead of the menu slides.</p>
+      <label style="font-size:12px;font-weight:600;color:#9A7D6B;display:block;margin-bottom:4px;">Video Ad URL (Google Drive)</label>
+      <input type="text" id="videoAdUrl" placeholder="https://drive.google.com/file/d/..."
+             style="width:100%;padding:10px;border:1.5px solid #E0D5C8;border-radius:10px;font-size:13px;margin-bottom:4px;">
+      <div style="font-size:11px;color:#9A7D6B;margin-bottom:8px;">Share your video on Google Drive, set access to "Anyone with link can view", then paste the link here.</div>
+      <div style="background:#FFF8F0;border-radius:8px;padding:12px;font-size:12px;color:#9A7D6B;margin-bottom:10px;line-height:1.8;">
+        <b style="color:#2C1A0E;">How to get your Google Drive video URL:</b><br>
+        1. Upload your video to Google Drive<br>
+        2. Right click the video → Share<br>
+        3. Set access to "Anyone with the link"<br>
+        4. Copy the link and paste it above
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="saveVideoAdUrl()">Save Video URL</button>
+      <button class="btn btn-sm" style="background:#f5f5f5;color:#c62828;border:1.5px solid #f5c6c6;margin-left:8px;" onclick="clearVideoAdUrl()">Clear</button>
+      <p id="videoAdStatus" style="font-size:13px;color:green;font-weight:600;margin-top:6px;"></p>
+    </div>
+
+    <!-- Background Music -->
+    <div class="dsetting-panel">
+      <h3>Background Music</h3>
+      <p>Plays silently in the background on the TV display screen.</p>
+      <label style="font-size:12px;font-weight:600;color:#9A7D6B;display:block;margin-bottom:4px;">Background Music URL (YouTube playlist or Google Drive audio)</label>
+      <input type="text" id="displayMusicUrl" placeholder="https://youtube.com/playlist?list=... or Google Drive link"
+             style="width:100%;padding:10px;border:1.5px solid #E0D5C8;border-radius:10px;font-size:13px;margin-bottom:10px;">
+      <button class="btn btn-primary btn-sm" onclick="saveMusicUrl()">Save Music URL</button>
+      <button class="btn btn-sm" style="background:#f5f5f5;color:#c62828;border:1.5px solid #f5c6c6;margin-left:8px;" onclick="clearMusicUrl()">Clear</button>
+      <p id="musicUrlStatus" style="font-size:13px;color:green;font-weight:600;margin-top:6px;"></p>
+    </div>
+
   </div>
 
   <!-- Section: Ads & Banners -->
@@ -1992,6 +2024,12 @@ async function loadDisplaySettings() {
 
   // Hidden categories (stored for use in toggles)
   currentHiddenCategories = d.hiddenCategories || [];
+
+  // Video Ad URL
+  document.getElementById("videoAdUrl").value = d.videoUrl || "";
+
+  // Background Music URL
+  document.getElementById("displayMusicUrl").value = d.musicUrl || "";
 }
 
 window.saveDisplaySettings = async function () {
@@ -1999,6 +2037,36 @@ window.saveDisplaySettings = async function () {
   await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { intervalSeconds: secs }, { merge: true });
   const st = document.getElementById("displaySettingsStatus");
   st.textContent = "Saved!";
+  setTimeout(() => { st.textContent = ""; }, 2000);
+};
+
+window.saveVideoAdUrl = async function () {
+  const url = document.getElementById("videoAdUrl").value.trim();
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { videoUrl: url }, { merge: true });
+  const st = document.getElementById("videoAdStatus");
+  st.textContent = url ? "Video URL saved!" : "Saved (video cleared).";
+  setTimeout(() => { st.textContent = ""; }, 2500);
+};
+window.clearVideoAdUrl = async function () {
+  document.getElementById("videoAdUrl").value = "";
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { videoUrl: "" }, { merge: true });
+  const st = document.getElementById("videoAdStatus");
+  st.textContent = "Video cleared.";
+  setTimeout(() => { st.textContent = ""; }, 2000);
+};
+
+window.saveMusicUrl = async function () {
+  const url = document.getElementById("displayMusicUrl").value.trim();
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { musicUrl: url }, { merge: true });
+  const st = document.getElementById("musicUrlStatus");
+  st.textContent = url ? "Music URL saved!" : "Saved (music cleared).";
+  setTimeout(() => { st.textContent = ""; }, 2500);
+};
+window.clearMusicUrl = async function () {
+  document.getElementById("displayMusicUrl").value = "";
+  await setDoc(doc(db, "outlets", selectedOutlet, "settings", "display"), { musicUrl: "" }, { merge: true });
+  const st = document.getElementById("musicUrlStatus");
+  st.textContent = "Music cleared.";
   setTimeout(() => { st.textContent = ""; }, 2000);
 };
 
