@@ -149,242 +149,200 @@
     .slide {
       position: absolute; inset: 0;
       opacity: 1; transform: scale(1.0);
-      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
     }
     .slide.hidden { opacity: 0; transform: scale(1.02); }
 
     /* ─────────────────────────────────────────
-       CATEGORY SLIDE
+       STYLE A — List + Hero Image  (odd categories)
     ───────────────────────────────────────── */
-    .cat-slide {
+    .slide-a {
       width: 100%; height: 100%;
       background: var(--slide-bg);
-      display: flex; flex-direction: column;
-      overflow: hidden;
-    }
-    .cat-header {
-      padding: 18px 52px 6px;
-      flex-shrink: 0;
-      display: flex; align-items: baseline;
-      justify-content: space-between;
-    }
-    .cat-name {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 32px; font-weight: 700;
-      color: var(--cat-name-clr);
-      line-height: 1;
-    }
-    .cat-count {
-      font-size: 13px; font-weight: 600;
-      color: var(--bar-sub); letter-spacing: 0.5px;
-      flex-shrink: 0; margin-left: 16px;
-    }
-    .cat-divider {
-      height: 2px; margin: 0 52px 12px; flex-shrink: 0;
-      background: var(--divider-grad);
-    }
-
-    /* ─── Grid layouts ─── */
-    .cat-grid {
-      flex: 1; display: grid;
-      gap: 16px; padding: 0 48px 24px;
-      min-height: 0;
-    }
-    /* 2 items: 2 cols, 1 row */
-    .cat-grid.layout-2  { grid-template-columns: repeat(2,1fr); grid-template-rows: 1fr; }
-    /* 3-4 items: 2 cols, 2 rows */
-    .cat-grid.layout-34 { grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(2,1fr); }
-    /* 5-6 items: 2 cols, 3 rows */
-    .cat-grid.layout-56 { grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(3,1fr); }
-    /* 7-9 items: 3 cols, 3 rows */
-    .cat-grid.layout-79 { grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); }
-
-    /* ─────────────────────────────────────────
-       ITEM CARD
-    ───────────────────────────────────────── */
-    .item-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex; flex-direction: column;
-      min-height: 0;
-    }
-    .item-card.sold-out { opacity: 0.45; }
-
-    /* image wrapper — used for badge positioning */
-    .card-img-wrap {
-      position: relative; overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    /* item-img-wrap — flex centering + per-layout fixed height */
-    .item-img-wrap {
-      overflow: hidden;
-      background: #F0E6D3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .item-img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .item-img-wrap .food-svg {
-      width: 80px;
-      height: 80px;
-    }
-    .item-img-wrap .food-svg svg {
-      width: 100%;
-      height: 100%;
-    }
-    .layout-2  .item-img-wrap { height: 220px; }
-    .layout-34 .item-img-wrap { height: 180px; }
-    .layout-56 .item-img-wrap { height: 150px; }
-    .layout-79 .item-img-wrap { height: 130px; }
-
-    .veg-ind {
-      position: absolute; top: 8px; left: 8px;
-      width: 12px; height: 12px; border-radius: 2px;
-      border: 1.5px solid rgba(255,255,255,0.7);
-    }
-    .veg-green { background: #22C55E; }
-    .veg-red   { background: #EF4444; }
-
-    .sold-overlay {
-      position: absolute; inset: 0;
-      background: rgba(0,0,0,0.6);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 700;
-      color: #fff; letter-spacing: 2px; text-transform: uppercase;
-    }
-
-    .popular-badge {
-      position: absolute; top: 8px; right: 8px;
-      background: #C8894A; color: #fff;
-      font-size: 10px; font-weight: 700;
-      padding: 3px 7px; border-radius: 6px;
-      letter-spacing: 0.3px;
-    }
-
-    .card-info {
-      flex: 1; display: flex; flex-direction: column; justify-content: center;
-      min-height: 0;
-    }
-    .card-name {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-weight: 700; line-height: 1.25;
-      color: var(--card-name);
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .card-price {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600; color: var(--card-price);
-    }
-    .card-desc {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 400; color: var(--bar-sub);
-      display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
-    }
-
-    /* ── 2 items ── */
-    .layout-2 .card-info  { padding: 16px 20px; }
-    .layout-2 .card-name  { font-size: 36px; margin-bottom: 4px; }
-    .layout-2 .card-price { font-size: 28px; margin-bottom: 6px; }
-    .layout-2 .card-desc  { font-size: 16px; -webkit-line-clamp: 2; display: -webkit-box; }
-
-    /* ── 3-4 items (2×2) ── */
-    .layout-34 .card-info  { padding: 10px 14px; }
-    .layout-34 .card-name  { font-size: 24px; margin-bottom: 3px; }
-    .layout-34 .card-price { font-size: 20px; margin-bottom: 4px; }
-    .layout-34 .card-desc  { font-size: 13px; -webkit-line-clamp: 1; display: -webkit-box; }
-
-    /* ── 5-6 items (2×3) ── */
-    .layout-56 .card-info  { padding: 8px 12px; }
-    .layout-56 .card-name  { font-size: 20px; margin-bottom: 3px; }
-    .layout-56 .card-price { font-size: 18px; }
-    .layout-56 .card-desc  { display: none; }
-
-    /* ── 7-9 items (3×3) ── */
-    .layout-79 .card-info  { padding: 6px 9px; }
-    .layout-79 .card-name  { font-size: 16px; margin-bottom: 2px; }
-    .layout-79 .card-price { font-size: 14px; }
-    .layout-79 .card-desc  { display: none; }
-
-    /* ─────────────────────────────────────────
-       CINEMATIC SINGLE-ITEM — horizontal split
-    ───────────────────────────────────────── */
-    .cinema-slide {
-      width: 100%; height: 100%;
       display: flex; flex-direction: row;
+      overflow: hidden;
     }
-    .cinema-img-half {
-      flex: 1; position: relative; overflow: hidden;
+    /* Left panel: 65% */
+    .slide-a-left {
+      flex: 65; display: flex; flex-direction: column;
+      overflow: hidden; min-width: 0;
     }
-    .cinema-img-half img {
+    .slide-a-cat {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 42px; font-weight: 700;
+      color: var(--cat-name-clr);
+      padding: 32px 40px 12px;
+      line-height: 1; flex-shrink: 0;
+    }
+    .slide-a-underline {
+      width: 60px; height: 3px;
+      background: #C8894A;
+      margin: 0 0 24px 40px;
+      flex-shrink: 0;
+    }
+    .slide-a-items {
+      flex: 1; overflow: hidden;
+      padding: 0 40px;
+    }
+    .slide-a-row {
+      display: flex; align-items: center;
+      height: 52px; min-height: 52px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    body.tmpl-dark .slide-a-row,
+    body.tmpl-bold .slide-a-row { border-bottom-color: rgba(255,255,255,0.06); }
+    .slide-a-row:last-child { border-bottom: none; }
+    .slide-a-row.sold-out { opacity: 0.4; }
+    .slide-a-veg {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; margin-right: 12px;
+    }
+    .slide-a-name-wrap {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .slide-a-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 22px; font-weight: 500;
+      color: var(--card-name);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .slide-a-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 400;
+      color: var(--bar-sub);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+    .slide-a-dots {
+      flex: 1; min-width: 16px; max-width: 80px;
+      border-bottom: 1px dotted rgba(200,137,74,0.35);
+      margin: 0 12px; align-self: flex-end;
+      margin-bottom: 13px;
+    }
+    .slide-a-price {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 22px; font-weight: 600;
+      color: #C8894A; flex-shrink: 0;
+    }
+    /* Right panel: 35% */
+    .slide-a-right {
+      flex: 35; position: relative; overflow: hidden;
+    }
+    .slide-a-right-img {
       width: 100%; height: 100%; object-fit: cover; display: block;
     }
-    .cinema-illus {
+    .slide-a-right-illus {
       width: 100%; height: 100%;
+      background: #C8894A;
       display: flex; align-items: center; justify-content: center;
-      background: #F0E6D3;
     }
-    .cinema-illus .food-svg {
-      width: 180px; height: 180px;
+    .slide-a-right-illus svg {
+      width: 120px; height: 120px;
+      filter: brightness(0) invert(1); opacity: 0.85;
     }
-    .cinema-illus .food-svg svg {
+    .slide-a-strip {
+      position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: #C8894A; z-index: 1;
+    }
+
+    /* ─────────────────────────────────────────
+       STYLE B — Full Screen Grid  (even categories)
+    ───────────────────────────────────────── */
+    .slide-b {
       width: 100%; height: 100%;
-    }
-    .cinema-info-half {
-      flex: 1;
-      display: flex; flex-direction: column;
-      align-items: flex-start; justify-content: center;
-      padding: 60px;
       background: var(--slide-bg);
+      display: flex; flex-direction: column;
+      overflow: hidden;
     }
-    .cinema-cat {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px; font-weight: 500;
-      color: #C8894A; letter-spacing: 3px;
-      text-transform: uppercase; margin-bottom: 20px;
+    .slide-b-header {
+      padding: 20px 48px 0;
+      flex-shrink: 0;
     }
-    .cinema-name {
+    .slide-b-cat {
       font-family: 'Playfair Display', Georgia, serif;
-      font-size: 72px; font-weight: 700;
-      color: var(--card-name); line-height: 1.05;
+      font-size: 38px; font-weight: 700;
+      color: var(--cat-name-clr); line-height: 1;
+    }
+    .slide-b-underline {
+      width: 60px; height: 3px;
+      background: #C8894A; margin-top: 10px;
+    }
+    .slide-b-grid {
+      flex: 1; display: grid;
+      gap: 14px; padding: 16px 48px 20px;
+      min-height: 0;
+    }
+    .slide-b-grid.layout-2  { grid-template-columns: repeat(2,1fr); grid-template-rows: 1fr; }
+    .slide-b-grid.layout-34 { grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(2,1fr); }
+    .slide-b-grid.layout-56 { grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(3,1fr); }
+    .slide-b-grid.layout-79 { grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); }
+
+    /* Grid card */
+    .grid-card {
+      background: var(--card-bg);
+      border-radius: 16px; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      min-height: 0;
+    }
+    .grid-card.sold-out { opacity: 0.4; }
+    .grid-card-img {
+      position: relative; overflow: hidden; flex-shrink: 0;
+      background: #F0E6D3;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .grid-card-img img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .grid-card-img .food-svg { width: 70px; height: 70px; }
+    .grid-card-img .food-svg svg { width: 100%; height: 100%; }
+    .layout-2  .grid-card-img { height: 200px; }
+    .layout-34 .grid-card-img { height: 160px; }
+    .layout-56 .grid-card-img { height: 130px; }
+    .layout-79 .grid-card-img { height: 110px; }
+    .grid-veg-dot {
+      position: absolute; top: 8px; left: 8px;
+      width: 10px; height: 10px; border-radius: 2px;
+    }
+    .grid-popular {
+      position: absolute; top: 8px; right: 8px;
+      background: #C8894A; color: #fff;
+      font-size: 9px; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .grid-sold-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      color: #fff; letter-spacing: 2px; text-transform: uppercase;
+    }
+    .grid-card-info {
+      flex: 1; display: flex; flex-direction: column; justify-content: center;
+      padding: 10px 14px; min-height: 0;
+    }
+    .grid-card-name {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700; line-height: 1.2; color: var(--card-name);
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
-      margin-bottom: 24px;
     }
-    .cinema-divider {
-      width: 60px; height: 2px;
-      background: #C8894A; margin-bottom: 20px; flex-shrink: 0;
-    }
-    .cinema-price {
+    .grid-card-price {
       font-family: 'DM Sans', sans-serif;
-      font-size: 48px; font-weight: 600;
-      color: #C8894A; margin-bottom: 16px;
+      font-weight: 600; color: var(--card-price);
+      margin-top: 4px;
     }
-    .cinema-desc {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 20px; font-weight: 400;
-      color: #9A7D6B; line-height: 1.5; max-width: 500px;
-      display: -webkit-box; -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical; overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .cinema-veg-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 12px; border-radius: 20px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px; font-weight: 600;
-    }
-    .cinema-veg-pill.veg    { background: rgba(34,197,94,0.1);  color: #22C55E; }
-    .cinema-veg-pill.nonveg { background: rgba(239,68,68,0.1);  color: #EF4444; }
-    .cinema-veg-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .layout-2  .grid-card-info  { padding: 14px 18px; }
+    .layout-2  .grid-card-name  { font-size: 28px; }
+    .layout-2  .grid-card-price { font-size: 24px; }
+    .layout-34 .grid-card-name  { font-size: 20px; }
+    .layout-34 .grid-card-price { font-size: 18px; }
+    .layout-56 .grid-card-name  { font-size: 17px; }
+    .layout-56 .grid-card-price { font-size: 15px; }
+    .layout-79 .grid-card-name  { font-size: 14px; }
+    .layout-79 .grid-card-price { font-size: 13px; }
 
     /* ─────────────────────────────────────────
        OFFER SLIDE
@@ -399,8 +357,8 @@
     }
     .offer-circle {
       position: absolute;
-      width: 600px; height: 600px; border-radius: 50%;
-      background: rgba(200,137,74,0.15);
+      width: 500px; height: 500px; border-radius: 50%;
+      background: rgba(200,137,74,0.12);
       top: -100px; right: -100px;
       pointer-events: none;
     }
@@ -416,11 +374,11 @@
     .offer-title {
       font-family: 'Playfair Display', Georgia, serif;
       font-size: 72px; font-weight: 700; color: #fff;
-      line-height: 1.1; max-width: 700px;
+      line-height: 1.1; max-width: 800px;
       margin-top: 24px;
     }
     .offer-line {
-      width: 80px; height: 2px;
+      width: 80px; height: 3px;
       background: #C8894A;
       margin: 24px auto;
     }
@@ -638,7 +596,10 @@ function layoutClass(n) {
 function buildSlides() {
   slides = [];
   const { hiddenCategories = [], maxItemsPerSlide = 9, showOffers = true } = cfg;
-  const cap = Math.min(maxItemsPerSlide, 9); // never more than 9 per slide
+  const cap = Math.min(maxItemsPerSlide, 9);
+
+  // Offer goes first (index 0)
+  if (showOffers && activeOffer) slides.push({ type: "offer", data: activeOffer });
 
   const catMap = {};
   menuItems.forEach(item => {
@@ -648,92 +609,110 @@ function buildSlides() {
     catMap[cat].push(item);
   });
 
+  // Alternate Style A (odd slides: 1,3,5…) and Style B (even slides: 2,4,6…)
+  let catIndex = 0;
   Object.keys(catMap).sort().forEach(cat => {
-    const items      = catMap[cat];
-    const pageCount  = Math.ceil(items.length / cap);
+    const items     = catMap[cat];
+    const pageCount = Math.ceil(items.length / cap);
     for (let p = 0; p < pageCount; p++) {
       slides.push({
         type: "category", category: cat,
-        items:      items.slice(p * cap, (p + 1) * cap),
-        totalItems: items.length,
-        page: p + 1, totalPages: pageCount
+        items: items.slice(p * cap, (p + 1) * cap),
+        style: catIndex % 2 === 0 ? "A" : "B"
       });
     }
+    catIndex++;
   });
-
-  if (showOffers && activeOffer) slides.push({ type: "offer", data: activeOffer });
 }
 
-// ── HTML: item card (multi-item grids) ──
-function itemCardHTML(item) {
-  const vegDot  = item.veg === "veg"
-    ? `<span class="veg-ind veg-green"></span>`
-    : item.veg === "nonveg"
-    ? `<span class="veg-ind veg-red"></span>` : "";
+// ── HTML: Style A — List + Hero Image ──
+function styleASlideHTML(slide) {
+  const { category, items } = slide;
+  const shown    = items.slice(0, 8);
+  const heroItem = items.find(i => i.imageUrl) || null;
+  const bgAttr   = cfg.template === "bold"
+    ? ` style="background:${boldGradient(category)};"` : "";
+
+  const rightPanel = heroItem
+    ? `<img class="slide-a-right-img" src="${esc(heroItem.imageUrl)}" alt="${esc(heroItem.name)}" loading="lazy">`
+    : `<div class="slide-a-right-illus">${getFoodIllustration(category, items[0]?.name || "")}</div>`;
+
+  const rows = shown.map(item => {
+    const out = item.available === false || item.soldOut === true;
+    const vegDot = item.veg === "veg"
+      ? `<span class="slide-a-veg" style="background:#22C55E;"></span>`
+      : item.veg === "nonveg"
+      ? `<span class="slide-a-veg" style="background:#EF4444;"></span>`
+      : `<span style="width:22px;flex-shrink:0;"></span>`;
+    const desc = item.description
+      ? `<div class="slide-a-desc">${esc(item.description)}</div>` : "";
+    return `<div class="slide-a-row${out ? " sold-out" : ""}">
+      ${vegDot}
+      <div class="slide-a-name-wrap">
+        <div class="slide-a-name">${esc(item.name)}</div>
+        ${desc}
+      </div>
+      <div class="slide-a-dots"></div>
+      <div class="slide-a-price">₹${esc(item.price)}</div>
+    </div>`;
+  }).join("");
+
+  return `<div class="slide-a"${bgAttr}>
+    <div class="slide-a-left">
+      <div class="slide-a-cat">${esc(category)}</div>
+      <div class="slide-a-underline"></div>
+      <div class="slide-a-items">${rows}</div>
+    </div>
+    <div class="slide-a-right">
+      <div class="slide-a-strip"></div>
+      ${rightPanel}
+    </div>
+  </div>`;
+}
+
+// ── HTML: grid card (Style B) ──
+function gridCardHTML(item) {
   const out     = item.available === false || item.soldOut === true;
-  const popular = item.popular ? `<span class="popular-badge">★ Popular</span>` : "";
-  const cardImg = item.imageUrl
+  const vegDot  = item.veg === "veg"
+    ? `<span class="grid-veg-dot" style="background:#22C55E;"></span>`
+    : item.veg === "nonveg"
+    ? `<span class="grid-veg-dot" style="background:#EF4444;"></span>` : "";
+  const popular = item.popular ? `<span class="grid-popular">★ Popular</span>` : "";
+  const img = item.imageUrl
     ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy">`
     : `<div class="food-svg">${getFoodIllustration(item.category, item.name)}</div>`;
-  const desc = item.description
-    ? `<div class="card-desc">${esc(item.description)}</div>` : "";
-  return `<div class="item-card${out ? " sold-out" : ""}">
-    <div class="card-img-wrap item-img-wrap">
-      ${cardImg}
-      ${vegDot}${popular}${out ? '<div class="sold-overlay">Sold Out</div>' : ""}
+  return `<div class="grid-card${out ? " sold-out" : ""}">
+    <div class="grid-card-img">
+      ${img}${vegDot}${popular}${out ? '<div class="grid-sold-overlay">Sold Out</div>' : ""}
     </div>
-    <div class="card-info">
-      <div class="card-name">${esc(item.name)}</div>
-      <div class="card-price">₹${esc(item.price)}</div>
-      ${desc}
+    <div class="grid-card-info">
+      <div class="grid-card-name">${esc(item.name)}</div>
+      <div class="grid-card-price">₹${esc(item.price)}</div>
     </div>
   </div>`;
 }
 
-// ── HTML: cinematic single-item slide (horizontal split) ──
-function singleItemSlideHTML(slide) {
+// ── HTML: Style B — Full Screen Grid ──
+function styleBSlideHTML(slide) {
   const { category, items } = slide;
-  const item = items[0];
-  const imgHtml = item.imageUrl
-    ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">`
-    : `<div class="cinema-illus"><div class="food-svg">${getFoodIllustration(item.category, item.name)}</div></div>`;
-  let vegPill = "";
-  if (item.veg === "veg") {
-    vegPill = `<div class="cinema-veg-pill veg"><span class="cinema-veg-dot" style="background:#22C55E;"></span>Veg</div>`;
-  } else if (item.veg === "nonveg") {
-    vegPill = `<div class="cinema-veg-pill nonveg"><span class="cinema-veg-dot" style="background:#EF4444;"></span>Non-Veg</div>`;
-  }
-  const infoBg = cfg.template === "bold"
-    ? ` style="background:${boldGradient(category)};"` : "";
-  return `<div class="cinema-slide">
-    <div class="cinema-img-half">${imgHtml}</div>
-    <div class="cinema-info-half"${infoBg}>
-      <div class="cinema-cat">${esc(category)}</div>
-      <div class="cinema-name">${esc(item.name)}</div>
-      <div class="cinema-divider"></div>
-      <div class="cinema-price">₹${esc(item.price)}</div>
-      ${item.description ? `<div class="cinema-desc">${esc(item.description)}</div>` : ""}
-      ${vegPill}
-    </div>
-  </div>`;
-}
-
-// ── HTML: category slide ──
-function catSlideHTML(slide) {
-  const { category, items } = slide;
-  if (items.length === 1) return singleItemSlideHTML(slide);
   const layout = layoutClass(items.length);
   const bgAttr = cfg.template === "bold"
     ? ` style="background:${boldGradient(category)};"` : "";
-  return `<div class="cat-slide"${bgAttr}>
-    <div class="cat-header">
-      <div class="cat-name">${esc(category)}</div>
+  return `<div class="slide-b"${bgAttr}>
+    <div class="slide-b-header">
+      <div class="slide-b-cat">${esc(category)}</div>
+      <div class="slide-b-underline"></div>
     </div>
-    <div class="cat-divider"></div>
-    <div class="cat-grid ${layout}">
-      ${items.map(itemCardHTML).join("")}
+    <div class="slide-b-grid ${layout}">
+      ${items.map(gridCardHTML).join("")}
     </div>
   </div>`;
+}
+
+// ── HTML: category slide — dispatch by assigned style ──
+function catSlideHTML(slide) {
+  if (slide.style === "B" && slide.items.length > 1) return styleBSlideHTML(slide);
+  return styleASlideHTML(slide); // Style A handles all counts including 1
 }
 
 // ── HTML: offer slide ──
@@ -785,7 +764,7 @@ async function transitionTo(idx) {
 
   const slideEl = document.getElementById("slide");
   slideEl.classList.add("hidden");
-  await sleep(820); // match 0.8s CSS transition
+  await sleep(620); // match 0.6s CSS transition
 
   const slide = slides[idx];
   slideEl.innerHTML = slides.length
