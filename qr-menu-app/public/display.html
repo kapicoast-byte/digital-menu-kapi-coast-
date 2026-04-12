@@ -212,14 +212,38 @@
     }
     .item-card.sold-out { opacity: 0.45; }
 
+    /* image wrapper — used for badge positioning */
     .card-img-wrap {
       position: relative; overflow: hidden;
-      min-height: 0;
+      flex-shrink: 0;
     }
-    .card-img-wrap img {
-      width: 100%; height: 100%;
-      object-fit: cover; display: block;
+
+    /* item-img-wrap — flex centering + per-layout fixed height */
+    .item-img-wrap {
+      overflow: hidden;
+      background: #F0E6D3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
+    .item-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .item-img-wrap .food-svg {
+      width: 80px;
+      height: 80px;
+    }
+    .item-img-wrap .food-svg svg {
+      width: 100%;
+      height: 100%;
+    }
+    .layout-2  .item-img-wrap { height: 220px; }
+    .layout-34 .item-img-wrap { height: 180px; }
+    .layout-56 .item-img-wrap { height: 150px; }
+    .layout-79 .item-img-wrap { height: 130px; }
 
     .veg-ind {
       position: absolute; top: 8px; left: 8px;
@@ -246,7 +270,7 @@
     }
 
     .card-info {
-      display: flex; flex-direction: column; justify-content: center;
+      flex: 1; display: flex; flex-direction: column; justify-content: center;
       min-height: 0;
     }
     .card-name {
@@ -266,33 +290,29 @@
       display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    /* ── 2 items: 2 cols, 55% image ── */
-    .layout-2 .card-img-wrap { flex: 55; }
-    .layout-2 .card-info     { flex: 45; padding: 16px 20px; }
-    .layout-2 .card-name     { font-size: 36px; margin-bottom: 4px; }
-    .layout-2 .card-price    { font-size: 28px; margin-bottom: 6px; }
-    .layout-2 .card-desc     { font-size: 16px; -webkit-line-clamp: 2; display: -webkit-box; }
+    /* ── 2 items ── */
+    .layout-2 .card-info  { padding: 16px 20px; }
+    .layout-2 .card-name  { font-size: 36px; margin-bottom: 4px; }
+    .layout-2 .card-price { font-size: 28px; margin-bottom: 6px; }
+    .layout-2 .card-desc  { font-size: 16px; -webkit-line-clamp: 2; display: -webkit-box; }
 
-    /* ── 3-4 items: 2×2, 50% image ── */
-    .layout-34 .card-img-wrap { flex: 50; }
-    .layout-34 .card-info     { flex: 50; padding: 10px 14px; }
-    .layout-34 .card-name     { font-size: 24px; margin-bottom: 3px; }
-    .layout-34 .card-price    { font-size: 20px; margin-bottom: 4px; }
-    .layout-34 .card-desc     { font-size: 13px; -webkit-line-clamp: 1; display: -webkit-box; }
+    /* ── 3-4 items (2×2) ── */
+    .layout-34 .card-info  { padding: 10px 14px; }
+    .layout-34 .card-name  { font-size: 24px; margin-bottom: 3px; }
+    .layout-34 .card-price { font-size: 20px; margin-bottom: 4px; }
+    .layout-34 .card-desc  { font-size: 13px; -webkit-line-clamp: 1; display: -webkit-box; }
 
-    /* ── 5-6 items: 2×3, 45% image, no desc ── */
-    .layout-56 .card-img-wrap { flex: 45; }
-    .layout-56 .card-info     { flex: 55; padding: 8px 12px; }
-    .layout-56 .card-name     { font-size: 20px; margin-bottom: 3px; }
-    .layout-56 .card-price    { font-size: 18px; }
-    .layout-56 .card-desc     { display: none; }
+    /* ── 5-6 items (2×3) ── */
+    .layout-56 .card-info  { padding: 8px 12px; }
+    .layout-56 .card-name  { font-size: 20px; margin-bottom: 3px; }
+    .layout-56 .card-price { font-size: 18px; }
+    .layout-56 .card-desc  { display: none; }
 
-    /* ── 7-9 items: 3×3, 40% image, no desc ── */
-    .layout-79 .card-img-wrap { flex: 40; }
-    .layout-79 .card-info     { flex: 60; padding: 6px 9px; }
-    .layout-79 .card-name     { font-size: 16px; margin-bottom: 2px; }
-    .layout-79 .card-price    { font-size: 14px; }
-    .layout-79 .card-desc     { display: none; }
+    /* ── 7-9 items (3×3) ── */
+    .layout-79 .card-info  { padding: 6px 9px; }
+    .layout-79 .card-name  { font-size: 16px; margin-bottom: 2px; }
+    .layout-79 .card-price { font-size: 14px; }
+    .layout-79 .card-desc  { display: none; }
 
     /* ─────────────────────────────────────────
        CINEMATIC SINGLE-ITEM — horizontal split
@@ -310,7 +330,13 @@
     .cinema-illus {
       width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
-      background: #EDE5DB;
+      background: #F0E6D3;
+    }
+    .cinema-illus .food-svg {
+      width: 180px; height: 180px;
+    }
+    .cinema-illus .food-svg svg {
+      width: 100%; height: 100%;
     }
     .cinema-info-half {
       flex: 1;
@@ -640,7 +666,7 @@ function buildSlides() {
 
 // ── HTML: item card (multi-item grids) ──
 function itemCardHTML(item) {
-  const vegDot = item.veg === "veg"
+  const vegDot  = item.veg === "veg"
     ? `<span class="veg-ind veg-green"></span>`
     : item.veg === "nonveg"
     ? `<span class="veg-ind veg-red"></span>` : "";
@@ -648,11 +674,11 @@ function itemCardHTML(item) {
   const popular = item.popular ? `<span class="popular-badge">★ Popular</span>` : "";
   const cardImg = item.imageUrl
     ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy">`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--card-bg);">${getFoodIllustration(item.category, item.name)}</div>`;
+    : `<div class="food-svg">${getFoodIllustration(item.category, item.name)}</div>`;
   const desc = item.description
     ? `<div class="card-desc">${esc(item.description)}</div>` : "";
   return `<div class="item-card${out ? " sold-out" : ""}">
-    <div class="card-img-wrap">
+    <div class="card-img-wrap item-img-wrap">
       ${cardImg}
       ${vegDot}${popular}${out ? '<div class="sold-overlay">Sold Out</div>' : ""}
     </div>
@@ -669,8 +695,8 @@ function singleItemSlideHTML(slide) {
   const { category, items } = slide;
   const item = items[0];
   const imgHtml = item.imageUrl
-    ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy">`
-    : `<div class="cinema-illus">${getFoodIllustration(item.category, item.name)}</div>`;
+    ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">`
+    : `<div class="cinema-illus"><div class="food-svg">${getFoodIllustration(item.category, item.name)}</div></div>`;
   let vegPill = "";
   if (item.veg === "veg") {
     vegPill = `<div class="cinema-veg-pill veg"><span class="cinema-veg-dot" style="background:#22C55E;"></span>Veg</div>`;
@@ -694,19 +720,14 @@ function singleItemSlideHTML(slide) {
 
 // ── HTML: category slide ──
 function catSlideHTML(slide) {
-  const { category, items, page, totalPages, totalItems } = slide;
+  const { category, items } = slide;
   if (items.length === 1) return singleItemSlideHTML(slide);
-  const layout    = layoutClass(items.length);
-  const titleText = totalPages > 1 ? `${category} ${page}/${totalPages}` : category;
-  const countText = totalPages > 1
-    ? `Slide ${page}/${totalPages}`
-    : `${items.length} item${items.length !== 1 ? "s" : ""}`;
+  const layout = layoutClass(items.length);
   const bgAttr = cfg.template === "bold"
     ? ` style="background:${boldGradient(category)};"` : "";
   return `<div class="cat-slide"${bgAttr}>
     <div class="cat-header">
-      <div class="cat-name">${esc(titleText)}</div>
-      <div class="cat-count">${esc(countText)}</div>
+      <div class="cat-name">${esc(category)}</div>
     </div>
     <div class="cat-divider"></div>
     <div class="cat-grid ${layout}">
