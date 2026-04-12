@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digital Menu</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -101,67 +101,97 @@
     }
     .pill.active { background: #2C1A0E; color: #fff; border-color: #2C1A0E; }
 
-    /* ── Category heading ── */
-    .cat-heading {
-      font-size: 17px; font-weight: 800; color: #2C1A0E;
-      padding: 18px 12px 10px; letter-spacing: -0.2px;
+    /* ── Category title ── */
+    .cat-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #2C1A0E;
+      padding: 16px 12px 8px;
+      border-bottom: 2px solid #C8894A;
+      margin: 0 12px 12px;
+      display: inline-block;
     }
 
-    /* ── Menu grid ── */
-    .menu-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 12px; padding: 0 12px;
+    /* ── Menu list ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    .menu-card {
-      background: #fff; border-radius: 14px; overflow: hidden;
-      box-shadow: 0 2px 10px rgba(44,26,14,0.07);
-      position: relative; display: flex; flex-direction: column;
+    .menu-item-row {
+      display: flex;
+      gap: 12px;
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      margin: 0 12px 10px;
+      box-shadow: 0 2px 8px rgba(44,26,14,0.06);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      animation: fadeUp 0.4s ease both;
     }
-    .menu-card.sold-out { opacity: 0.6; }
-    .card-img-wrap {
-      position: relative; width: 100%; height: 100px; background: #EDE5DB;
+    .menu-item-row:active { transform: scale(0.98); }
+    .menu-item-row.sold-out { opacity: 0.6; }
+    .menu-item-row.time-unavail { opacity: 0.55; }
+    .item-thumb {
+      width: 90px;
+      height: 90px;
+      border-radius: 10px;
       overflow: hidden;
+      flex-shrink: 0;
+      background: #F0E6D3;
     }
-    .card-img-wrap img {
-      width: 100%; height: 100%; object-fit: cover;
+    .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .item-details { flex: 1; min-width: 0; }
+    .item-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2C1A0E;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
     .veg-dot {
-      width: 9px; height: 9px; border-radius: 2px;
-      flex-shrink: 0; display: inline-block; margin-right: 5px;
-      vertical-align: middle;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
-    .veg-dot.is-veg    { background: #22C55E; }
-    .veg-dot.is-nonveg { background: #EF4444; }
-    .sold-out-badge {
-      position: absolute; top: 8px; right: 8px;
-      background: #EF4444; color: #fff;
-      font-size: 10px; font-weight: 700;
-      padding: 3px 8px; border-radius: 6px;
-      letter-spacing: 0.4px; text-transform: uppercase;
-      display: none;
+    .item-desc {
+      font-size: 13px;
+      color: #9A7D6B;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
-    .menu-card.sold-out .sold-out-badge { display: block; }
-    .menu-card.time-unavail { opacity: 0.55; }
-    .time-unavail-badge {
+    .item-price { font-size: 15px; font-weight: 700; color: #C8894A; }
+    .popular-pill {
+      font-size: 10px;
+      background: #FFF3E0;
+      color: #C8894A;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .special-pill {
+      font-size: 10px;
+      background: #E8F5E9;
+      color: #2E7D32;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
       display: inline-block;
+      margin-top: 4px;
+    }
+    .time-unavail-badge {
       font-size: 10px; background: #f5f5f5; color: #888;
       border-radius: 4px; padding: 2px 6px; font-weight: 700;
-      margin-left: 4px; vertical-align: middle; white-space: nowrap;
+      margin-left: 4px; white-space: nowrap;
     }
-    .card-body {
-      padding: 9px 10px 11px;
-      flex: 1; display: flex; flex-direction: column; gap: 3px;
-    }
-    .card-name {
-      font-size: 15px; font-weight: 700; color: #2C1A0E; line-height: 1.3;
-      display: flex; align-items: center;
-    }
-    .card-desc {
-      font-size: 11px; color: #9A7D6B; line-height: 1.4;
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .card-price { font-size: 15px; font-weight: 800; color: #C8894A; margin-top: 4px; }
 
     /* ── No results ── */
     #noResults {
@@ -401,14 +431,15 @@
     /* ── Dark mode ── */
     body.dark { background: #0D0D0D; color: white; }
     body.dark .sticky-nav { background: #0D0D0D; }
-    body.dark .menu-card { background: #1A1A1A; }
+    body.dark .menu-item-row { background: #1A1A1A; }
+    body.dark .item-title { color: white; }
+    body.dark .item-price { color: #C8894A; }
+    body.dark .cat-title { color: white; }
     body.dark .header { background: #1A1A1A; }
-    body.dark .card-name { color: white; }
-    body.dark .cat-heading { color: white; border-color: #333; }
     body.dark .social-bar { background: #1A1A1A; border-color: #333; }
     body.dark .pill { background: #333; color: #aaa; border-color: #444; }
     body.dark .pill.active { background: #C8894A; color: white; border-color: #C8894A; }
-    body.dark .card-desc { color: #888; }
+    body.dark .item-desc { color: #888; }
     body.dark .search-input { background: #1A1A1A; color: white; border-color: #333; }
     body.dark .search-input::placeholder { color: #666; }
     body.dark .specials-heading { color: #fff; }
@@ -443,6 +474,35 @@
 <div id="offerBanner">
   <div class="offer-title" id="offerTitle"></div>
   <div class="offer-body"  id="offerBody"></div>
+</div>
+
+<!-- ── Welcome Banner ── -->
+<div id="welcomeBanner" style="margin:12px 16px;background:white;border-radius:16px;border-left:4px solid #C8894A;box-shadow:0 2px 12px rgba(44,26,14,0.08);padding:14px;display:flex;align-items:center;gap:14px;position:relative;">
+  <!-- Barista SVG Avatar -->
+  <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+    <circle cx="32" cy="52" r="18" fill="#2C1A0E"/>
+    <path d="M20 52 Q32 42 44 52 L44 64 L20 64 Z" fill="#C8894A" opacity="0.9"/>
+    <circle cx="32" cy="26" r="14" fill="#D4956A"/>
+    <ellipse cx="32" cy="14" rx="14" ry="7" fill="#2C1A0E"/>
+    <circle cx="20" cy="20" r="6" fill="#2C1A0E"/>
+    <circle cx="44" cy="20" r="6" fill="#2C1A0E"/>
+    <circle cx="27" cy="26" r="2.5" fill="#2C1A0E"/>
+    <circle cx="37" cy="26" r="2.5" fill="#2C1A0E"/>
+    <circle cx="28" cy="25" r="0.8" fill="white"/>
+    <circle cx="38" cy="25" r="0.8" fill="white"/>
+    <path d="M26 32 Q32 37 38 32" fill="none" stroke="#2C1A0E" stroke-width="2" stroke-linecap="round"/>
+    <rect x="40" y="40" width="12" height="10" rx="2" fill="#FAF6F0"/>
+    <path d="M52 43 Q56 43 56 47 Q56 51 52 51" fill="none" stroke="#FAF6F0" stroke-width="2"/>
+    <rect x="41" y="38" width="10" height="3" rx="1" fill="#9A7D6B"/>
+  </svg>
+  <!-- Text -->
+  <div style="flex:1;">
+    <div id="welcomeGreeting" style="font-size:15px;font-weight:700;color:#2C1A0E;margin-bottom:3px;">Welcome!</div>
+    <div id="welcomeTable" style="font-size:13px;color:#9A7D6B;margin-bottom:2px;">Scan. Sip. Smile.</div>
+    <div style="font-size:12px;color:#C8894A;">Today's menu, freshly updated</div>
+  </div>
+  <!-- Close button -->
+  <button onclick="dismissWelcome()" style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:18px;color:#9A7D6B;cursor:pointer;line-height:1;">×</button>
 </div>
 
 <!-- ── Sticky nav: pills then search ── -->
@@ -542,10 +602,17 @@
 <!-- ── Scroll to top ── -->
 <button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
 
+<!-- ── Item bottom sheet ── -->
+<div id="itemSheetOverlay" onclick="closeItemSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;opacity:0;transition:opacity 0.3s;"></div>
+<div id="itemSheet" style="display:none;position:fixed;bottom:0;left:0;right:0;height:75vh;background:white;border-radius:24px 24px 0 0;z-index:501;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s ease;">
+  <div style="width:40px;height:4px;background:#E0D5C8;border-radius:2px;margin:12px auto;"></div>
+  <div id="sheetContent" style="padding:0 20px 40px;"></div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, addDoc, query, where, onSnapshot, serverTimestamp
+  getFirestore, collection, doc, getDoc, addDoc, setDoc, query, where, onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -561,32 +628,72 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
+// ── Welcome banner ──
+function initWelcomeBanner() {
+  if (sessionStorage.getItem("welcomeSeen")) {
+    document.getElementById("welcomeBanner").style.display = "none";
+    return;
+  }
+  const hour = new Date().getHours();
+  let greeting = "Welcome!";
+  if (hour >= 6  && hour < 12) greeting = "Good morning!";
+  else if (hour >= 12 && hour < 17) greeting = "Good afternoon!";
+  else if (hour >= 17 && hour < 21) greeting = "Good evening!";
+  document.getElementById("welcomeGreeting").textContent = greeting;
+  const params = new URLSearchParams(window.location.search);
+  const table = params.get("table");
+  if (table) document.getElementById("welcomeTable").textContent = "You are at Table " + table;
+  const outlet = params.get("outlet") || "ecr";
+  getDoc(doc(db, "outlets", outlet)).then(snap => {
+    if (snap.exists()) {
+      const name = snap.data().name || "Kapi Coast";
+      document.getElementById("welcomeGreeting").textContent = greeting + " to " + name + "!";
+    }
+  }).catch(() => {});
+}
+window.dismissWelcome = function() {
+  sessionStorage.setItem("welcomeSeen", "true");
+  const banner = document.getElementById("welcomeBanner");
+  banner.style.transition = "opacity 0.3s, transform 0.3s";
+  banner.style.opacity = "0";
+  banner.style.transform = "translateY(-10px)";
+  setTimeout(() => banner.style.display = "none", 300);
+};
+initWelcomeBanner();
+
 function escapeHtml(v) {
   return String(v ?? "").replace(/[&<>"']/g,
     c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-function getFoodIllustration(category, name) {
-  const c = (category || "").toLowerCase();
-  const n = (name || "").toLowerCase();
-  const illustrations = {
-    coffee: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><ellipse cx="40" cy="52" rx="20" ry="14" fill="#C8894A" opacity=".3"/><rect x="22" y="36" width="32" height="24" rx="6" fill="#C8894A"/><rect x="54" y="42" width="10" height="12" rx="5" fill="none" stroke="#C8894A" stroke-width="2.5"/><path d="M30 36 Q32 26 36 24 Q40 22 44 24 Q48 26 50 36" fill="#7B4F2E" opacity=".5"/><ellipse cx="40" cy="36" rx="16" ry="4" fill="#FAF6F0" opacity=".6"/></svg>`,
-    tea: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><rect x="20" y="34" width="32" height="26" rx="6" fill="#9A7D6B"/><rect x="52" y="40" width="10" height="12" rx="5" fill="none" stroke="#9A7D6B" stroke-width="2.5"/><path d="M26 34 Q28 22 36 20 Q44 18 46 34" fill="#7B4F2E" opacity=".4"/><path d="M30 26 Q32 20 34 24" stroke="#C8894A" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M37 24 Q39 18 41 22" stroke="#C8894A" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`,
-    snack: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><rect x="16" y="38" width="48" height="24" rx="8" fill="#C8894A"/><rect x="20" y="30" width="40" height="14" rx="6" fill="#E8A96A"/><circle cx="28" cy="37" r="3" fill="#FAF6F0" opacity=".5"/><circle cx="40" cy="35" r="3" fill="#FAF6F0" opacity=".5"/><circle cx="52" cy="37" r="3" fill="#FAF6F0" opacity=".5"/></svg>`,
-    food: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><ellipse cx="40" cy="48" rx="26" ry="14" fill="#C8894A" opacity=".3"/><rect x="14" y="38" width="52" height="18" rx="9" fill="#C8894A"/><rect x="18" y="34" width="44" height="10" rx="5" fill="#E8A96A"/><circle cx="40" cy="34" r="14" fill="#F0A030" opacity=".2"/><rect x="30" y="20" width="20" height="18" rx="10" fill="#E8A96A" opacity=".6"/></svg>`,
-    dessert: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><ellipse cx="40" cy="54" rx="22" ry="8" fill="#C8894A" opacity=".3"/><rect x="20" y="42" width="40" height="18" rx="9" fill="#C8894A"/><path d="M24 42 Q40 24 56 42" fill="#E8A96A"/><path d="M36 26 Q38 18 40 14 Q42 18 44 26" fill="#9A7D6B" opacity=".6"/><circle cx="40" cy="14" r="4" fill="#C8894A"/></svg>`,
-    juice: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><rect x="26" y="30" width="28" height="34" rx="6" fill="#F0A030" opacity=".8"/><rect x="26" y="26" width="28" height="10" rx="4" fill="#E8A96A"/><rect x="38" y="16" width="4" height="14" rx="2" fill="#9A7D6B"/><circle cx="28" cy="44" r="3" fill="#FAF6F0" opacity=".4"/><circle cx="52" cy="50" r="2" fill="#FAF6F0" opacity=".4"/></svg>`,
-    "cold-drink": `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><rect x="26" y="24" width="28" height="40" rx="8" fill="#9A7D6B" opacity=".7"/><rect x="26" y="24" width="28" height="12" rx="6" fill="#C8894A"/><rect x="40" y="14" width="3" height="14" rx="1.5" fill="#2C1A0E" opacity=".5"/><circle cx="34" cy="44" r="2" fill="#FAF6F0" opacity=".5"/><circle cx="46" cy="52" r="2" fill="#FAF6F0" opacity=".5"/><circle cx="34" cy="56" r="2" fill="#FAF6F0" opacity=".5"/></svg>`,
-    default: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="8" fill="#EDE5DB"/><circle cx="40" cy="38" r="20" fill="#C8894A" opacity=".2"/><text x="40" y="44" text-anchor="middle" font-size="28" fill="#C8894A">🍽</text></svg>`
-  };
-  if (c.includes("coffee") || n.includes("coffee") || n.includes("espresso") || n.includes("cappuccino") || n.includes("latte") || n.includes("brew")) return illustrations.coffee;
-  if (c.includes("tea") || n.includes("tea") || n.includes("chai")) return illustrations.tea;
-  if (c.includes("juice") || n.includes("juice") || n.includes("lemon") || n.includes("orange")) return illustrations.juice;
-  if (c.includes("cold") || n.includes("cold") || n.includes("soda") || n.includes("cola") || n.includes("fizz")) return illustrations["cold-drink"];
-  if (c.includes("dessert") || c.includes("sweet") || n.includes("cake") || n.includes("ice cream") || n.includes("pudding") || n.includes("cookie")) return illustrations.dessert;
-  if (c.includes("snack") || n.includes("snack") || n.includes("chip") || n.includes("sandwich") || n.includes("toast")) return illustrations.snack;
-  if (c.includes("food") || c.includes("meal") || c.includes("rice") || c.includes("curry") || n.includes("rice") || n.includes("curry")) return illustrations.food;
-  return illustrations.default;
+function getPlaceholderCard(category, name) {
+  const cat = (category || "").toLowerCase();
+  const nm  = (name || "").toLowerCase();
+  let bg, emoji;
+  if (cat.includes("coffee") || nm.includes("coffee") || nm.includes("latte") || nm.includes("cappuccino") || nm.includes("espresso") || nm.includes("mocha") || nm.includes("filter")) {
+    bg = "#6B3F1F"; emoji = "☕";
+  } else if (cat.includes("tea") || nm.includes("tea") || nm.includes("chai")) {
+    bg = "#8B6914"; emoji = "🍵";
+  } else if (cat.includes("juice") || cat.includes("cold") || cat.includes("shake") || nm.includes("juice") || nm.includes("smoothie") || nm.includes("frappe") || nm.includes("milkshake")) {
+    bg = "#1565C0"; emoji = "🥤";
+  } else if (cat.includes("cake") || cat.includes("dessert") || cat.includes("cookie") || cat.includes("sweet") || nm.includes("cake") || nm.includes("cookie") || nm.includes("brownie") || nm.includes("muffin")) {
+    bg = "#AD1457"; emoji = "🍰";
+  } else if (cat.includes("bun") || cat.includes("bread") || cat.includes("sandwich") || nm.includes("bun") || nm.includes("bread") || nm.includes("sandwich") || nm.includes("toast") || nm.includes("pav")) {
+    bg = "#E65100"; emoji = "🥐";
+  } else if (cat.includes("snack") || cat.includes("street") || nm.includes("bajji") || nm.includes("vada") || nm.includes("bonda") || nm.includes("pakoda") || nm.includes("fritter")) {
+    bg = "#33691E"; emoji = "🍟";
+  } else if (cat.includes("meal") || cat.includes("rice") || cat.includes("biryani") || nm.includes("meal") || nm.includes("rice") || nm.includes("biryani") || nm.includes("thali")) {
+    bg = "#4A148C"; emoji = "🍱";
+  } else if (cat.includes("pizza") || nm.includes("pizza")) {
+    bg = "#BF360C"; emoji = "🍕";
+  } else if (cat.includes("panipuri") || cat.includes("chaat") || cat.includes("pani") || nm.includes("panipuri") || nm.includes("pani puri") || nm.includes("golgappa")) {
+    bg = "#00695C"; emoji = "🫙";
+  } else if (cat.includes("hot drink") || cat.includes("beverage") || nm.includes("hot chocolate") || nm.includes("cocoa")) {
+    bg = "#4E342E"; emoji = "🍫";
+  } else {
+    bg = "#4E342E"; emoji = "🍽";
+  }
+  return `<div style="width:100%;height:100%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:32px;border-radius:inherit;">${emoji}</div>`;
 }
 
 // ── Outlet + table from URL ──
@@ -692,40 +799,37 @@ function renderMenu() {
   });
 
   let html = "";
+  let rowIndex = 0;
   catOrder.forEach(cat => {
     if (!byCat[cat]) return;
-    html += `<div class="cat-heading">${escapeHtml(cat)}</div><div class="menu-grid">`;
+    html += `<div class="cat-title">${escapeHtml(cat)}</div>`;
     byCat[cat].forEach(item => {
-      const soldOut  = item.available === false;
-      const timeOk   = isItemAvailableNow(item);
-      const vegDot   = item.veg === "veg"
-        ? `<span class="veg-dot is-veg"></span>`
-        : item.veg === "nonveg"
-        ? `<span class="veg-dot is-nonveg"></span>` : "";
-      const imgSrc   = item.imageUrl || "";
-      const onImgClick = imgSrc
-        ? `onclick="openImageModal('${escapeHtml(imgSrc)}','${escapeHtml(item.name).replace(/'/g,"\\'")}','${escapeHtml(item.price)}','${escapeHtml(item.description||"").replace(/'/g,"\\'")}','${item.veg||""}')"` : "";
-      const imgContent = imgSrc
-        ? `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(item.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`
-        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${getFoodIllustration(item.category, item.name)}</div>`;
+      const soldOut = item.available === false;
+      const timeOk  = isItemAvailableNow(item);
+      const vegColor = item.veg === "nonveg" ? "#E53935" : "#43A047";
+      const thumbHtml = item.imageUrl
+        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy">`
+        : getPlaceholderCard(item.category, item.name);
       const timeTag = (!timeOk && item.availableFrom)
         ? `<span class="time-unavail-badge">Available ${item.availableFrom}–${item.availableTo}</span>` : "";
       html += `
-        <div class="menu-card${soldOut ? " sold-out" : ""}${!timeOk ? " time-unavail" : ""}">
-          <div class="card-img-wrap" ${onImgClick} style="${imgSrc ? "cursor:pointer;" : ""}">
-            ${imgContent}
-            <span class="sold-out-badge">Sold Out</span>
-            ${item.popular ? '<span class="popular-badge">Popular</span>' : ""}
-            ${item.dailySpecial ? '<span class="special-card-ribbon">Special</span>' : ""}
-          </div>
-          <div class="card-body">
-            <div class="card-name">${vegDot}${escapeHtml(item.name)}${timeTag}</div>
-            <div class="card-desc">${escapeHtml(item.description || "")}</div>
-            <div class="card-price">Rs. ${escapeHtml(item.price)}</div>
+        <div class="menu-item-row${soldOut ? " sold-out" : ""}${!timeOk ? " time-unavail" : ""}"
+             style="animation-delay:${rowIndex * 0.05}s"
+             onclick="openItemSheet('${escapeHtml(item.id)}')">
+          <div class="item-thumb">${thumbHtml}</div>
+          <div class="item-details">
+            <div class="item-title">
+              <span class="veg-dot" style="background:${vegColor};"></span>
+              ${escapeHtml(item.name)}${timeTag}
+              ${item.popular ? '<span class="popular-pill">Popular</span>' : ""}
+            </div>
+            <div class="item-desc">${escapeHtml(item.description || "")}</div>
+            <div class="item-price">Rs. ${escapeHtml(item.price)}</div>
+            ${item.dailySpecial ? '<span class="special-pill">Today\'s Special</span>' : ""}
           </div>
         </div>`;
+      rowIndex++;
     });
-    html += `</div>`;
   });
   container.innerHTML = html;
 }
@@ -739,7 +843,7 @@ function renderSpecials() {
   scroll.innerHTML = specials.map(item => {
     const specialImg = item.imageUrl
       ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">`
-      : `<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${getFoodIllustration(item.category, item.name)}</div>`;
+      : getPlaceholderCard(item.category, item.name);
     return `
     <div class="special-card">
       <div class="special-img-wrap">
@@ -825,6 +929,66 @@ const savedTheme = localStorage.getItem('theme') || 'light';
 document.body.classList.add(savedTheme);
 document.getElementById('themeToggle').checked = savedTheme === 'dark';
 document.getElementById('themeLabel').textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
+
+// ── Item bottom sheet ──
+window.openItemSheet = function(itemId) {
+  const item = allItems.find(i => i.id === itemId);
+  if (!item) return;
+  const sheet   = document.getElementById("itemSheet");
+  const overlay = document.getElementById("itemSheetOverlay");
+
+  const imgHtml = item.imageUrl
+    ? `<img src="${escapeHtml(item.imageUrl)}" style="width:100%;height:200px;object-fit:cover;border-radius:16px;margin-bottom:16px;">`
+    : `<div style="width:100%;height:200px;border-radius:16px;margin-bottom:16px;overflow:hidden;">${getPlaceholderCard(item.category, item.name)}</div>`;
+
+  document.getElementById("sheetContent").innerHTML = `
+    ${imgHtml}
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="width:12px;height:12px;border-radius:50%;background:${item.veg === "nonveg" ? "#E53935" : "#43A047"};flex-shrink:0;"></span>
+      <span style="font-size:11px;color:#9A7D6B;">${escapeHtml(item.category || "")}</span>
+    </div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#2C1A0E;margin-bottom:8px;">${escapeHtml(item.name)}</h2>
+    <div style="font-size:22px;font-weight:700;color:#C8894A;margin-bottom:12px;">Rs. ${escapeHtml(item.price)}</div>
+    <p style="font-size:14px;color:#9A7D6B;line-height:1.6;margin-bottom:20px;">${escapeHtml(item.description || "No description available.")}</p>
+    ${item.availableFrom ? `<div style="font-size:12px;color:#C8894A;margin-bottom:16px;">Available: ${escapeHtml(item.availableFrom)} – ${escapeHtml(item.availableTo)}</div>` : ""}
+    <div style="border-top:1px solid #F0E6D3;padding-top:16px;">
+      <div style="font-size:13px;font-weight:600;color:#2C1A0E;margin-bottom:10px;">Rate this item:</div>
+      <div style="display:flex;gap:8px;" id="starRating">
+        ${[1,2,3,4,5].map(i => `<span onclick="rateItem('${escapeHtml(itemId)}',${i})" style="font-size:28px;cursor:pointer;color:#E0D5C8;" data-star="${i}">★</span>`).join("")}
+      </div>
+    </div>
+  `;
+
+  sheet.style.display = "block";
+  overlay.style.display = "block";
+  requestAnimationFrame(() => {
+    sheet.style.transform = "translateY(0)";
+    overlay.style.opacity = "1";
+  });
+};
+
+window.closeItemSheet = function() {
+  const sheet   = document.getElementById("itemSheet");
+  const overlay = document.getElementById("itemSheetOverlay");
+  sheet.style.transform  = "translateY(100%)";
+  overlay.style.opacity  = "0";
+  setTimeout(() => {
+    sheet.style.display   = "none";
+    overlay.style.display = "none";
+  }, 300);
+};
+
+window.rateItem = async function(itemId, rating) {
+  const stars = document.querySelectorAll("#starRating span");
+  stars.forEach((s, i) => {
+    s.style.color = i < rating ? "#C8894A" : "#E0D5C8";
+  });
+  try {
+    await setDoc(doc(db, "outlets", outlet, "itemRatings", itemId), {
+      rating, itemId, ratedAt: new Date()
+    }, { merge: true });
+  } catch(e) { console.log("Rating error:", e); }
+};
 
 // ── Scroll to top button ──
 window.addEventListener("scroll", () => {
