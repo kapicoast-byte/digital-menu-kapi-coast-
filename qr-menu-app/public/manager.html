@@ -409,6 +409,35 @@
     .item-card.archived-card {
       background: #f0f0f0; opacity: 0.7;
     }
+
+    /* ── Inline delete confirm ── */
+    .inline-confirm {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: #FFF5F5;
+      border: 1px solid #FFCCCC; border-radius: 0 0 10px 10px;
+      margin-top: -4px; margin-bottom: 8px;
+      font-size: 13px; color: #C0392B; font-weight: 600;
+      animation: fadeInDown 0.15s ease;
+    }
+    @keyframes fadeInDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .inline-confirm-yes {
+      padding: 5px 14px; background: #C0392B; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;
+    }
+    .inline-confirm-yes:hover { background: #96281b; }
+    .inline-confirm-no {
+      padding: 5px 14px; background: #fff; color: #666;
+      border: 1.5px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
+    }
+    .inline-confirm-no:hover { background: #f5f5f5; }
+
+    /* ── Bulk select ── */
+    .item-card.bulk-selected { outline: 2px solid var(--caramel); background: #FFF9F4; }
+    .item-checkbox { display: none; align-items: center; margin-right: 10px; flex-shrink: 0; }
+    #bulkBar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--espresso); padding: 14px 20px; z-index: 200; align-items: center; justify-content: space-between; gap: 10px; }
+    .bulk-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .bulk-section-header h3 { margin: 0; }
+
     .archived-label {
       font-size: 11px; font-weight: 700; color: #999;
       text-transform: uppercase; letter-spacing: 0.05em;
@@ -751,6 +780,13 @@
           <div class="form-status" id="itemStatus"></div>
         </div>
         <hr class="section-hr">
+        <div class="bulk-section-header">
+          <h3 style="font-size:15px;font-weight:700;color:var(--espresso);">All Items</h3>
+          <button onclick="toggleBulkSelect()" id="bulkSelectBtn"
+            style="padding:7px 16px;border:1.5px solid #E0D5C8;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:white;color:var(--espresso);">
+            Select
+          </button>
+        </div>
         <div class="tools-panel">
           <div class="tools-header">
             <button class="tools-toggle-btn" id="toolsToggleBtn" onclick="toggleTools()">Tools ▼</button>
@@ -774,6 +810,23 @@
           </div>
         </div>
         <div class="items-list" id="menuList">Loading…</div>
+      </div>
+
+      <!-- Bulk select action bar -->
+      <div id="bulkBar">
+        <span id="selectedCount" style="color:white;font-size:14px;font-weight:600;">0 items selected</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <select id="bulkCategoryFilter" onchange="selectByCategory(this.value)"
+            style="padding:7px 10px;background:rgba(255,255,255,0.12);color:white;border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:12px;cursor:pointer;outline:none;">
+            <option value="">Select by category…</option>
+          </select>
+          <button onclick="selectAllItems()" style="padding:7px 14px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:8px;cursor:pointer;font-size:13px;">Select All</button>
+          <button onclick="bulkDeleteItems()" id="bulkDeleteBtn" disabled
+            style="padding:7px 14px;background:#C0392B;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;opacity:0.5;">
+            Delete Selected
+          </button>
+          <button onclick="toggleBulkSelect()" style="padding:7px 14px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:8px;cursor:pointer;font-size:13px;">Cancel</button>
+        </div>
       </div>
 
       <!-- Bulk Edit Prices overlay -->
@@ -1192,18 +1245,22 @@ async function loadItems() {
     }
     const handle = `<span class="drag-handle" style="font-size:20px;color:var(--muted);cursor:grab;padding:0 10px 0 8px;flex-shrink:0;user-select:none;display:none;align-items:center;">≡</span>`;
     const draggable = (!isArchived && mgrReorderMode) ? `draggable="true"` : "";
+    const checkbox = `<div class="item-checkbox"><input type="checkbox" data-id="${escapeHtml(item.id)}" onchange="toggleItemSelect('${escapeHtml(item.id)}', this.checked)" style="width:18px;height:18px;cursor:pointer;accent-color:var(--caramel);"></div>`;
     return `
-      <div class="item-card${isArchived ? " archived-card" : ""}" ${draggable} data-id="${escapeHtml(item.id)}" data-cat="${escapeHtml(item.category || "Others")}">
-        ${handle}
-        <div class="ic-img">${imgHtml}</div>
-        <div class="ic-body">
-          <div class="ic-name">${dot} ${escapeHtml(item.name)}</div>
-          <div class="ic-meta">${escapeHtml(item.category || "")} &nbsp;·&nbsp; ₹${escapeHtml(String(item.price))}</div>
-          ${item.description ? `<div class="ic-desc">${escapeHtml(item.description)}</div>` : ""}
-          ${tags.length ? `<div class="ic-tags">${tags.join("")}</div>` : ""}
-        </div>
-        <div class="ic-actions">
-          <button class="ic-menu-btn" onclick="openItemMenu(this,'${escapeHtml(item.id)}')" title="Actions">⋮</button>
+      <div class="item-wrap" data-id="${escapeHtml(item.id)}" style="margin-bottom:8px;">
+        <div class="item-card${isArchived ? " archived-card" : ""}" ${draggable} data-id="${escapeHtml(item.id)}" data-cat="${escapeHtml(item.category || "Others")}" style="margin-bottom:0;">
+          ${checkbox}
+          ${handle}
+          <div class="ic-img">${imgHtml}</div>
+          <div class="ic-body">
+            <div class="ic-name">${dot} ${escapeHtml(item.name)}</div>
+            <div class="ic-meta">${escapeHtml(item.category || "")} &nbsp;·&nbsp; ₹${escapeHtml(String(item.price))}</div>
+            ${item.description ? `<div class="ic-desc">${escapeHtml(item.description)}</div>` : ""}
+            ${tags.length ? `<div class="ic-tags">${tags.join("")}</div>` : ""}
+          </div>
+          <div class="ic-actions">
+            <button class="ic-menu-btn" onclick="openItemMenu(this,'${escapeHtml(item.id)}')" title="Actions">⋮</button>
+          </div>
         </div>
       </div>`;
   }
@@ -1214,7 +1271,10 @@ async function loadItems() {
     activeCats[cat].forEach(item => { html += itemCardHtml(item, false); });
   });
   if (mgrShowArchived && Object.keys(archivedCats).length > 0) {
-    html += `<div class="cat-header" style="color:var(--muted);margin-top:20px;">— Archived Items —</div>`;
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;">
+      <span class="cat-header" style="color:var(--muted);margin:0;">— Archived Items —</span>
+      <button onclick="deleteAllArchived()" style="padding:5px 12px;background:#C0392B;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Delete All Archived</button>
+    </div>`;
     Object.keys(archivedCats).sort().forEach(cat => {
       html += `<div class="cat-header" style="font-size:12px;">${escapeHtml(cat)}</div>`;
       archivedCats[cat].forEach(item => { html += itemCardHtml(item, true); });
@@ -1265,10 +1325,37 @@ window.addItem = async function () {
   loadItems();
 };
 
-window.archiveItem = async function (id) {
-  if (!confirm("Archive this item? It will be hidden from customers.")) return;
-  await updateDoc(menuDocRef(id), { archived: true });
-  loadItems();
+// ── Inline confirm helpers ──
+let _inlineConfirmFn = null;
+function showInlineConfirm(itemId, message, confirmText, fn) {
+  cancelInlineConfirm();
+  _inlineConfirmFn = fn;
+  const wrap = document.querySelector(`.item-wrap[data-id="${CSS.escape(itemId)}"]`);
+  if (!wrap) return;
+  const row = document.createElement("div");
+  row.className = "inline-confirm";
+  row.id = "inline-confirm-active";
+  row.innerHTML = `<span style="flex:1;">${message}</span>
+    <button class="inline-confirm-yes" onclick="execInlineConfirm()">${confirmText}</button>
+    <button class="inline-confirm-no" onclick="cancelInlineConfirm()">Cancel</button>`;
+  wrap.appendChild(row);
+}
+window.execInlineConfirm = async function () {
+  if (_inlineConfirmFn) await _inlineConfirmFn();
+  cancelInlineConfirm();
+};
+window.cancelInlineConfirm = function () {
+  const el = document.getElementById("inline-confirm-active");
+  if (el) el.remove();
+  _inlineConfirmFn = null;
+};
+
+window.archiveItem = function (id) {
+  closeDropdown();
+  showInlineConfirm(id, "Archive this item?", "Archive", async () => {
+    await updateDoc(menuDocRef(id), { archived: true });
+    loadItems();
+  });
 };
 
 window.restoreItem = async function (id) {
@@ -1276,10 +1363,12 @@ window.restoreItem = async function (id) {
   loadItems();
 };
 
-window.deleteForever = async function (id) {
-  if (!confirm("Permanently delete this item? This cannot be undone.")) return;
-  await deleteDoc(menuDocRef(id));
-  loadItems();
+window.deleteForever = function (id) {
+  closeDropdown();
+  showInlineConfirm(id, "Permanently delete? This cannot be undone.", "Delete Forever", async () => {
+    await deleteDoc(menuDocRef(id));
+    loadItems();
+  });
 };
 
 window.duplicateItem = async function (id) {
@@ -1295,6 +1384,106 @@ window.duplicateItem = async function (id) {
 window.toggleArchivedView = function () {
   mgrShowArchived = document.getElementById("showArchivedToggle").checked;
   loadItems();
+};
+
+// ── Bulk select ──
+let bulkMode = false;
+let selectedItems = new Set();
+
+window.toggleBulkSelect = function () {
+  bulkMode = !bulkMode;
+  selectedItems.clear();
+  const btn = document.getElementById("bulkSelectBtn");
+  const bar = document.getElementById("bulkBar");
+  if (bulkMode) {
+    btn.textContent = "Cancel";
+    btn.style.background = "#FAF6F0";
+    bar.style.display = "flex";
+    document.querySelectorAll(".item-checkbox").forEach(cb => { cb.style.display = "flex"; });
+    // Populate category filter from active items
+    const allCached = Object.values(window._itemsCache || {});
+    const cats = [...new Set(allCached.filter(i => !i.archived).map(i => i.category || "Others"))].sort();
+    const sel = document.getElementById("bulkCategoryFilter");
+    sel.innerHTML = `<option value="">Select by category…</option>` +
+      cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+  } else {
+    btn.textContent = "Select";
+    btn.style.background = "white";
+    bar.style.display = "none";
+    document.querySelectorAll(".item-checkbox").forEach(cb => {
+      cb.style.display = "none";
+      cb.querySelector("input").checked = false;
+    });
+    document.querySelectorAll(".item-card.bulk-selected").forEach(c => c.classList.remove("bulk-selected"));
+    updateBulkCount();
+  }
+};
+
+window.toggleItemSelect = function (itemId, checked) {
+  if (checked) {
+    selectedItems.add(itemId);
+    const card = document.querySelector(`.item-card[data-id="${CSS.escape(itemId)}"]`);
+    if (card) card.classList.add("bulk-selected");
+  } else {
+    selectedItems.delete(itemId);
+    const card = document.querySelector(`.item-card[data-id="${CSS.escape(itemId)}"]`);
+    if (card) card.classList.remove("bulk-selected");
+  }
+  updateBulkCount();
+};
+
+function updateBulkCount() {
+  const count = selectedItems.size;
+  document.getElementById("selectedCount").textContent = count + " item" + (count !== 1 ? "s" : "") + " selected";
+  const btn = document.getElementById("bulkDeleteBtn");
+  btn.disabled = count === 0;
+  btn.style.opacity = count === 0 ? "0.5" : "1";
+}
+
+window.selectAllItems = function () {
+  document.querySelectorAll(".item-checkbox input").forEach(cb => {
+    if (!cb.checked) { cb.checked = true; toggleItemSelect(cb.dataset.id, true); }
+  });
+};
+
+window.selectByCategory = function (cat) {
+  if (!cat) return;
+  document.querySelectorAll(".item-checkbox input").forEach(cb => {
+    const card = cb.closest(".item-card");
+    if (card && card.dataset.cat === cat) { cb.checked = true; toggleItemSelect(cb.dataset.id, true); }
+  });
+  document.getElementById("bulkCategoryFilter").value = "";
+};
+
+window.bulkDeleteItems = async function () {
+  if (selectedItems.size === 0) return;
+  const btn = document.getElementById("bulkDeleteBtn");
+  btn.textContent = "Deleting…";
+  btn.disabled = true;
+  try {
+    await Promise.all(Array.from(selectedItems).map(id => deleteDoc(menuDocRef(id))));
+    toggleBulkSelect();
+    loadItems();
+  } catch(e) {
+    console.error(e);
+    btn.textContent = "Delete Selected";
+    btn.disabled = false;
+    btn.style.opacity = "1";
+  }
+};
+
+window.deleteAllArchived = function () {
+  const archivedIds = Object.values(window._itemsCache || {}).filter(i => i.archived === true).map(i => i.id);
+  if (!archivedIds.length) return;
+  showInlineConfirm(
+    archivedIds[0],
+    `Delete all ${archivedIds.length} archived item${archivedIds.length !== 1 ? "s" : ""}?`,
+    "Delete All",
+    async () => {
+      await Promise.all(archivedIds.map(id => deleteDoc(menuDocRef(id))));
+      loadItems();
+    }
+  );
 };
 
 // ── Tools panel toggle ──
@@ -1320,8 +1509,8 @@ window.openItemMenu = function (btn, itemId) {
     <div class="dd-sep"></div>
     ${isArchived
       ? `<button class="dd-item" onclick="restoreItem('${escapeHtml(itemId)}');closeDropdown()">↩ Restore</button>
-         <button class="dd-item danger" onclick="deleteForever('${escapeHtml(itemId)}');closeDropdown()">🗑 Delete Forever</button>`
-      : `<button class="dd-item" onclick="archiveItem('${escapeHtml(itemId)}');closeDropdown()">📦 Archive</button>`}
+         <button class="dd-item danger" onclick="deleteForever('${escapeHtml(itemId)}')">🗑 Delete Forever</button>`
+      : `<button class="dd-item" onclick="archiveItem('${escapeHtml(itemId)}')">📦 Archive</button>`}
   `;
   const rect = btn.getBoundingClientRect();
   dd.style.top = (rect.bottom + 6) + "px";
