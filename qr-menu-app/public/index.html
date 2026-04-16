@@ -463,6 +463,7 @@
     <div class="header-brand">
       <span class="logo">Kapi Coast</span>
       <span class="outlet-name" id="outletName"></span>
+      <span id="outletStatus" style="display:none;font-size:10px;font-weight:700;letter-spacing:0.02em;margin-top:1px;"></span>
     </div>
     <span class="table-badge" id="tableBadge"></span>
   </div>
@@ -618,6 +619,18 @@
 <!-- ── Scroll to top ── -->
 <button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
 
+<!-- ── Closed banner ── -->
+<div id="closedBanner" style="display:none;position:fixed;inset:0;background:rgba(44,26,14,0.88);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:24px;">
+  <div style="font-size:52px;">☕</div>
+  <div style="font-family:'Playfair Display',serif;font-size:28px;color:white;font-weight:700;">We are Closed</div>
+  <div id="closedMessage" style="font-size:16px;color:#C8894A;font-weight:600;"></div>
+  <div style="font-size:13px;color:#9A7D6B;">See you soon!</div>
+  <button onclick="document.getElementById('closedBanner').style.display='none'"
+          style="margin-top:8px;background:#C8894A;color:white;border:none;padding:12px 28px;border-radius:24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;">
+    Browse Menu Anyway →
+  </button>
+</div>
+
 <!-- ── Item bottom sheet ── -->
 <div id="itemSheetOverlay" onclick="closeItemSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;opacity:0;transition:opacity 0.3s;"></div>
 <div id="itemSheet" style="display:none;position:fixed;bottom:0;left:0;right:0;height:75vh;background:white;border-radius:24px 24px 0 0;z-index:501;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s ease;">
@@ -628,7 +641,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, addDoc, setDoc, query, where, onSnapshot, serverTimestamp
+  getFirestore, collection, doc, getDoc, addDoc, setDoc, updateDoc, query, where, onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -705,12 +718,30 @@ function getPlaceholderCard(category, name) {
   </div>`;
 }
 
+// ── Opening hours status helper ──
+function checkOutletStatus(hoursData, closedToday) {
+  if (closedToday) return { open: false, message: "Closed today" };
+  if (!hoursData)  return { open: true,  message: "" };
+  const now  = new Date();
+  const days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+  const todayHours = hoursData[days[now.getDay()]];
+  if (!todayHours || !todayHours.open) return { open: false, message: "Closed today" };
+  const cur   = now.getHours() * 60 + now.getMinutes();
+  const [fh, fm] = todayHours.from.split(":").map(Number);
+  const [th, tm] = todayHours.to.split(":").map(Number);
+  const openT = fh * 60 + fm, closeT = th * 60 + tm;
+  if (cur < openT)  return { open: false, message: "Opens at " + todayHours.from };
+  if (cur > closeT) return { open: false, message: "Closed · Opens tomorrow at " + todayHours.from };
+  if (closeT - cur <= 30) return { open: true, message: "Closing soon at " + todayHours.to, closingSoon: true };
+  return { open: true, message: "Open until " + todayHours.to };
+}
+
 // ── Outlet + table from URL ──
 const params  = new URLSearchParams(location.search);
 const outlet  = params.get("outlet") || "ecr";
 const tableNum = params.get("table");
 
-// Show outlet name in header; hide page if outlet doesn't exist
+// Show outlet name in header; show open/closed status
 getDoc(doc(db, "outlets", outlet)).then(snap => {
   if (!snap.exists()) {
     document.getElementById("menuContainer").innerHTML =
@@ -718,7 +749,22 @@ getDoc(doc(db, "outlets", outlet)).then(snap => {
     document.querySelector(".sticky-nav").style.display = "none";
     return;
   }
-  document.getElementById("outletName").textContent = snap.data().name || outlet.toUpperCase();
+  const data = snap.data();
+  document.getElementById("outletName").textContent = data.name || outlet.toUpperCase();
+
+  const status    = checkOutletStatus(data.hours, data.closedToday);
+  const statusEl  = document.getElementById("outletStatus");
+  if (status.message && statusEl) {
+    const color = status.closingSoon ? "#F59E0B" : status.open ? "#22C55E" : "#EF4444";
+    statusEl.innerHTML =
+      `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${color};margin-right:4px;vertical-align:middle;"></span>${escapeHtml(status.message)}`;
+    statusEl.style.color   = color;
+    statusEl.style.display = "block";
+  }
+  if (!status.open) {
+    document.getElementById("closedMessage").textContent = status.message;
+    document.getElementById("closedBanner").style.display = "flex";
+  }
 });
 if (tableNum) {
   const badge = document.getElementById("tableBadge");
@@ -736,23 +782,6 @@ onSnapshot(query(collection(db, "outlets", outlet, "ads"), where("active", "==",
   banner.style.background =
     `linear-gradient(135deg, ${ad.color || "#C8894A"} 0%, #6B3F22 100%)`;
   banner.style.display = "block";
-});
-
-// ── Offer message — real-time ──
-onSnapshot(doc(db, "outlets", outlet, "settings", "offer"), snap => {
-  const msg = snap.exists() ? (snap.data().message || "") : "";
-  const el  = document.getElementById("offerBanner");
-  // Only show offer message if no active ad is visible
-  if (msg && el.style.display === "none") {
-    document.getElementById("offerTitle").textContent = msg;
-    document.getElementById("offerBody").textContent  = "";
-    el.style.background = "linear-gradient(135deg, #C8894A 0%, #6B3F22 100%)";
-    el.style.display = "block";
-    el.dataset.fromOffer = "1";
-  } else if (!msg && el.dataset.fromOffer === "1") {
-    el.style.display = "none";
-    delete el.dataset.fromOffer;
-  }
 });
 
 // ── Menu — real-time ──
@@ -974,6 +1003,7 @@ window.openItemSheet = function(itemId) {
     sheet.style.transform = "translateY(0)";
     overlay.style.opacity = "1";
   });
+  trackItemView(itemId);
 };
 
 window.closeItemSheet = function() {
@@ -998,6 +1028,18 @@ window.rateItem = async function(itemId, rating) {
     }, { merge: true });
   } catch(e) { console.log("Rating error:", e); }
 };
+
+async function trackItemView(itemId) {
+  try {
+    const ref = doc(db, "outlets", outlet, "itemViews", itemId);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      await updateDoc(ref, { views: (snap.data().views || 0) + 1, lastViewed: serverTimestamp() });
+    } else {
+      await setDoc(ref, { itemId, views: 1, lastViewed: serverTimestamp() });
+    }
+  } catch(e) { console.log("View tracking error:", e); }
+}
 
 // ── Scroll to top button ──
 window.addEventListener("scroll", () => {

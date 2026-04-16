@@ -409,6 +409,35 @@
     .item-card.archived-card {
       background: #f0f0f0; opacity: 0.7;
     }
+
+    /* ── Inline delete confirm ── */
+    .inline-confirm {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: #FFF5F5;
+      border: 1px solid #FFCCCC; border-radius: 0 0 10px 10px;
+      margin-top: -4px; margin-bottom: 8px;
+      font-size: 13px; color: #C0392B; font-weight: 600;
+      animation: fadeInDown 0.15s ease;
+    }
+    @keyframes fadeInDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .inline-confirm-yes {
+      padding: 5px 14px; background: #C0392B; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;
+    }
+    .inline-confirm-yes:hover { background: #96281b; }
+    .inline-confirm-no {
+      padding: 5px 14px; background: #fff; color: #666;
+      border: 1.5px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
+    }
+    .inline-confirm-no:hover { background: #f5f5f5; }
+
+    /* ── Bulk select ── */
+    .item-card.bulk-selected { outline: 2px solid var(--caramel); background: #FFF9F4; }
+    .item-checkbox { display: none; align-items: center; margin-right: 10px; flex-shrink: 0; }
+    #bulkBar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--espresso); padding: 14px 20px; z-index: 200; align-items: center; justify-content: space-between; gap: 10px; }
+    .bulk-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .bulk-section-header h3 { margin: 0; }
+
     .archived-label {
       font-size: 11px; font-weight: 700; color: #999;
       text-transform: uppercase; letter-spacing: 0.05em;
@@ -684,9 +713,6 @@
       <div class="nav-item active" id="sidebarNav-menuItems" onclick="showSection('menuItems')">
         <span class="nav-icon">☰</span><span>Menu Items</span>
       </div>
-      <div class="nav-item" id="sidebarNav-offerBanner" onclick="showSection('offerBanner')">
-        <span class="nav-icon">★</span><span>Offer Banner</span>
-      </div>
       <div class="nav-item" id="sidebarNav-adsBanners" onclick="showSection('adsBanners')">
         <span class="nav-icon">▣</span><span>Ads &amp; Banners</span>
       </div>
@@ -754,6 +780,13 @@
           <div class="form-status" id="itemStatus"></div>
         </div>
         <hr class="section-hr">
+        <div class="bulk-section-header">
+          <h3 style="font-size:15px;font-weight:700;color:var(--espresso);">All Items</h3>
+          <button onclick="toggleBulkSelect()" id="bulkSelectBtn"
+            style="padding:7px 16px;border:1.5px solid #E0D5C8;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:white;color:var(--espresso);">
+            Select
+          </button>
+        </div>
         <div class="tools-panel">
           <div class="tools-header">
             <button class="tools-toggle-btn" id="toolsToggleBtn" onclick="toggleTools()">Tools ▼</button>
@@ -777,6 +810,23 @@
           </div>
         </div>
         <div class="items-list" id="menuList">Loading…</div>
+      </div>
+
+      <!-- Bulk select action bar -->
+      <div id="bulkBar">
+        <span id="selectedCount" style="color:white;font-size:14px;font-weight:600;">0 items selected</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <select id="bulkCategoryFilter" onchange="selectByCategory(this.value)"
+            style="padding:7px 10px;background:rgba(255,255,255,0.12);color:white;border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:12px;cursor:pointer;outline:none;">
+            <option value="">Select by category…</option>
+          </select>
+          <button onclick="selectAllItems()" style="padding:7px 14px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:8px;cursor:pointer;font-size:13px;">Select All</button>
+          <button onclick="bulkDeleteItems()" id="bulkDeleteBtn" disabled
+            style="padding:7px 14px;background:#C0392B;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;opacity:0.5;">
+            Delete Selected
+          </button>
+          <button onclick="toggleBulkSelect()" style="padding:7px 14px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:8px;cursor:pointer;font-size:13px;">Cancel</button>
+        </div>
       </div>
 
       <!-- Bulk Edit Prices overlay -->
@@ -878,19 +928,6 @@
         </div>
       </div>
 
-      <!-- ── Section 2: Offer Banner ── -->
-      <div id="offerBanner" class="section">
-        <h2>Offer Banner</h2>
-        <div class="form-panel">
-          <h3>Active Offer</h3>
-          <label class="field-label">Offer Message</label>
-          <textarea class="field-input" id="offerInput" placeholder="e.g. 20% off on all cold brews today!"></textarea>
-          <button class="form-btn btn-espresso" onclick="saveOffer()">Save Offer</button>
-          <button class="form-btn" style="background:#f5f5f5;color:var(--espresso);border:1.5px solid #ddd;" onclick="clearOffer()">Clear</button>
-          <div class="form-status" id="offerStatus"></div>
-        </div>
-      </div>
-
       <!-- ── Section 3: Ads & Banners ── -->
       <div id="adsBanners" class="section">
         <h2>Ads &amp; Banners</h2>
@@ -966,6 +1003,40 @@
           </div>
           <div class="form-status" id="musicUrlStatus"></div>
         </div>
+
+        <div class="form-panel">
+          <h3>Opening Hours</h3>
+          <p>Set when this outlet is open. Customers will see open/closed status on the menu.</p>
+          <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:7px 10px;align-items:center;font-size:13px;margin-bottom:12px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-monday"    checked style="accent-color:var(--caramel);width:15px;height:15px;"> Mon</label>
+            <input class="field-input" type="time" id="from-monday"    value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-monday"      value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-tuesday"   checked style="accent-color:var(--caramel);width:15px;height:15px;"> Tue</label>
+            <input class="field-input" type="time" id="from-tuesday"   value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-tuesday"     value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-wednesday" checked style="accent-color:var(--caramel);width:15px;height:15px;"> Wed</label>
+            <input class="field-input" type="time" id="from-wednesday" value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-wednesday"   value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-thursday"  checked style="accent-color:var(--caramel);width:15px;height:15px;"> Thu</label>
+            <input class="field-input" type="time" id="from-thursday"  value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-thursday"    value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-friday"    checked style="accent-color:var(--caramel);width:15px;height:15px;"> Fri</label>
+            <input class="field-input" type="time" id="from-friday"    value="08:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-friday"      value="22:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-saturday"  checked style="accent-color:var(--caramel);width:15px;height:15px;"> Sat</label>
+            <input class="field-input" type="time" id="from-saturday"  value="09:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-saturday"    value="23:00" style="margin:0;padding:6px;">
+            <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="hr-sunday"    checked style="accent-color:var(--caramel);width:15px;height:15px;"> Sun</label>
+            <input class="field-input" type="time" id="from-sunday"    value="09:00" style="margin:0;padding:6px;">
+            <input class="field-input" type="time" id="to-sunday"      value="23:00" style="margin:0;padding:6px;">
+          </div>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:#E53935;margin-bottom:12px;">
+            <input type="checkbox" id="closedToday" style="width:16px;height:16px;accent-color:#E53935;">
+            Mark as closed today (override)
+          </label>
+          <button class="form-btn btn-espresso btn-sm" onclick="saveOutletHours()">Save Hours</button>
+          <div class="form-status" id="hoursStatus"></div>
+        </div>
       </div>
 
       <!-- ── Section 5: QR Codes ── -->
@@ -992,10 +1063,6 @@
     <div class="mobile-nav-item active" id="mobileNav-menuItems" onclick="showSection('menuItems')">
       <span class="mobile-nav-icon">☰</span>
       <span>Menu</span>
-    </div>
-    <div class="mobile-nav-item" id="mobileNav-offerBanner" onclick="showSection('offerBanner')">
-      <span class="mobile-nav-icon">★</span>
-      <span>Offer</span>
     </div>
     <div class="mobile-nav-item" id="mobileNav-adsBanners" onclick="showSection('adsBanners')">
       <span class="mobile-nav-icon">▣</span>
@@ -1096,9 +1163,8 @@ window.showSection = function (sectionId) {
   if (mobile)  mobile.classList.add("active");
   document.getElementById(sectionId).classList.add("active");
   if (sectionId === "menuItems")   loadItems();
-  if (sectionId === "offerBanner") loadOffer();
-  if (sectionId === "adsBanners")  loadAds();
-  if (sectionId === "castTV")      loadDisplaySettings();
+if (sectionId === "adsBanners")  loadAds();
+  if (sectionId === "castTV")      { loadDisplaySettings(); loadOutletHours(); }
 };
 
 // ── Show panel after login ──
@@ -1112,7 +1178,6 @@ function showPanel(oId, oName) {
   const castUrl = "https://menu.kapicoast.org/display.html?outlet=" + encodeURIComponent(oId);
   document.getElementById("previewDisplayLink").href = castUrl;
   loadItems();
-  loadOffer();
   loadAds();
 }
 
@@ -1180,18 +1245,22 @@ async function loadItems() {
     }
     const handle = `<span class="drag-handle" style="font-size:20px;color:var(--muted);cursor:grab;padding:0 10px 0 8px;flex-shrink:0;user-select:none;display:none;align-items:center;">≡</span>`;
     const draggable = (!isArchived && mgrReorderMode) ? `draggable="true"` : "";
+    const checkbox = `<div class="item-checkbox"><input type="checkbox" data-id="${escapeHtml(item.id)}" onchange="toggleItemSelect('${escapeHtml(item.id)}', this.checked)" style="width:18px;height:18px;cursor:pointer;accent-color:var(--caramel);"></div>`;
     return `
-      <div class="item-card${isArchived ? " archived-card" : ""}" ${draggable} data-id="${escapeHtml(item.id)}" data-cat="${escapeHtml(item.category || "Others")}">
-        ${handle}
-        <div class="ic-img">${imgHtml}</div>
-        <div class="ic-body">
-          <div class="ic-name">${dot} ${escapeHtml(item.name)}</div>
-          <div class="ic-meta">${escapeHtml(item.category || "")} &nbsp;·&nbsp; ₹${escapeHtml(String(item.price))}</div>
-          ${item.description ? `<div class="ic-desc">${escapeHtml(item.description)}</div>` : ""}
-          ${tags.length ? `<div class="ic-tags">${tags.join("")}</div>` : ""}
-        </div>
-        <div class="ic-actions">
-          <button class="ic-menu-btn" onclick="openItemMenu(this,'${escapeHtml(item.id)}')" title="Actions">⋮</button>
+      <div class="item-wrap" data-id="${escapeHtml(item.id)}" style="margin-bottom:8px;">
+        <div class="item-card${isArchived ? " archived-card" : ""}" ${draggable} data-id="${escapeHtml(item.id)}" data-cat="${escapeHtml(item.category || "Others")}" style="margin-bottom:0;">
+          ${checkbox}
+          ${handle}
+          <div class="ic-img">${imgHtml}</div>
+          <div class="ic-body">
+            <div class="ic-name">${dot} ${escapeHtml(item.name)}</div>
+            <div class="ic-meta">${escapeHtml(item.category || "")} &nbsp;·&nbsp; ₹${escapeHtml(String(item.price))}</div>
+            ${item.description ? `<div class="ic-desc">${escapeHtml(item.description)}</div>` : ""}
+            ${tags.length ? `<div class="ic-tags">${tags.join("")}</div>` : ""}
+          </div>
+          <div class="ic-actions">
+            <button class="ic-menu-btn" onclick="openItemMenu(this,'${escapeHtml(item.id)}')" title="Actions">⋮</button>
+          </div>
         </div>
       </div>`;
   }
@@ -1202,7 +1271,10 @@ async function loadItems() {
     activeCats[cat].forEach(item => { html += itemCardHtml(item, false); });
   });
   if (mgrShowArchived && Object.keys(archivedCats).length > 0) {
-    html += `<div class="cat-header" style="color:var(--muted);margin-top:20px;">— Archived Items —</div>`;
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;">
+      <span class="cat-header" style="color:var(--muted);margin:0;">— Archived Items —</span>
+      <button onclick="deleteAllArchived()" style="padding:5px 12px;background:#C0392B;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Delete All Archived</button>
+    </div>`;
     Object.keys(archivedCats).sort().forEach(cat => {
       html += `<div class="cat-header" style="font-size:12px;">${escapeHtml(cat)}</div>`;
       archivedCats[cat].forEach(item => { html += itemCardHtml(item, true); });
@@ -1253,10 +1325,37 @@ window.addItem = async function () {
   loadItems();
 };
 
-window.archiveItem = async function (id) {
-  if (!confirm("Archive this item? It will be hidden from customers.")) return;
-  await updateDoc(menuDocRef(id), { archived: true });
-  loadItems();
+// ── Inline confirm helpers ──
+let _inlineConfirmFn = null;
+function showInlineConfirm(itemId, message, confirmText, fn) {
+  cancelInlineConfirm();
+  _inlineConfirmFn = fn;
+  const wrap = document.querySelector(`.item-wrap[data-id="${CSS.escape(itemId)}"]`);
+  if (!wrap) return;
+  const row = document.createElement("div");
+  row.className = "inline-confirm";
+  row.id = "inline-confirm-active";
+  row.innerHTML = `<span style="flex:1;">${message}</span>
+    <button class="inline-confirm-yes" onclick="execInlineConfirm()">${confirmText}</button>
+    <button class="inline-confirm-no" onclick="cancelInlineConfirm()">Cancel</button>`;
+  wrap.appendChild(row);
+}
+window.execInlineConfirm = async function () {
+  if (_inlineConfirmFn) await _inlineConfirmFn();
+  cancelInlineConfirm();
+};
+window.cancelInlineConfirm = function () {
+  const el = document.getElementById("inline-confirm-active");
+  if (el) el.remove();
+  _inlineConfirmFn = null;
+};
+
+window.archiveItem = function (id) {
+  closeDropdown();
+  showInlineConfirm(id, "Archive this item?", "Archive", async () => {
+    await updateDoc(menuDocRef(id), { archived: true });
+    loadItems();
+  });
 };
 
 window.restoreItem = async function (id) {
@@ -1264,10 +1363,12 @@ window.restoreItem = async function (id) {
   loadItems();
 };
 
-window.deleteForever = async function (id) {
-  if (!confirm("Permanently delete this item? This cannot be undone.")) return;
-  await deleteDoc(menuDocRef(id));
-  loadItems();
+window.deleteForever = function (id) {
+  closeDropdown();
+  showInlineConfirm(id, "Permanently delete? This cannot be undone.", "Delete Forever", async () => {
+    await deleteDoc(menuDocRef(id));
+    loadItems();
+  });
 };
 
 window.duplicateItem = async function (id) {
@@ -1283,6 +1384,106 @@ window.duplicateItem = async function (id) {
 window.toggleArchivedView = function () {
   mgrShowArchived = document.getElementById("showArchivedToggle").checked;
   loadItems();
+};
+
+// ── Bulk select ──
+let bulkMode = false;
+let selectedItems = new Set();
+
+window.toggleBulkSelect = function () {
+  bulkMode = !bulkMode;
+  selectedItems.clear();
+  const btn = document.getElementById("bulkSelectBtn");
+  const bar = document.getElementById("bulkBar");
+  if (bulkMode) {
+    btn.textContent = "Cancel";
+    btn.style.background = "#FAF6F0";
+    bar.style.display = "flex";
+    document.querySelectorAll(".item-checkbox").forEach(cb => { cb.style.display = "flex"; });
+    // Populate category filter from active items
+    const allCached = Object.values(window._itemsCache || {});
+    const cats = [...new Set(allCached.filter(i => !i.archived).map(i => i.category || "Others"))].sort();
+    const sel = document.getElementById("bulkCategoryFilter");
+    sel.innerHTML = `<option value="">Select by category…</option>` +
+      cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+  } else {
+    btn.textContent = "Select";
+    btn.style.background = "white";
+    bar.style.display = "none";
+    document.querySelectorAll(".item-checkbox").forEach(cb => {
+      cb.style.display = "none";
+      cb.querySelector("input").checked = false;
+    });
+    document.querySelectorAll(".item-card.bulk-selected").forEach(c => c.classList.remove("bulk-selected"));
+    updateBulkCount();
+  }
+};
+
+window.toggleItemSelect = function (itemId, checked) {
+  if (checked) {
+    selectedItems.add(itemId);
+    const card = document.querySelector(`.item-card[data-id="${CSS.escape(itemId)}"]`);
+    if (card) card.classList.add("bulk-selected");
+  } else {
+    selectedItems.delete(itemId);
+    const card = document.querySelector(`.item-card[data-id="${CSS.escape(itemId)}"]`);
+    if (card) card.classList.remove("bulk-selected");
+  }
+  updateBulkCount();
+};
+
+function updateBulkCount() {
+  const count = selectedItems.size;
+  document.getElementById("selectedCount").textContent = count + " item" + (count !== 1 ? "s" : "") + " selected";
+  const btn = document.getElementById("bulkDeleteBtn");
+  btn.disabled = count === 0;
+  btn.style.opacity = count === 0 ? "0.5" : "1";
+}
+
+window.selectAllItems = function () {
+  document.querySelectorAll(".item-checkbox input").forEach(cb => {
+    if (!cb.checked) { cb.checked = true; toggleItemSelect(cb.dataset.id, true); }
+  });
+};
+
+window.selectByCategory = function (cat) {
+  if (!cat) return;
+  document.querySelectorAll(".item-checkbox input").forEach(cb => {
+    const card = cb.closest(".item-card");
+    if (card && card.dataset.cat === cat) { cb.checked = true; toggleItemSelect(cb.dataset.id, true); }
+  });
+  document.getElementById("bulkCategoryFilter").value = "";
+};
+
+window.bulkDeleteItems = async function () {
+  if (selectedItems.size === 0) return;
+  const btn = document.getElementById("bulkDeleteBtn");
+  btn.textContent = "Deleting…";
+  btn.disabled = true;
+  try {
+    await Promise.all(Array.from(selectedItems).map(id => deleteDoc(menuDocRef(id))));
+    toggleBulkSelect();
+    loadItems();
+  } catch(e) {
+    console.error(e);
+    btn.textContent = "Delete Selected";
+    btn.disabled = false;
+    btn.style.opacity = "1";
+  }
+};
+
+window.deleteAllArchived = function () {
+  const archivedIds = Object.values(window._itemsCache || {}).filter(i => i.archived === true).map(i => i.id);
+  if (!archivedIds.length) return;
+  showInlineConfirm(
+    archivedIds[0],
+    `Delete all ${archivedIds.length} archived item${archivedIds.length !== 1 ? "s" : ""}?`,
+    "Delete All",
+    async () => {
+      await Promise.all(archivedIds.map(id => deleteDoc(menuDocRef(id))));
+      loadItems();
+    }
+  );
 };
 
 // ── Tools panel toggle ──
@@ -1308,8 +1509,8 @@ window.openItemMenu = function (btn, itemId) {
     <div class="dd-sep"></div>
     ${isArchived
       ? `<button class="dd-item" onclick="restoreItem('${escapeHtml(itemId)}');closeDropdown()">↩ Restore</button>
-         <button class="dd-item danger" onclick="deleteForever('${escapeHtml(itemId)}');closeDropdown()">🗑 Delete Forever</button>`
-      : `<button class="dd-item" onclick="archiveItem('${escapeHtml(itemId)}');closeDropdown()">📦 Archive</button>`}
+         <button class="dd-item danger" onclick="deleteForever('${escapeHtml(itemId)}')">🗑 Delete Forever</button>`
+      : `<button class="dd-item" onclick="archiveItem('${escapeHtml(itemId)}')">📦 Archive</button>`}
   `;
   const rect = btn.getBoundingClientRect();
   dd.style.top = (rect.bottom + 6) + "px";
@@ -1477,27 +1678,6 @@ window.editItem = async function (id) {
 };
 
 // ──────────────────────────────────────────────────
-// SECTION 2 — Offer Banner
-// ──────────────────────────────────────────────────
-async function loadOffer() {
-  console.log("loadOffer — outletId:", getOutletId());
-  const snap = await getDoc(offerRef());
-  document.getElementById("offerInput").value = snap.exists() ? (snap.data().message || "") : "";
-}
-
-window.saveOffer = async function () {
-  const msg = document.getElementById("offerInput").value.trim();
-  await setDoc(offerRef(), { message: msg });
-  setStatus("offerStatus", msg ? "Offer saved!" : "Offer cleared.");
-};
-
-window.clearOffer = async function () {
-  document.getElementById("offerInput").value = "";
-  await setDoc(offerRef(), { message: "" });
-  setStatus("offerStatus", "Offer cleared.");
-};
-
-// ──────────────────────────────────────────────────
 // SECTION 3 — Ads & Banners
 // ──────────────────────────────────────────────────
 window.saveAd = async function () {
@@ -1582,6 +1762,41 @@ window.saveDisplaySettings = async function () {
   const secs = parseInt(document.getElementById("intervalSlider").value, 10);
   await setDoc(displayRef(), { intervalSeconds: secs }, { merge: true });
   setStatus("displayStatus", "Saved!");
+};
+
+const OUTLET_DAYS = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+
+async function loadOutletHours() {
+  if (!getOutletId()) return;
+  const snap = await getDoc(doc(db, "outlets", getOutletId()));
+  if (!snap.exists()) return;
+  const d = snap.data();
+  const hours = d.hours || {};
+  OUTLET_DAYS.forEach(day => {
+    const h = hours[day] || {};
+    const openEl = document.getElementById("hr-" + day);
+    const fromEl = document.getElementById("from-" + day);
+    const toEl   = document.getElementById("to-" + day);
+    if (openEl) openEl.checked = h.open !== false;
+    if (fromEl) fromEl.value  = h.from || (["saturday","sunday"].includes(day) ? "09:00" : "08:00");
+    if (toEl)   toEl.value    = h.to   || (["saturday","sunday"].includes(day) ? "23:00" : "22:00");
+  });
+  const closedEl = document.getElementById("closedToday");
+  if (closedEl) closedEl.checked = d.closedToday === true;
+}
+
+window.saveOutletHours = async function () {
+  const hours = {};
+  OUTLET_DAYS.forEach(day => {
+    hours[day] = {
+      open: document.getElementById("hr-" + day)?.checked ?? true,
+      from: document.getElementById("from-" + day)?.value || "08:00",
+      to:   document.getElementById("to-" + day)?.value   || "22:00"
+    };
+  });
+  const closedToday = document.getElementById("closedToday")?.checked || false;
+  await updateDoc(doc(db, "outlets", getOutletId()), { hours, closedToday });
+  setStatus("hoursStatus", "Hours saved!");
 };
 
 window.saveVideoAdUrl = async function () {
