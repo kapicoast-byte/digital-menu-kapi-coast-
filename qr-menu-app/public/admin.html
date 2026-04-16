@@ -210,30 +210,17 @@
     /* ── Archived item cards ── */
     .item-card.archived-card { background: #f0f0f0; opacity: 0.7; }
 
-    /* ── Inline delete confirm ── */
-    .inline-confirm {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 14px; background: #FFF5F5;
-      border: 1px solid #FFCCCC; border-radius: 0 0 10px 10px;
-      margin-top: -4px; margin-bottom: 8px;
-      font-size: 13px; color: #C0392B; font-weight: 600;
-      animation: fadeInDown 0.15s ease;
-    }
-    @keyframes fadeInDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
-    .inline-confirm-yes {
-      padding: 5px 14px; background: #C0392B; color: #fff;
-      border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;
-    }
-    .inline-confirm-yes:hover { background: #96281b; }
-    .inline-confirm-no {
-      padding: 5px 14px; background: #fff; color: #666;
-      border: 1.5px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
-    }
-    .inline-confirm-no:hover { background: #f5f5f5; }
-
     /* ── Bulk select ── */
-    .item-card.bulk-selected { outline: 2px solid #C8894A; background: #FFF9F4; }
-    .item-checkbox { display: none; align-items: center; margin-right: 10px; flex-shrink: 0; }
+    .item-card.bulk-selected { border-left: 3px solid #C8894A; background: #FFF9F4; }
+    .item-checkbox-circle {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid #E0D5C8; background: white;
+      flex-shrink: 0; display: none;
+      align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s; margin-right: 10px;
+    }
+    .item-checkbox-circle.checked { background: #C8894A; border-color: #C8894A; }
+    .item-checkbox-circle.checked::after { content: "✓"; color: white; font-size: 14px; font-weight: 700; }
     #bulkBar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #2C1A0E; padding: 14px 20px; z-index: 200; align-items: center; justify-content: space-between; gap: 10px; }
     .bulk-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .bulk-section-header h3 { margin: 0; }
@@ -1262,7 +1249,7 @@ async function loadItems() {
     }
     const handle = `<span class="drag-handle" style="font-size:20px;color:#aaa;cursor:grab;padding:0 10px 0 8px;flex-shrink:0;user-select:none;display:none;align-items:center;">≡</span>`;
     const draggable = (!isArchived && adminReorderMode) ? `draggable="true"` : "";
-    const checkbox = `<div class="item-checkbox"><input type="checkbox" data-id="${escapeHtml(item.id)}" onchange="toggleItemSelect('${escapeHtml(item.id)}', this.checked)" style="width:18px;height:18px;cursor:pointer;accent-color:#C8894A;"></div>`;
+    const checkbox = `<div class="item-checkbox-circle" data-id="${escapeHtml(item.id)}" onclick="toggleItemSelect('${escapeHtml(item.id)}', this)"></div>`;
     return `
       <div class="item-wrap" data-id="${escapeHtml(item.id)}" style="margin-bottom:8px;">
         <div class="item-card${isArchived ? " archived-card" : ""}" ${draggable} data-id="${escapeHtml(item.id)}" data-cat="${escapeHtml(item.category || "Others")}" style="margin-bottom:0;">
@@ -1337,37 +1324,27 @@ window.addItem = async function () {
   loadItems();
 };
 
-// ── Inline confirm helpers ──
-let _inlineConfirmFn = null;
-function showInlineConfirm(itemId, message, confirmText, fn) {
-  cancelInlineConfirm();
-  _inlineConfirmFn = fn;
-  const wrap = document.querySelector(`.item-wrap[data-id="${CSS.escape(itemId)}"]`);
-  if (!wrap) return;
-  const row = document.createElement("div");
-  row.className = "inline-confirm";
-  row.id = "inline-confirm-active";
-  row.innerHTML = `<span style="flex:1;">${message}</span>
-    <button class="inline-confirm-yes" onclick="execInlineConfirm()">${confirmText}</button>
-    <button class="inline-confirm-no" onclick="cancelInlineConfirm()">Cancel</button>`;
-  wrap.appendChild(row);
+// ── Delete with undo toast ──
+function showUndoToast(label, undoFn, commitFn) {
+  const existing = document.getElementById("deleteUndoToast");
+  if (existing) existing.remove();
+  let undone = false;
+  const toast = document.createElement("div");
+  toast.id = "deleteUndoToast";
+  toast.style.cssText = "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2C1A0E;color:white;padding:12px 20px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);white-space:nowrap;";
+  toast.innerHTML = `<span>${label}</span><button style="background:#C8894A;color:white;border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;">Undo</button>`;
+  toast.querySelector("button").onclick = () => { undone = true; toast.remove(); undoFn(); };
+  document.body.appendChild(toast);
+  setTimeout(async () => {
+    toast.remove();
+    if (!undone) await commitFn();
+  }, 4000);
 }
-window.execInlineConfirm = async function () {
-  if (_inlineConfirmFn) await _inlineConfirmFn();
-  cancelInlineConfirm();
-};
-window.cancelInlineConfirm = function () {
-  const el = document.getElementById("inline-confirm-active");
-  if (el) el.remove();
-  _inlineConfirmFn = null;
-};
 
-window.archiveItem = function (id) {
+window.archiveItem = async function (id) {
   closeDropdown();
-  showInlineConfirm(id, "Archive this item?", "Archive", async () => {
-    await updateDoc(menuDocRef(id), { archived: true });
-    loadItems();
-  });
+  await updateDoc(menuDocRef(id), { archived: true });
+  loadItems();
 };
 
 window.restoreItem = async function (id) {
@@ -1377,10 +1354,19 @@ window.restoreItem = async function (id) {
 
 window.deleteForever = function (id) {
   closeDropdown();
-  showInlineConfirm(id, "Permanently delete? This cannot be undone.", "Delete Forever", async () => {
-    await deleteDoc(menuDocRef(id));
-    loadItems();
-  });
+  const itemName = (window._itemsCache[id] || {}).name || "Item";
+  const wrap = document.querySelector(`.item-wrap[data-id="${CSS.escape(id)}"]`);
+  if (wrap) {
+    wrap.style.transition = "opacity 0.3s, transform 0.3s";
+    wrap.style.opacity = "0";
+    wrap.style.transform = "translateX(20px)";
+    setTimeout(() => { wrap.style.display = "none"; }, 300);
+  }
+  showUndoToast(
+    `"${itemName}" deleted`,
+    () => { if (wrap) { wrap.style.display = ""; wrap.style.opacity = "1"; wrap.style.transform = "none"; } },
+    async () => { try { await deleteDoc(menuDocRef(id)); } catch(e) { console.error(e); if (wrap) { wrap.style.display = ""; wrap.style.opacity = "1"; wrap.style.transform = "none"; } } }
+  );
 };
 
 window.duplicateItem = async function (id) {
@@ -1411,8 +1397,7 @@ window.toggleBulkSelect = function () {
     btn.textContent = "Cancel";
     btn.style.background = "#FAF6F0";
     bar.style.display = "flex";
-    document.querySelectorAll(".item-checkbox").forEach(cb => { cb.style.display = "flex"; });
-    // Populate category filter
+    document.querySelectorAll(".item-checkbox-circle").forEach(c => { c.style.display = "flex"; });
     const cats = [...new Set(allMenuItems.filter(i => !i.archived).map(i => i.category || "Others"))].sort();
     const sel = document.getElementById("bulkCategoryFilter");
     sel.innerHTML = `<option value="">Select by category…</option>` +
@@ -1421,25 +1406,17 @@ window.toggleBulkSelect = function () {
     btn.textContent = "Select";
     btn.style.background = "white";
     bar.style.display = "none";
-    document.querySelectorAll(".item-checkbox").forEach(cb => {
-      cb.style.display = "none";
-      cb.querySelector("input").checked = false;
-    });
+    document.querySelectorAll(".item-checkbox-circle").forEach(c => { c.style.display = "none"; c.classList.remove("checked"); });
     document.querySelectorAll(".item-card.bulk-selected").forEach(c => c.classList.remove("bulk-selected"));
     updateBulkCount();
   }
 };
 
-window.toggleItemSelect = function (itemId, checked) {
-  if (checked) {
-    selectedItems.add(itemId);
-    const card = document.querySelector(`.item-card[data-id="${CSS.escape(itemId)}"]`);
-    if (card) card.classList.add("bulk-selected");
-  } else {
-    selectedItems.delete(itemId);
-    const card = document.querySelector(`.item-card[data-id="${CSS.escape(itemId)}"]`);
-    if (card) card.classList.remove("bulk-selected");
-  }
+window.toggleItemSelect = function (itemId, el) {
+  const isChecked = el.classList.toggle("checked");
+  const card = el.closest(".item-card");
+  if (card) card.classList.toggle("bulk-selected", isChecked);
+  if (isChecked) selectedItems.add(itemId); else selectedItems.delete(itemId);
   updateBulkCount();
 };
 
@@ -1449,19 +1426,20 @@ function updateBulkCount() {
   const btn = document.getElementById("bulkDeleteBtn");
   btn.disabled = count === 0;
   btn.style.opacity = count === 0 ? "0.5" : "1";
+  btn.textContent = count > 0 ? `Delete ${count} item${count !== 1 ? "s" : ""}` : "Delete";
 }
 
 window.selectAllItems = function () {
-  document.querySelectorAll(".item-checkbox input").forEach(cb => {
-    if (!cb.checked) { cb.checked = true; toggleItemSelect(cb.dataset.id, true); }
+  document.querySelectorAll(".item-checkbox-circle:not(.checked)").forEach(c => {
+    toggleItemSelect(c.dataset.id, c);
   });
 };
 
 window.selectByCategory = function (cat) {
   if (!cat) return;
-  document.querySelectorAll(".item-checkbox input").forEach(cb => {
-    const card = cb.closest(".item-card");
-    if (card && card.dataset.cat === cat) { cb.checked = true; toggleItemSelect(cb.dataset.id, true); }
+  document.querySelectorAll(".item-checkbox-circle").forEach(c => {
+    const card = c.closest(".item-card");
+    if (card && card.dataset.cat === cat && !c.classList.contains("checked")) toggleItemSelect(c.dataset.id, c);
   });
   document.getElementById("bulkCategoryFilter").value = "";
 };
@@ -1469,32 +1447,28 @@ window.selectByCategory = function (cat) {
 window.bulkDeleteItems = async function () {
   if (selectedItems.size === 0) return;
   const count = selectedItems.size;
-  const btn = document.getElementById("bulkDeleteBtn");
-  btn.textContent = "Deleting…";
-  btn.disabled = true;
-  try {
-    await Promise.all(Array.from(selectedItems).map(id => deleteDoc(menuDocRef(id))));
-    toggleBulkSelect();
-    loadItems();
-  } catch(e) {
-    console.error(e);
-    btn.textContent = "Delete Selected";
-    btn.disabled = false;
-    btn.style.opacity = "1";
-  }
+  const ids = Array.from(selectedItems);
+  // Hide selected wraps immediately
+  const wraps = ids.map(id => document.querySelector(`.item-wrap[data-id="${CSS.escape(id)}"]`)).filter(Boolean);
+  wraps.forEach(w => { w.style.transition = "opacity 0.25s"; w.style.opacity = "0"; setTimeout(() => { w.style.display = "none"; }, 250); });
+  toggleBulkSelect();
+  showUndoToast(
+    `${count} item${count !== 1 ? "s" : ""} deleted`,
+    () => { wraps.forEach(w => { w.style.display = ""; w.style.opacity = "1"; }); },
+    async () => { await Promise.all(ids.map(id => deleteDoc(menuDocRef(id)))); loadItems(); }
+  );
 };
 
 window.deleteAllArchived = function () {
   const archivedIds = allMenuItems.filter(i => i.archived === true).map(i => i.id);
   if (!archivedIds.length) return;
-  showInlineConfirm(
-    archivedIds[0],
-    `Delete all ${archivedIds.length} archived item${archivedIds.length !== 1 ? "s" : ""}?`,
-    "Delete All",
-    async () => {
-      await Promise.all(archivedIds.map(id => deleteDoc(menuDocRef(id))));
-      loadItems();
-    }
+  const count = archivedIds.length;
+  const wraps = archivedIds.map(id => document.querySelector(`.item-wrap[data-id="${CSS.escape(id)}"]`)).filter(Boolean);
+  wraps.forEach(w => { w.style.transition = "opacity 0.25s"; w.style.opacity = "0"; setTimeout(() => { w.style.display = "none"; }, 250); });
+  showUndoToast(
+    `${count} archived item${count !== 1 ? "s" : ""} deleted`,
+    () => { wraps.forEach(w => { w.style.display = ""; w.style.opacity = "1"; }); },
+    async () => { await Promise.all(archivedIds.map(id => deleteDoc(menuDocRef(id)))); loadItems(); }
   );
 };
 
